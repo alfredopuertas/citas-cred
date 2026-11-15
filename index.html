@@ -661,11 +661,20 @@
                 </button>
 
                 <div class="grid grid-cols-2 gap-2">
-                    <button onclick="rescheduleCurrentAppointment()" class="py-2.5 rounded-2xl bg-white text-ios-orange border border-gray-200 font-bold text-xs flex items-center justify-center gap-1 ios-tap">
-                        <i class="ph-bold ph-clock-clockwise"></i> Reprogramar
+                    <button onclick="openEditModal()" class="py-2.5 rounded-2xl bg-white text-ios-blue border border-gray-200 font-bold text-xs flex items-center justify-center gap-1.5 ios-tap">
+                        <i class="ph-bold ph-pencil-simple text-sm"></i> Editar Datos
                     </button>
-                    <button onclick="markCurrentAsNoShow()" class="py-2.5 rounded-2xl bg-white text-ios-red border border-gray-200 font-bold text-xs flex items-center justify-center gap-1 ios-tap">
-                        <i class="ph-bold ph-x-circle"></i> No Asistió
+                    <button onclick="rescheduleCurrentAppointment()" class="py-2.5 rounded-2xl bg-white text-ios-orange border border-gray-200 font-bold text-xs flex items-center justify-center gap-1.5 ios-tap">
+                        <i class="ph-bold ph-clock-clockwise text-sm"></i> Reprogramar
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="markCurrentAsNoShow()" class="py-2 rounded-2xl bg-white text-gray-700 border border-gray-200 font-bold text-xs flex items-center justify-center gap-1 ios-tap">
+                        <i class="ph-bold ph-x-circle text-ios-red"></i> No Asistió
+                    </button>
+                    <button onclick="deleteCurrentAppointment()" class="py-2 rounded-2xl bg-red-50 text-ios-red border border-red-200/60 font-bold text-xs flex items-center justify-center gap-1 ios-tap">
+                        <i class="ph-bold ph-trash text-sm"></i> Eliminar Cita
                     </button>
                 </div>
             </div>
@@ -822,6 +831,154 @@
                     Restablecer Datos de Demostración
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- MODAL 5: EDITAR CITA COMPLETA                            -->
+    <!-- ======================================================== -->
+    <div id="modalEditAppointment" onclick="closeEditModal()" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end">
+        <div onclick="event.stopPropagation()" class="w-full max-w-lg mx-auto bg-[#F2F2F7] rounded-t-[32px] p-4 pb-7 space-y-3 animate-slide-up shadow-2xl max-h-[92vh] overflow-y-auto no-scrollbar">
+            <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto"></div>
+
+            <div class="flex items-center justify-between pb-2 border-b border-gray-200">
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-xl bg-ios-blue text-white flex items-center justify-center">
+                        <i class="ph-bold ph-pencil-simple"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-extrabold text-gray-900">Editar Datos de la Cita</h2>
+                        <p class="text-[10px] text-gray-500">Modifica cualquier dato y guarda los cambios</p>
+                    </div>
+                </div>
+                <button onclick="closeEditModal()" class="w-7 h-7 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center">
+                    <i class="ph-bold ph-x text-xs"></i>
+                </button>
+            </div>
+
+            <form id="editAppointmentForm" onsubmit="saveEditAppointment(event)" class="space-y-3">
+                <input type="hidden" id="editAppId">
+
+                <!-- 1. Patient Data -->
+                <div class="bg-white rounded-2xl p-3 shadow-ios space-y-2">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">1. Datos del Niño / Historia</span>
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">N° Historia Clínica</label>
+                            <input type="text" id="editHcl" required class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-bold text-ios-blue focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">DNI del Menor</label>
+                            <input type="text" id="editDni" maxlength="8" required class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-bold text-gray-900 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Nombres y Apellidos del Menor</label>
+                        <input type="text" id="editName" required class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-bold text-gray-900 focus:outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">F. Nacimiento</label>
+                            <input type="date" id="editDob" required class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-semibold focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Estado de la Cita</label>
+                            <select id="editStatus" class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-bold text-gray-900 focus:outline-none">
+                                <option value="PENDIENTE">Pendiente</option>
+                                <option value="ATENDIDO">Atendido</option>
+                                <option value="NO_ASISTIO">No asistió</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Parents & Phones -->
+                <div class="bg-white rounded-2xl p-3 shadow-ios space-y-2">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">2. Apoderado y Teléfonos</span>
+                    
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Padre, Madre o Apoderado</label>
+                        <input type="text" id="editParentName" required class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-semibold focus:outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-bold text-ios-green mb-0.5">Celular Principal (WhatsApp)</label>
+                            <input type="tel" id="editPhone1" maxlength="9" required class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Celular Secundario</label>
+                            <input type="tel" id="editPhone2" maxlength="9" placeholder="Opcional" class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-mono font-medium focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Programación -->
+                <div class="bg-white rounded-2xl p-3 shadow-ios space-y-2">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">3. Fecha, Hora y Consultorio</span>
+                    
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <div class="col-span-1">
+                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Fecha</label>
+                            <input type="date" id="editDate" required class="w-full bg-ios-bg px-2 py-1.5 rounded-xl text-xs font-bold text-ios-blue focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Hora (HH:mm)</label>
+                            <input type="time" id="editTime" required class="w-full bg-ios-bg px-2 py-1.5 rounded-xl text-xs font-bold focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Consultorio</label>
+                            <select id="editConsultorio" class="w-full bg-ios-bg px-2 py-1.5 rounded-xl text-xs font-bold focus:outline-none">
+                                <option value="A">Cons. A</option>
+                                <option value="B">Cons. B</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Servicio</label>
+                            <select id="editService" class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-bold focus:outline-none">
+                                <option value="CRED">Control CRED</option>
+                                <option value="SULFATO">Sulfato Ferroso</option>
+                                <option value="CRED_SULFATO">CRED + Sulfato</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Duración</label>
+                            <select id="editBlocks" class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-bold focus:outline-none">
+                                <option value="1">1 bloque (20 min)</option>
+                                <option value="2">2 bloques (40 min)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-1">
+                        <label class="cursor-pointer inline-flex items-center gap-2">
+                            <input type="checkbox" id="editPrematuro" class="w-4 h-4 rounded text-ios-purple focus:ring-0">
+                            <span class="text-xs font-bold text-ios-purple">¿Es niño prematuro? (CRED-Prematuro)</span>
+                        </label>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Detalle / Nota</label>
+                        <input type="text" id="editDetail" class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-medium focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <button type="button" onclick="closeEditModal()" class="py-3 rounded-2xl bg-gray-200/80 font-bold text-xs text-gray-700 ios-tap">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="py-3 rounded-2xl bg-ios-blue text-white font-extrabold text-xs shadow-md flex items-center justify-center gap-1.5 ios-tap">
+                        <i class="ph-bold ph-check"></i>
+                        <span>Guardar Cambios</span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -1438,6 +1595,105 @@
 
             switchScreen('new');
             showToast('Datos Cargados', `Selecciona la nueva fecha y hora para ${app.name.split(' ')[0]}`, 'blue');
+        }
+
+        // --- EDITAR Y ELIMINAR CITAS ---
+        function openEditModal() {
+            const app = appointments.find(a => a.id === activeActionAppointmentId);
+            if (!app) return;
+
+            document.getElementById('editAppId').value = app.id;
+            document.getElementById('editHcl').value = app.hcl || '';
+            document.getElementById('editDni').value = app.dni || '';
+            document.getElementById('editName').value = app.name || '';
+            document.getElementById('editDob').value = app.dob || '';
+            document.getElementById('editStatus').value = app.status || 'PENDIENTE';
+            document.getElementById('editParentName').value = app.parentName || '';
+            document.getElementById('editPhone1').value = app.phone1 || '';
+            document.getElementById('editPhone2').value = app.phone2 || '';
+            document.getElementById('editDate').value = app.date || '';
+            document.getElementById('editTime').value = app.time || '';
+            document.getElementById('editConsultorio').value = app.consultorio || 'A';
+            document.getElementById('editService').value = app.service || 'CRED';
+            document.getElementById('editBlocks').value = app.blocks || 1;
+            document.getElementById('editPrematuro').checked = !!app.isPrematuro;
+            document.getElementById('editDetail').value = app.detail || '';
+
+            closeActionSheet();
+            document.getElementById('modalEditAppointment').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('modalEditAppointment').classList.add('hidden');
+        }
+
+        function saveEditAppointment(e) {
+            e.preventDefault();
+            const id = Number(document.getElementById('editAppId').value);
+            const app = appointments.find(a => a.id === id);
+            if (!app) return;
+
+            app.hcl = document.getElementById('editHcl').value.trim();
+            app.dni = document.getElementById('editDni').value.trim();
+            app.name = document.getElementById('editName').value.trim();
+            app.dob = document.getElementById('editDob').value;
+            app.status = document.getElementById('editStatus').value;
+            app.parentName = document.getElementById('editParentName').value.trim();
+            app.phone1 = document.getElementById('editPhone1').value.trim();
+            app.phone2 = document.getElementById('editPhone2').value.trim();
+            app.date = document.getElementById('editDate').value;
+            app.time = document.getElementById('editTime').value;
+            app.consultorio = document.getElementById('editConsultorio').value;
+            app.service = document.getElementById('editService').value;
+            app.blocks = Number(document.getElementById('editBlocks').value);
+            app.isPrematuro = document.getElementById('editPrematuro').checked;
+            app.detail = document.getElementById('editDetail').value.trim();
+
+            const hour = parseInt(app.time.split(':')[0], 10);
+            app.shift = hour >= 13 ? 'TARDE' : 'MANANA';
+
+            saveLocalState();
+            renderAppointments();
+            renderAlerts();
+            renderStats();
+            closeEditModal();
+            showToast('Cita Modificada', `Cambios guardados para ${app.name.split(' ')[0]}`, 'green');
+
+            // Send to Google Drive
+            pushNewAppointmentToCloud(app);
+        }
+
+        function deleteCurrentAppointment() {
+            const app = appointments.find(a => a.id === activeActionAppointmentId);
+            if (!app) return;
+
+            const confirmDelete = confirm(`¿Estás seguro de ELIMINAR la cita de:\n${app.name} (H.Cl. ${app.hcl})?\n\nEsta acción quitará la cita del celular y de Google Drive.`);
+            if (!confirmDelete) return;
+
+            const deletedId = app.id;
+            appointments = appointments.filter(a => a.id !== deletedId);
+            saveLocalState();
+            renderAppointments();
+            renderAlerts();
+            renderStats();
+            closeActionSheet();
+            showToast('Cita Eliminada', `Se eliminó la cita de H.Cl. ${app.hcl}`, 'red');
+
+            // Delete in Google Drive
+            pushDeleteAppointmentToCloud(deletedId);
+        }
+
+        function pushDeleteAppointmentToCloud(id) {
+            if (!googleScriptUrl) return;
+            fetch(googleScriptUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'ELIMINAR_CITA',
+                    id: id
+                })
+            }).catch(() => {});
         }
 
         // --- SCREEN 2: NUEVA CITA & TIME SLOTS COLLISION ENGINE ---

@@ -99,6 +99,16 @@ function doPost(e) {
         }
       }
 
+    } else if (payload.action === 'ELIMINAR_CITA') {
+      const sheet = ss.getSheetByName('Registro_Citas_En_Vivo');
+      const rows = sheet.getDataRange().getValues();
+      for (let i = 3; i < rows.length; i++) {
+        if (String(rows[i][0]) === String(payload.id)) {
+          sheet.deleteRow(i + 1);
+          break;
+        }
+      }
+
     } else if (payload.action === 'TOGGLE_CONSULTORIO_B') {
       const sheet = ss.getSheetByName('Habilitar_Consultorio_B');
       const rows = sheet.getDataRange().getValues();

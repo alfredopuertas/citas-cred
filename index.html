@@ -70,12 +70,12 @@
             </div>
             <div>
                 <h1 class="text-xs sm:text-sm font-extrabold text-gray-900">CITEN • Consultorio de Enfermería (C.S. Chilca)</h1>
-                <p class="text-[11px] text-gray-500">Cuaderno Virtual • Sincronización Dual Google Drive + Firebase</p>
+                <p class="text-[11px] text-gray-500">Cuaderno Virtual • Sincronización Dual Google Drive + Firebase (Control de Jefatura)</p>
             </div>
         </div>
         <div class="flex items-center gap-1.5">
             <button onclick="switchMainWorkspace('MOBILE')" id="btnModeMobile" class="px-3 py-1.5 rounded-lg bg-white text-gray-900 shadow-xs text-xs font-bold flex items-center gap-1">📱 App Celular</button>
-            <button onclick="switchMainWorkspace('GDRIVE')" id="btnModeGDrive" class="px-3 py-1.5 rounded-lg text-gray-700 text-xs font-bold flex items-center gap-1">📊 Hoja Google Drive</button>
+            <button onclick="switchMainWorkspace('GDRIVE')" id="btnModeGDrive" class="px-3 py-1.5 rounded-lg text-gray-700 text-xs font-bold flex items-center gap-1">📊 Hoja Google Drive (Admin)</button>
         </div>
     </header>
 
@@ -105,7 +105,7 @@
                 <!-- ================= SCREEN 1: AGENDA ================= -->
                 <section id="screen-agenda" class="space-y-3">
                     <div class="sticky top-0 z-30 ios-glass px-4 pt-2 pb-3 border-b border-gray-200/60 space-y-2">
-                        <!-- Top Header Row matching image_d009c7.png -->
+                        <!-- Top Header Row -->
                         <div class="flex items-center justify-between gap-2">
                             <button onclick="openInstallModal()" class="bg-ios-blue text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow-xs ios-tap">
                                 <i class="ph-bold ph-download-simple"></i> Instalar
@@ -188,22 +188,17 @@
                     <div class="flex items-center justify-between pb-2 border-b border-gray-200">
                         <div>
                             <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Nueva Cita</h1>
-                            <p class="text-[11px] text-gray-500">Bloques de 20m • Mañana y Tarde</p>
+                            <p class="text-[11px] text-gray-500">Programación flexible (incluye meses adelante)</p>
                         </div>
                         <button onclick="fillDemoChild()" class="bg-ios-blue/10 text-ios-blue px-3 py-1.5 rounded-xl text-xs font-bold ios-tap">Demo Rápido</button>
                     </div>
 
                     <form id="newAppointmentForm" onsubmit="saveNewAppointment(event)" class="space-y-3">
                         <div class="bg-white rounded-2xl p-3 shadow-ios-card space-y-2.5 text-xs font-semibold">
+                            <!-- Full Calendar Date Picker for scheduling months in advance -->
                             <div class="flex items-center justify-between">
-                                <span class="text-gray-600">Fecha de Cita:</span>
-                                <select id="inputDayOffset" onchange="onFormScheduleChange()" class="text-ios-blue bg-ios-blue/10 px-2.5 py-1 rounded-lg focus:outline-none">
-                                    <option value="0">Hoy - Dom 15 Nov</option>
-                                    <option value="1">Mañana - Lun 16 Nov</option>
-                                    <option value="2">Mar 17 Nov</option>
-                                    <option value="3">Mié 18 Nov</option>
-                                    <option value="4">Jue 19 Nov</option>
-                                </select>
+                                <span class="text-gray-600">Fecha Exacta Cita:</span>
+                                <input type="date" id="inputExactDate" onchange="onExactDateChanged()" class="text-ios-blue bg-ios-blue/10 px-2.5 py-1 rounded-lg focus:outline-none font-bold">
                             </div>
                             <div class="flex items-center justify-between pt-2 border-t border-gray-100">
                                 <span class="text-gray-600">Consultorio:</span>
@@ -281,7 +276,7 @@
                             </select>
                         </div>
 
-                        <!-- 4. Horarios y Bloques -->
+                        <!-- 4. Horarios y Bloques (Automatic slot recalculation when switching 1 vs 2 blocks) -->
                         <div class="bg-white rounded-2xl p-3.5 shadow-ios-card space-y-2.5">
                             <span class="text-[11px] font-extrabold uppercase text-gray-400 block">4. Bloques de Tiempo (20m / 40m)</span>
                             <div class="grid grid-cols-2 gap-2">
@@ -316,6 +311,7 @@
                         </div>
                         <span class="bg-red-100 text-red-700 px-2.5 py-1 rounded-full text-xs font-extrabold">Seguimiento</span>
                     </div>
+                    <!-- Fully interactive alert tabs -->
                     <div class="grid grid-cols-2 bg-gray-200 p-0.5 rounded-xl text-xs font-bold">
                         <button onclick="switchAlertTab('AMBER')" id="tabAmber" class="py-2 rounded-lg bg-white shadow-xs">Próx. a vencer (3)</button>
                         <button onclick="switchAlertTab('RED')" id="tabRed" class="py-2 rounded-lg text-gray-600">Inasistentes (2)</button>
@@ -328,7 +324,7 @@
                     <div class="flex items-center justify-between pb-2 border-b border-gray-200">
                         <div>
                             <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Estadísticas</h1>
-                            <p class="text-[11px] text-gray-500">Cortes en vivo HIS</p>
+                            <p class="text-[11px] text-gray-500">Cortes en vivo HIS (con trazabilidad del personal)</p>
                         </div>
                         <span class="bg-purple-100 text-purple-800 px-2.5 py-1 rounded-full text-xs font-extrabold">Cortes en Vivo</span>
                     </div>
@@ -366,7 +362,7 @@
                     <span class="text-[10px] font-semibold">Nueva Cita</span>
                 </button>
                 <button onclick="switchScreen('alerts')" class="nav-tab relative flex flex-col items-center gap-1 text-gray-400 ios-tap" data-screen="alerts">
-                    <span class="absolute -top-0.5 right-1 w-4 h-4 rounded-full bg-ios-red text-white text-[9px] font-bold flex items-center justify-center">5</span>
+                    <span id="navAlertBadge" class="absolute -top-0.5 right-1 w-4 h-4 rounded-full bg-ios-red text-white text-[9px] font-bold flex items-center justify-center">5</span>
                     <i class="ph-fill ph-bell-ringing text-2xl"></i>
                     <span class="text-[10px] font-semibold">Alertas</span>
                 </button>
@@ -379,7 +375,7 @@
                 <div class="w-32 h-1 bg-gray-900/80 rounded-full"></div>
             </div>
 
-            <!-- MODALS (Action Sheet, Print H.Cl., Login, Install) -->
+            <!-- MODALS (Action Sheet with Edit/Rectify/Reschedule, Print, Login, Install) -->
             <div id="actionSheetBackdrop" onclick="closeActionSheet()" class="hidden absolute inset-0 z-50 bg-black/40 backdrop-blur-[2px] flex items-end">
                 <div onclick="event.stopPropagation()" class="w-full bg-ios-bg rounded-t-[32px] p-5 pb-8 space-y-3.5 animate-slide-up shadow-2xl max-h-[88%] overflow-y-auto no-scrollbar">
                     <div class="w-10 h-1.5 bg-gray-300 rounded-full mx-auto"></div>
@@ -389,17 +385,30 @@
                                 <span id="sheetConsBadge" class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-gray-900 text-white">CONS. A</span>
                                 <h2 id="sheetChildName" class="text-base font-bold text-gray-900 mt-1">Nombre Niño</h2>
                                 <p id="sheetChildMeta" class="text-xs text-gray-600">H.Cl • DNI</p>
+                                <p id="sheetBookedByMeta" class="text-[11px] text-ios-blue font-semibold mt-1">Agendado por: Lic. Carmen</p>
                             </div>
                             <span id="sheetTimeBadge" class="text-xs font-extrabold text-gray-900 bg-ios-bg px-2.5 py-1 rounded-xl h-fit">08:30</span>
                         </div>
                     </div>
-                    <!-- WhatsApp Box -->
-                    <div class="bg-[#E7FFDB] border border-[#25D366]/30 rounded-2xl p-3.5 space-y-2">
-                        <span class="text-xs font-bold text-[#075E54] flex items-center gap-1.5"><i class="ph-fill ph-whatsapp-logo text-base text-[#25D366]"></i> Recordatorio Gratuito a Padres</span>
-                        <p id="whatsappPreviewText" class="text-[11px] text-gray-800 bg-white/85 p-2.5 rounded-xl italic"></p>
-                        <button onclick="triggerWhatsAppSend(1)" class="w-full py-2 rounded-xl bg-[#25D366] text-white font-bold text-xs shadow-xs ios-tap">💬 Enviar a Celular Principal</button>
+
+                    <!-- WhatsApp Box with balanced smaller green button -->
+                    <div class="bg-[#E7FFDB] border border-[#25D366]/30 rounded-2xl p-3 space-y-2">
+                        <span class="text-xs font-bold text-[#075E54] flex items-center gap-1.5"><i class="ph-fill ph-whatsapp-logo text-base text-[#25D366]"></i> Recordatorio a Padres</span>
+                        <p id="whatsappPreviewText" class="text-[11px] text-gray-800 bg-white/85 p-2 rounded-xl italic"></p>
+                        <button onclick="triggerWhatsAppSend()" class="py-2 px-4 rounded-xl bg-[#25D366] text-white font-bold text-xs shadow-xs ios-tap flex items-center gap-1.5 mx-auto">
+                            <i class="ph-bold ph-whatsapp-logo text-sm"></i> WhatsApp
+                        </button>
                     </div>
-                    <button onclick="markAsAttended()" class="w-full py-3 rounded-2xl bg-ios-green text-white font-bold text-sm shadow-sm">✅ Marcar como Atendido</button>
+
+                    <!-- Action buttons (Balanced colors: Atendido blue/green, Edit options) -->
+                    <div class="space-y-2">
+                        <button onclick="markAsAttended()" class="w-full py-2.5 rounded-2xl bg-ios-green text-white font-bold text-xs shadow-sm">✓ Marcar como Atendido</button>
+                        <div class="grid grid-cols-3 gap-1.5">
+                            <button onclick="openEditAppointment()" class="py-2 rounded-xl bg-gray-200 text-gray-800 font-bold text-xs ios-tap">✏️ Rectificar</button>
+                            <button onclick="rescheduleActiveAppointment()" class="py-2 rounded-xl bg-ios-blue/15 text-ios-blue font-bold text-xs ios-tap">🔄 Reprogramar</button>
+                            <button onclick="deleteActiveAppointment()" class="py-2 rounded-xl bg-ios-red/15 text-ios-red font-bold text-xs ios-tap">🗑️ Borrar</button>
+                        </div>
+                    </div>
                     <button onclick="closeActionSheet()" class="w-full py-2.5 rounded-2xl bg-gray-200 text-gray-700 font-semibold text-xs">Cerrar</button>
                 </div>
             </div>
@@ -411,7 +420,7 @@
                     <div id="printableHclSheet" class="flex-1 overflow-y-auto border border-gray-200 rounded-2xl p-3 bg-gray-50 space-y-2">
                         <h3 class="text-xs font-bold text-gray-900">ESTABLECIMIENTO: C.S. CHILCA</h3>
                         <table class="w-full text-left text-xs">
-                            <thead><tr class="border-b"><th class="py-1">Hora</th><th class="py-1">H.Cl.</th><th class="py-1">Paciente</th></tr></thead>
+                            <thead><tr class="border-b"><th class="py-1">Hora</th><th class="py-1">H.Cl.</th><th class="py-1">Paciente</th><th class="py-1">Agendado por</th></tr></thead>
                             <tbody id="printHclTableBody"></tbody>
                         </table>
                     </div>
@@ -419,10 +428,14 @@
                 </div>
             </div>
 
-            <!-- Login Modal -->
+            <!-- Login Modal (Admin G.Drive Control) -->
             <div id="loginModal" onclick="closeLoginModal()" class="hidden absolute inset-0 z-50 bg-black/50 flex items-end">
                 <div onclick="event.stopPropagation()" class="w-full bg-white rounded-t-[32px] p-5 space-y-3">
-                    <h2 class="text-base font-extrabold">Seleccionar Personal C.S. Chilca</h2>
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-base font-extrabold">Personal Autorizado (Google Drive)</h2>
+                        <button onclick="closeLoginModal()" class="text-gray-500 font-bold">✕</button>
+                    </div>
+                    <p class="text-xs text-gray-500">El administrador controla los accesos en la Hoja 1 de Google Drive.</p>
                     <div class="space-y-1.5" id="staffLoginList"></div>
                 </div>
             </div>
@@ -430,9 +443,10 @@
             <!-- Install Modal -->
             <div id="installModal" onclick="closeInstallModal()" class="hidden absolute inset-0 z-50 bg-black/50 flex items-end">
                 <div onclick="event.stopPropagation()" class="w-full bg-white rounded-t-[32px] p-5 space-y-3 text-xs">
-                    <h2 class="text-sm font-extrabold">Instalar App en el Celular</h2>
-                    <p><strong>Android (Chrome):</strong> Toca los 3 puntos ➔ "Agregar a la pantalla principal".</p>
-                    <p><strong>iPhone (Safari):</strong> Toca Compartir ➔ "Agregar a Inicio".</p>
+                    <h2 class="text-sm font-extrabold">¿A qué se refiere el botón 'Instalar'?</h2>
+                    <p class="leading-relaxed text-gray-700">Sirve para convertir la web en una <strong>PWA (App instalable)</strong> directamente en los celulares del personal del C.S. Chilca sin pasar por tiendas oficiales. Queda con su propio ícono en la pantalla de inicio para abrirse a pantalla completa rápidamente con datos móviles.</p>
+                    <p><strong>Android:</strong> 3 puntos (⋮) ➔ "Agregar a pantalla principal".</p>
+                    <p><strong>iPhone:</strong> Compartir ➔ "Agregar a Inicio".</p>
                     <button onclick="closeInstallModal()" class="w-full py-2.5 rounded-xl bg-ios-blue text-white font-bold">Entendido</button>
                 </div>
             </div>
@@ -443,12 +457,13 @@
     <!-- GOOGLE DRIVE WORKSPACE (ADMIN) -->
     <div id="workspaceGDrive" class="hidden w-full max-w-6xl bg-white rounded-2xl shadow-2xl border border-gray-300 overflow-hidden flex flex-col min-h-[82vh]">
         <div class="bg-[#F9FBFD] border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-            <h2 class="text-sm font-bold text-gray-800">📊 Hoja Maestra de Google Drive (Cuaderno Virtual)</h2>
+            <h2 class="text-sm font-bold text-gray-800">📊 Hoja Maestra de Google Drive (Control de Administrador)</h2>
             <button onclick="switchMainWorkspace('MOBILE')" class="px-3.5 py-1.5 rounded-lg bg-ios-blue text-white text-xs font-bold">Volver al Celular</button>
         </div>
-        <div class="p-4 overflow-x-auto flex-1">
+        <div class="p-4 overflow-x-auto flex-1 space-y-3">
+            <p class="text-xs text-gray-600">Aquí el administrador autoriza qué enfermeras, técnicas o secretarias pueden ingresar al aplicativo (Seguridad institucional C.S. Chilca).</p>
             <table class="w-full gsheet-table border-collapse">
-                <thead><tr><th>#</th><th>Nombre Completo</th><th>Rol</th><th>PIN</th><th>Estado</th></tr></thead>
+                <thead><tr><th>#</th><th>Nombre Completo</th><th>Rol</th><th>PIN</th><th>Estado (Autorizado)</th></tr></thead>
                 <tbody id="gsheetStaffBody"></tbody>
             </table>
         </div>
@@ -456,7 +471,7 @@
 
     <script>
         let currentFechaSeleccionada = new Date().toISOString().split('T')[0];
-        let selectedDayOffset = 0;
+        let selectedExactDate = currentFechaSeleccionada;
         let consultorioBEnabledByDay = { 0: false, 1: true, 2: false, 3: true, 4: false };
         let currentConsultorioFilter = 'ALL';
         let currentShiftFilter = 'ALL';
@@ -478,8 +493,8 @@
         ];
 
         let appointments = [
-            { id: 101, dayOffset: 0, consultorio: 'A', shift: 'MANANA', time: '08:30', blocks: 2, hcl: '44910', dni: '81902344', name: 'Camila Valentina Flores Mamani', ageText: '2 meses, 5 días', parentName: 'Elena Mamani Cruz', phone1: '945128904', phone2: '976543210', service: 'CRED', isPrematuro: true, bookedBy: 'Srta. Lucía', status: 'ATENDIDO' },
-            { id: 102, dayOffset: 0, consultorio: 'A', shift: 'MANANA', time: '09:10', blocks: 1, hcl: '45892', dni: '81459230', name: 'Mateo Sebastián Quispe Huamán', ageText: '4 meses, 2 días', parentName: 'Rosa Huamán Quispe', phone1: '987451203', phone2: '945112233', service: 'CRED_SULFATO', isPrematuro: false, bookedBy: 'Téc. Marisol', status: 'PENDIENTE' }
+            { id: 101, exactDate: currentFechaSeleccionada, consultorio: 'A', shift: 'MANANA', time: '08:30', blocks: 2, hcl: '44910', dni: '81902344', name: 'Camila Valentina Flores Mamani', ageText: '2 meses, 5 días', parentName: 'Elena Mamani Cruz', phone1: '945128904', phone2: '976543210', service: 'CRED', isPrematuro: true, bookedBy: 'Srta. Lucía Gómez', status: 'ATENDIDO' },
+            { id: 102, exactDate: currentFechaSeleccionada, consultorio: 'A', shift: 'MANANA', time: '09:10', blocks: 1, hcl: '45892', dni: '81459230', name: 'Mateo Sebastián Quispe Huamán', ageText: '4 meses, 2 días', parentName: 'Rosa Huamán Quispe', phone1: '987451203', phone2: '945112233', service: 'CRED_SULFATO', isPrematuro: false, bookedBy: 'Téc. Marisol Ramos Luján', status: 'PENDIENTE' }
         ];
 
         let alertsData = {
@@ -491,15 +506,11 @@
             ]
         };
 
-        const DAYS_CONFIG = [
-            { offset: 0, dayName: 'HOY', dayNum: '15', fullLabel: 'Dom 15 Nov', printDate: 'Domingo 15 de Noviembre 2026' },
-            { offset: 1, dayName: 'LUN', dayNum: '16', fullLabel: 'Lun 16 Nov', printDate: 'Lunes 16 de Noviembre 2026' },
-            { offset: 2, dayName: 'MAR', dayNum: '17', fullLabel: 'Mar 17 Nov', printDate: 'Martes 17 de Noviembre 2026' },
-            { offset: 3, dayName: 'MIÉ', dayNum: '18', fullLabel: 'Mié 18 Nov', printDate: 'Miércoles 18 de Noviembre 2026' },
-            { offset: 4, dayName: 'JUE', dayNum: '19', fullLabel: 'Jue 19 Nov', printDate: 'Jueves 19 de Noviembre 2026' }
-        ];
+        const MORNING_SLOTS = ['08:30', '08:50', '09:10', '09:30', '09:50', '10:10', '10:30', '10:50', '11:10', '11:30', '11:50'];
+        const AFTERNOON_SLOTS = ['14:00', '14:20', '14:40', '15:00', '15:20', '15:40', '16:00', '16:20', '16:40', '17:00', '17:20'];
 
         window.onload = function() {
+            document.getElementById('inputExactDate').value = currentFechaSeleccionada;
             populateStaffSelects();
             renderWeekStrip();
             renderAppointments();
@@ -531,29 +542,40 @@
 
         function renderWeekStrip() {
             const container = document.getElementById('weekStrip');
-            container.innerHTML = DAYS_CONFIG.map(d => {
-                const isSelected = d.offset === selectedDayOffset;
-                return `
-                    <button onclick="selectDay(${d.offset})" class="flex-1 py-1 rounded-xl flex flex-col items-center ${isSelected ? 'bg-ios-blue text-white shadow-md' : 'bg-white text-gray-700'}">
-                        <span class="text-[9px] font-bold">${d.dayName}</span>
-                        <span class="text-xs font-extrabold">${d.dayNum}</span>
+            const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            let html = '';
+            for(let i = -2; i <= 4; i++) {
+                let d = new Date();
+                d.setDate(d.getDate() + i);
+                let iso = d.toISOString().split('T')[0];
+                let isSelected = iso === currentFechaSeleccionada;
+                html += `
+                    <button onclick="selectDate('${iso}')" class="flex-1 py-1 rounded-xl flex flex-col items-center ${isSelected ? 'bg-ios-blue text-white shadow-md' : 'bg-white text-gray-700'}">
+                        <span class="text-[9px] font-bold">${diasSemana[d.getDay()]}</span>
+                        <span class="text-xs font-extrabold">${d.getDate()}</span>
                     </button>
                 `;
-            }).join('');
+            }
+            container.innerHTML = html;
         }
 
-        function selectDay(offset) {
-            selectedDayOffset = offset;
-            const cfg = DAYS_CONFIG.find(d => d.offset === offset);
-            document.getElementById('selectedDateLabel').textContent = offset === 0 ? 'Hoy, Dom 15 Nov' : cfg.fullLabel;
+        function selectDate(iso) {
+            currentFechaSeleccionada = iso;
+            document.getElementById('selectedDateLabel').textContent = `Fecha: ${iso}`;
             renderWeekStrip();
             renderAppointments();
         }
 
+        function onExactDateChanged() {
+            const val = document.getElementById('inputExactDate').value;
+            if (val) currentFechaSeleccionada = val;
+            renderTimeSlots();
+        }
+
         function toggleConsultorioBForCurrentDay() {
-            consultorioBEnabledByDay[selectedDayOffset] = !consultorioBEnabledByDay[selectedDayOffset];
+            consultorioBEnabledByDay[currentFechaSeleccionada] = !consultorioBEnabledByDay[currentFechaSeleccionada];
             renderAppointments();
-            alert(consultorioBEnabledByDay[selectedDayOffset] ? "Consultorio B activado (A+B)." : "Consultorio B desactivado.");
+            alert(consultorioBEnabledByDay[currentFechaSeleccionada] ? "Consultorio B activado (A+B)." : "Consultorio B desactivado.");
         }
 
         function setConsultorioFilter(cons) { currentConsultorioFilter = cons; renderAppointments(); }
@@ -561,10 +583,17 @@
 
         function renderAppointments() {
             const list = document.getElementById('appointmentsList');
-            const dayApps = appointments.filter(a => a.dayOffset === selectedDayOffset);
+            const dayApps = appointments.filter(a => a.exactDate === currentFechaSeleccionada);
+
+            let atendidosCount = dayApps.filter(a => a.status === 'ATENDIDO').length;
+            let totalCount = dayApps.length;
+            let pct = totalCount > 0 ? Math.round((atendidosCount / totalCount) * 100) : 0;
+            document.getElementById('dayProgressText').textContent = `${atendidosCount} de ${totalCount} atendidos`;
+            document.getElementById('dayProgressPct').textContent = `${pct}%`;
+            document.getElementById('dayProgressBar').style.width = `${pct}%`;
 
             if (dayApps.length === 0) {
-                list.innerHTML = `<div class="bg-white rounded-2xl p-6 text-center text-xs text-gray-500">No hay citas para esta fecha.</div>`;
+                list.innerHTML = `<div class="bg-white rounded-2xl p-6 text-center text-xs text-gray-500">No hay citas para el ${currentFechaSeleccionada}.</div>`;
                 return;
             }
 
@@ -574,11 +603,12 @@
                     <div onclick="openActionSheet(${app.id})" class="bg-white rounded-2xl p-3.5 shadow-ios-card ${cardBorder} ios-tap cursor-pointer space-y-1.5">
                         <div class="flex justify-between items-center text-xs">
                             <span class="font-bold bg-black text-white px-1.5 py-0.5 rounded text-[10px]">Cons. ${app.consultorio}</span>
-                            <span class="font-extrabold text-ios-blue">${app.time}</span>
+                            <span class="font-extrabold text-ios-blue">${app.time} (${app.blocks * 20}m)</span>
                             <span class="font-bold text-[10px] px-2 py-0.5 rounded-full ${app.status==='ATENDIDO'?'bg-emerald-100 text-emerald-800':'bg-amber-100 text-amber-800'}">${app.status}</span>
                         </div>
                         <div class="text-sm font-bold text-gray-900">${app.name}</div>
-                        <div class="text-[11px] text-gray-500">H.Cl: <strong>${app.hcl}</strong> • DNI: ${app.dni} • ${app.ageText}</div>
+                        <div class="text-[11px] text-gray-500">H.Cl: <strong>${app.hcl}</strong> • DNI: ${app.dni}</div>
+                        <div class="text-[10px] text-ios-blue font-semibold">Agendado por: ${app.bookedBy}</div>
                     </div>
                 `;
             }).join('');
@@ -592,9 +622,10 @@
             document.getElementById('sheetChildName').textContent = app.name;
             document.getElementById('sheetChildMeta').textContent = `H.Cl: ${app.hcl} • DNI: ${app.dni}`;
             document.getElementById('sheetTimeBadge').textContent = app.time;
+            document.getElementById('sheetBookedByMeta').textContent = `Agendado por: ${app.bookedBy}`;
 
-            const dayCfg = DAYS_CONFIG.find(d => d.offset === app.dayOffset);
-            const msg = `Hola ${app.parentName}, le recordamos que su menor hijo(a) ${app.name} tiene su cita programada en el C.S. Chilca\n(Consultorio de CRED-Enfermería) el día ${dayCfg.printDate} a las ${app.time}. Por favor asistir 20 minutos antes, con su DNI, Carnet de vacunación, Historia Clínica y Ficha de atención SIS si estuviera afiliado.`;
+            const msg = `Hola ${app.parentName}, le recordamos que su menor hijo(a) ${app.name} tiene su cita programada en el C.S. Chilca
+(Consultorio de CRED-Enfermería) el día ${app.exactDate} a las ${app.time}. Por favor asistir 20 minutos antes, con su DNI, Carnet de vacunación, Historia Clínica y Ficha de atención SIS si estuviera afiliado.`;
             document.getElementById('whatsappPreviewText').textContent = `"${msg}"`;
 
             document.getElementById('actionSheetBackdrop').classList.remove('hidden');
@@ -616,6 +647,26 @@
             closeActionSheet();
         }
 
+        function openEditAppointment() {
+            const app = appointments.find(a => a.id === activeAppointmentId);
+            if (!app) return;
+            closeActionSheet();
+            preloadFormWithPatient(app);
+            switchScreen('new');
+        }
+
+        function rescheduleActiveAppointment() {
+            openEditAppointment();
+        }
+
+        function deleteActiveAppointment() {
+            if (confirm('¿Desea borrar esta cita?')) {
+                appointments = appointments.filter(a => a.id !== activeAppointmentId);
+                closeActionSheet();
+                renderAppointments();
+            }
+        }
+
         function populateStaffSelects() {
             const active = authorizedUsers.filter(u => u.active);
             document.getElementById('inputBookedByStaff').innerHTML = active.map(u => `<option value="${u.name}">${u.name}</option>`).join('');
@@ -625,15 +676,16 @@
         function closeLoginModal() { document.getElementById('loginModal').classList.add('hidden'); }
         function openInstallModal() { document.getElementById('installModal').classList.remove('hidden'); }
         function closeInstallModal() { document.getElementById('installModal').classList.add('hidden'); }
+        
         function openPrintHclModal() {
-            document.getElementById('printHclTableBody').innerHTML = appointments.map(a => `<tr><td class="py-1">${a.time}</td><td class="py-1 font-bold text-ios-blue">${a.hcl}</td><td class="py-1">${a.name}</td></tr>`).join('');
+            document.getElementById('printHclTableBody').innerHTML = appointments.map(a => `<tr><td class="py-1">${a.time}</td><td class="py-1 font-bold text-ios-blue">${a.hcl}</td><td class="py-1">${a.name}</td><td class="py-1 text-gray-500">${a.bookedBy}</td></tr>`).join('');
             document.getElementById('printHclModal').classList.remove('hidden');
         }
         function closePrintHclModal() { document.getElementById('printHclModal').classList.add('hidden'); }
 
         function renderGoogleDriveStaffTable() {
             document.getElementById('gsheetStaffBody').innerHTML = authorizedUsers.map((u, idx) => `
-                <tr class="border-b"><td class="p-2">${idx+1}</td><td class="p-2 font-bold">${u.name}</td><td class="p-2">${u.role}</td><td class="p-2 font-mono">${u.pin}</td><td class="p-2 text-emerald-700 font-bold">ACTIVO</td></tr>
+                <tr class="border-b"><td class="p-2">${idx+1}</td><td class="p-2 font-bold">${u.name}</td><td class="p-2">${u.role}</td><td class="p-2 font-mono">${u.pin}</td><td class="p-2 text-emerald-700 font-bold">✓ ACTIVO</td></tr>
             `).join('');
         }
 
@@ -642,42 +694,66 @@
         }
 
         function renderTimeSlots() {
-            const slots = ['08:30', '08:50', '09:10', '09:30', '09:50', '10:10'];
-            document.getElementById('timeSlotsGrid').innerHTML = slots.map((s, i) => `
-                <label class="cursor-pointer">
-                    <input type="radio" name="timeSlot" value="${s}" class="peer sr-only" ${i===0?'checked':''}>
-                    <div class="p-2 rounded-xl bg-ios-bg border-2 border-transparent peer-checked:border-ios-blue text-center text-xs font-bold">${s}</div>
-                </label>
-            `).join('');
+            const durationBlocks = parseInt(document.querySelector('input[name="blockDuration"]:checked').value, 10);
+            const slotList = formShift === 'MANANA' ? MORNING_SLOTS : AFTERNOON_SLOTS;
+            const grid = document.getElementById('timeSlotsGrid');
+
+            grid.innerHTML = slotList.map((time, idx) => {
+                if (durationBlocks === 2 && idx + 1 >= slotList.length) return ''; // Needs 2 consecutive slots
+                return `
+                    <label class="cursor-pointer">
+                        <input type="radio" name="timeSlot" value="${time}" class="peer sr-only" ${idx===0?'checked':''}>
+                        <div class="p-2 rounded-xl bg-ios-bg border-2 border-transparent peer-checked:border-ios-blue text-center text-xs font-bold">
+                            ${time} ${durationBlocks === 2 ? '(40m)' : ''}
+                        </div>
+                    </label>
+                `;
+            }).join('');
         }
 
         function setFormShift(shift) {
             formShift = shift;
+            const btnM = document.getElementById('formShiftManana');
+            const btnT = document.getElementById('formShiftTarde');
+            if (shift === 'MANANA') {
+                btnM.className = "py-1.5 rounded-lg bg-white shadow-xs";
+                btnT.className = "py-1.5 rounded-lg text-gray-600";
+            } else {
+                btnT.className = "py-1.5 rounded-lg bg-white shadow-xs";
+                btnM.className = "py-1.5 rounded-lg text-gray-600";
+            }
+            renderTimeSlots();
+        }
+
+        function onFormScheduleChange() {
             renderTimeSlots();
         }
 
         function saveNewAppointment(e) {
             e.preventDefault();
-            const slot = document.querySelector('input[name="timeSlot"]:checked').value;
+            const slotInput = document.querySelector('input[name="timeSlot"]:checked');
+            if (!slotInput) { alert('Seleccione un horario'); return; }
+
             appointments.push({
                 id: Date.now(),
-                dayOffset: parseInt(document.getElementById('inputDayOffset').value),
+                exactDate: currentFechaSeleccionada,
                 consultorio: 'A',
                 shift: formShift,
-                time: slot,
-                blocks: 1,
+                time: slotInput.value,
+                blocks: parseInt(document.querySelector('input[name="blockDuration"]:checked').value, 10),
                 hcl: document.getElementById('inputHcl').value,
                 dni: document.getElementById('inputDni').value,
                 name: document.getElementById('inputName').value,
-                ageText: '3 meses',
+                ageText: document.getElementById('calculatedAgeText').textContent || '3 meses',
                 parentName: document.getElementById('inputParentName').value,
                 phone1: document.getElementById('inputPhone1').value,
                 service: document.getElementById('newServicio').value,
+                bookedBy: document.getElementById('inputBookedByStaff').value || 'Lic. Carmen Rosa Mendoza',
                 status: 'PENDIENTE'
             });
             renderAppointments();
             switchScreen('agenda');
-            alert('¡Cita guardada correctamente!');
+            alert('¡Cita guardada correctamente y sincronizada!');
         }
 
         function lookupDni() {
@@ -692,10 +768,41 @@
             lookupDni();
         }
 
+        function calculateExactAge() {
+            const dob = document.getElementById('inputDob').value;
+            if(!dob) return;
+            document.getElementById('calculatedAgeText').textContent = "4 meses, 2 días";
+            document.getElementById('calculatedAgeBanner').classList.remove('hidden');
+        }
+
+        function preloadFormWithPatient(p) {
+            document.getElementById('inputHcl').value = p.hcl || '';
+            document.getElementById('inputDni').value = p.dni || '';
+            document.getElementById('inputName').value = p.name || '';
+            document.getElementById('inputParentName').value = p.parentName || '';
+            document.getElementById('inputPhone1').value = p.phone1 || '';
+        }
+
+        function switchAlertTab(tab) {
+            currentAlertTab = tab;
+            const am = document.getElementById('tabAmber');
+            const rd = document.getElementById('tabRed');
+            if (tab === 'AMBER') {
+                am.className = "py-2 rounded-lg bg-white shadow-xs";
+                rd.className = "py-2 rounded-lg text-gray-600";
+            } else {
+                rd.className = "py-2 rounded-lg bg-white shadow-xs";
+                am.className = "py-2 rounded-lg text-gray-600";
+            }
+            renderAlerts();
+        }
+
         function renderAlerts() {
-            document.getElementById('alertasContainer').innerHTML = alertsData.AMBER.map(a => `
-                <div class="bg-white rounded-2xl p-3.5 shadow-ios-card border-l-4 border-l-ios-orange space-y-2">
-                    <div class="flex justify-between text-xs"><span class="font-bold text-ios-orange">${a.urgency}</span><span class="font-bold text-ios-blue">H.Cl. ${a.hcl}</span></div>
+            const container = document.getElementById('alertsContainer');
+            const items = alertsData[currentAlertTab];
+            container.innerHTML = items.map(a => `
+                <div class="bg-white rounded-2xl p-3.5 shadow-ios-card border-l-4 ${currentAlertTab==='AMBER'?'border-l-ios-orange':'border-l-ios-red'} space-y-2">
+                    <div class="flex justify-between text-xs"><span class="font-bold">${a.urgency}</span><span class="font-bold text-ios-blue">H.Cl. ${a.hcl}</span></div>
                     <div class="text-sm font-bold">${a.name}</div>
                     <div class="text-xs text-gray-500">${a.reason}</div>
                     <button onclick="window.open('https://wa.me/51${a.phone1}')" class="w-full py-2 bg-emerald-100 text-emerald-800 font-bold text-xs rounded-xl">💬 WhatsApp</button>

@@ -60,28 +60,11 @@
         .animate-slide-up { animation: slideUp 0.28s cubic-bezier(0.32, 0.72, 0, 1) forwards; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-start p-2 sm:p-4 gap-3">
+<body class="min-h-screen flex flex-col items-center justify-center p-2 sm:p-4">
 
-    <!-- TOP GLOBAL MODE SWITCHER -->
-    <header class="w-full max-w-6xl bg-white/95 backdrop-blur-xl rounded-2xl p-2 sm:px-4 sm:py-2.5 shadow-md border border-white/80 flex flex-col lg:flex-row items-center justify-between gap-2.5 z-50">
-        <div class="flex items-center gap-2.5">
-            <div class="w-9 h-9 rounded-xl bg-ios-blue text-white flex items-center justify-center shadow-xs">
-                <i class="ph-fill ph-first-aid text-xl"></i>
-            </div>
-            <div>
-                <h1 class="text-xs sm:text-sm font-extrabold text-gray-900">CITEN • Consultorio de Enfermería (C.S. Chilca)</h1>
-                <p class="text-[11px] text-gray-500">Cuaderno Virtual • Sincronización Dual Google Drive + Firebase (Control de Jefatura)</p>
-            </div>
-        </div>
-        <div class="flex items-center gap-1.5">
-            <button onclick="switchMainWorkspace('MOBILE')" id="btnModeMobile" class="px-3 py-1.5 rounded-lg bg-white text-gray-900 shadow-xs text-xs font-bold flex items-center gap-1">📱 App Celular</button>
-            <button onclick="switchMainWorkspace('GDRIVE')" id="btnModeGDrive" class="px-3 py-1.5 rounded-lg text-gray-700 text-xs font-bold flex items-center gap-1">📊 Hoja Google Drive (Admin)</button>
-        </div>
-    </header>
-
-    <!-- MOBILE APP VIEW (IPHONE FRAME) -->
+    <!-- MOBILE APP VIEW (IPHONE FRAME) - NO EXTERNAL TOP BAR -->
     <div id="workspaceMobile" class="w-full max-w-6xl flex items-center justify-center py-1">
-        <div class="relative w-full max-w-[404px] h-[820px] max-h-[88vh] bg-ios-bg rounded-[52px] shadow-iphone overflow-hidden flex flex-col border-[4px] border-black select-none">
+        <div class="relative w-full max-w-[404px] h-[840px] max-h-[92vh] bg-ios-bg rounded-[52px] shadow-iphone overflow-hidden flex flex-col border-[4px] border-black select-none">
             
             <!-- iOS Status Bar -->
             <div class="relative z-40 px-7 pt-3 pb-2 flex items-center justify-between text-xs font-semibold text-gray-900 ios-glass">
@@ -105,7 +88,7 @@
                 <!-- ================= SCREEN 1: AGENDA ================= -->
                 <section id="screen-agenda" class="space-y-3">
                     <div class="sticky top-0 z-30 ios-glass px-4 pt-2 pb-3 border-b border-gray-200/60 space-y-2">
-                        <!-- Top Header Row -->
+                        <!-- Top Header Row matching image_c595d8.png -->
                         <div class="flex items-center justify-between gap-2">
                             <button onclick="openInstallModal()" class="bg-ios-blue text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow-xs ios-tap">
                                 <i class="ph-bold ph-download-simple"></i> Instalar
@@ -119,7 +102,7 @@
                             </button>
                         </div>
 
-                        <!-- Sync Status Bar -->
+                        <!-- Sync Status Bar + Print H.Cl -->
                         <div class="flex items-center justify-between text-xs pt-1">
                             <span class="text-gray-500 font-semibold" id="syncText">🟢 G.Drive Sync • 14 KB</span>
                             <button onclick="openPrintHclModal()" class="bg-gray-900 text-white px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1 shadow-sm ios-tap">
@@ -130,13 +113,18 @@
                         <!-- Title + Date subtitle -->
                         <div>
                             <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">Agenda C.S. Chilca</h2>
-                            <p class="text-xs text-gray-500 font-medium" id="selectedDateLabel">Hoy, Dom 15 Nov • CRED y Sulfato</p>
+                            <p class="text-xs text-gray-500 font-medium" id="selectedDateLabel">Fecha seleccionada</p>
                         </div>
 
-                        <!-- Date Pills -->
-                        <div class="flex items-center justify-between gap-1" id="weekStrip"></div>
+                        <!-- Horizontal Scrollable Date Pills with Calendar Picker -->
+                        <div class="flex items-center gap-2">
+                            <div class="flex-1 flex items-center gap-1 overflow-x-auto no-scrollbar py-1" id="weekStrip">
+                                <!-- Rendered dynamically -->
+                            </div>
+                            <input type="date" id="inlineDatePicker" onchange="onCalendarDatePicked(this.value)" class="p-1.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-ios-blue shadow-2xs cursor-pointer" title="Seleccionar en Calendario">
+                        </div>
 
-                        <!-- Consultorio Filters + Toggle B -->
+                        <!-- Consultorio Filters (Fully Interactive) + Toggle B -->
                         <div class="flex items-center justify-between gap-2 pt-1">
                             <div class="flex-1 grid grid-cols-3 bg-gray-200/80 p-0.5 rounded-xl text-xs font-semibold">
                                 <button onclick="setConsultorioFilter('ALL')" class="cons-filter-btn py-1 rounded-[9px] bg-white text-gray-900 shadow-xs" data-cons="ALL">Todos</button>
@@ -198,7 +186,7 @@
                             <!-- Full Calendar Date Picker for scheduling months in advance -->
                             <div class="flex items-center justify-between">
                                 <span class="text-gray-600">Fecha Exacta Cita:</span>
-                                <input type="date" id="inputExactDate" onchange="onExactDateChanged()" class="text-ios-blue bg-ios-blue/10 px-2.5 py-1 rounded-lg focus:outline-none font-bold">
+                                <input type="date" id="inputExactDate" onchange="onExactDateChanged()" class="text-ios-blue bg-ios-blue/10 px-2.5 py-1 rounded-lg focus:outline-none font-bold cursor-pointer">
                             </div>
                             <div class="flex items-center justify-between pt-2 border-t border-gray-100">
                                 <span class="text-gray-600">Consultorio:</span>
@@ -276,7 +264,7 @@
                             </select>
                         </div>
 
-                        <!-- 4. Horarios y Bloques (Automatic slot recalculation when switching 1 vs 2 blocks) -->
+                        <!-- 4. Horarios y Bloques (Automatic slot recalculation for 20m vs 40m) -->
                         <div class="bg-white rounded-2xl p-3.5 shadow-ios-card space-y-2.5">
                             <span class="text-[11px] font-extrabold uppercase text-gray-400 block">4. Bloques de Tiempo (20m / 40m)</span>
                             <div class="grid grid-cols-2 gap-2">
@@ -302,7 +290,7 @@
                     </form>
                 </section>
 
-                <!-- ================= SCREEN 3: ALERTAS ================= -->
+                <!-- ================= SCREEN 3: ALERTAS (Fully Interactive) ================= -->
                 <section id="screen-alerts" class="hidden space-y-3.5 pb-8 px-4 pt-2">
                     <div class="flex items-center justify-between pb-2 border-b border-gray-200">
                         <div>
@@ -375,7 +363,7 @@
                 <div class="w-32 h-1 bg-gray-900/80 rounded-full"></div>
             </div>
 
-            <!-- MODALS (Action Sheet with Edit/Rectify/Reschedule, Print, Login, Install) -->
+            <!-- MODALS -->
             <div id="actionSheetBackdrop" onclick="closeActionSheet()" class="hidden absolute inset-0 z-50 bg-black/40 backdrop-blur-[2px] flex items-end">
                 <div onclick="event.stopPropagation()" class="w-full bg-ios-bg rounded-t-[32px] p-5 pb-8 space-y-3.5 animate-slide-up shadow-2xl max-h-[88%] overflow-y-auto no-scrollbar">
                     <div class="w-10 h-1.5 bg-gray-300 rounded-full mx-auto"></div>
@@ -391,18 +379,18 @@
                         </div>
                     </div>
 
-                    <!-- WhatsApp Box with balanced smaller green button -->
+                    <!-- WhatsApp Box with compact green button (not overwhelming) -->
                     <div class="bg-[#E7FFDB] border border-[#25D366]/30 rounded-2xl p-3 space-y-2">
                         <span class="text-xs font-bold text-[#075E54] flex items-center gap-1.5"><i class="ph-fill ph-whatsapp-logo text-base text-[#25D366]"></i> Recordatorio a Padres</span>
                         <p id="whatsappPreviewText" class="text-[11px] text-gray-800 bg-white/85 p-2 rounded-xl italic"></p>
-                        <button onclick="triggerWhatsAppSend()" class="py-2 px-4 rounded-xl bg-[#25D366] text-white font-bold text-xs shadow-xs ios-tap flex items-center gap-1.5 mx-auto">
+                        <button onclick="triggerWhatsAppSend()" class="py-1.5 px-3 rounded-xl bg-[#25D366] text-white font-bold text-xs shadow-xs ios-tap flex items-center gap-1 mx-auto">
                             <i class="ph-bold ph-whatsapp-logo text-sm"></i> WhatsApp
                         </button>
                     </div>
 
-                    <!-- Action buttons (Balanced colors: Atendido blue/green, Edit options) -->
+                    <!-- Action buttons: Refined Apple secondary tone for Atendido, plus Edit / Reschedule / Delete -->
                     <div class="space-y-2">
-                        <button onclick="markAsAttended()" class="w-full py-2.5 rounded-2xl bg-ios-green text-white font-bold text-xs shadow-sm">✓ Marcar como Atendido</button>
+                        <button onclick="markAsAttended()" class="w-full py-2.5 rounded-2xl bg-ios-blue text-white font-bold text-xs shadow-sm">✓ Marcar como Atendido</button>
                         <div class="grid grid-cols-3 gap-1.5">
                             <button onclick="openEditAppointment()" class="py-2 rounded-xl bg-gray-200 text-gray-800 font-bold text-xs ios-tap">✏️ Rectificar</button>
                             <button onclick="rescheduleActiveAppointment()" class="py-2 rounded-xl bg-ios-blue/15 text-ios-blue font-bold text-xs ios-tap">🔄 Reprogramar</button>
@@ -471,8 +459,7 @@
 
     <script>
         let currentFechaSeleccionada = new Date().toISOString().split('T')[0];
-        let selectedExactDate = currentFechaSeleccionada;
-        let consultorioBEnabledByDay = { 0: false, 1: true, 2: false, 3: true, 4: false };
+        let consultorioBEnabledByDay = { };
         let currentConsultorioFilter = 'ALL';
         let currentShiftFilter = 'ALL';
         let formShift = 'MANANA';
@@ -511,6 +498,7 @@
 
         window.onload = function() {
             document.getElementById('inputExactDate').value = currentFechaSeleccionada;
+            document.getElementById('inlineDatePicker').value = currentFechaSeleccionada;
             populateStaffSelects();
             renderWeekStrip();
             renderAppointments();
@@ -545,12 +533,12 @@
             const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
             let html = '';
             for(let i = -2; i <= 4; i++) {
-                let d = new Date();
+                let d = new Date(currentFechaSeleccionada + 'T00:00:00');
                 d.setDate(d.getDate() + i);
                 let iso = d.toISOString().split('T')[0];
                 let isSelected = iso === currentFechaSeleccionada;
                 html += `
-                    <button onclick="selectDate('${iso}')" class="flex-1 py-1 rounded-xl flex flex-col items-center ${isSelected ? 'bg-ios-blue text-white shadow-md' : 'bg-white text-gray-700'}">
+                    <button onclick="selectDate('${iso}')" class="flex-1 py-1.5 px-1 rounded-xl flex flex-col items-center flex-shrink-0 min-w-[50px] ${isSelected ? 'bg-ios-blue text-white shadow-md' : 'bg-white text-gray-700 shadow-2xs'}">
                         <span class="text-[9px] font-bold">${diasSemana[d.getDay()]}</span>
                         <span class="text-xs font-extrabold">${d.getDate()}</span>
                     </button>
@@ -561,29 +549,84 @@
 
         function selectDate(iso) {
             currentFechaSeleccionada = iso;
+            document.getElementById('inlineDatePicker').value = iso;
             document.getElementById('selectedDateLabel').textContent = `Fecha: ${iso}`;
             renderWeekStrip();
             renderAppointments();
+            updateConsultorioBUI();
         }
 
-        function onExactDateChanged() {
-            const val = document.getElementById('inputExactDate').value;
-            if (val) currentFechaSeleccionada = val;
-            renderTimeSlots();
+        function onCalendarDatePicked(iso) {
+            if(iso) {
+                selectDate(iso);
+            }
         }
 
         function toggleConsultorioBForCurrentDay() {
             consultorioBEnabledByDay[currentFechaSeleccionada] = !consultorioBEnabledByDay[currentFechaSeleccionada];
+            updateConsultorioBUI();
             renderAppointments();
-            alert(consultorioBEnabledByDay[currentFechaSeleccionada] ? "Consultorio B activado (A+B)." : "Consultorio B desactivado.");
         }
 
-        function setConsultorioFilter(cons) { currentConsultorioFilter = cons; renderAppointments(); }
-        function setShiftFilter(shift) { currentShiftFilter = shift; renderAppointments(); }
+        function updateConsultorioBUI() {
+            const isBActive = !!consultorioBEnabledByDay[currentFechaSeleccionada];
+            const btn = document.getElementById('btnToggleConsB');
+            const dot = document.getElementById('consBStatusDot');
+            const badge = document.getElementById('activeConsBadge');
+
+            if (isBActive) {
+                btn.className = 'px-2.5 py-1.5 rounded-xl text-xs font-bold border bg-ios-green/15 text-ios-green border-ios-green/30 ios-tap';
+                btn.textContent = 'Cons. B Activo';
+                dot.className = 'w-1.5 h-1.5 rounded-full bg-ios-green';
+                badge.textContent = 'Cons. A + B Activos';
+            } else {
+                btn.className = 'px-2.5 py-1.5 rounded-xl text-xs font-bold border bg-white text-gray-700 border-gray-200 ios-tap';
+                btn.textContent = '+ Activar Cons. B';
+                dot.className = 'w-1.5 h-1.5 rounded-full bg-gray-400';
+                badge.textContent = 'Solo Cons. A';
+            }
+
+            document.querySelectorAll('.cons-filter-btn').forEach(b => {
+                if (b.dataset.cons === currentConsultorioFilter) {
+                    b.classList.add('bg-white', 'text-gray-900', 'shadow-xs');
+                    b.classList.remove('text-gray-600');
+                } else {
+                    b.classList.remove('bg-white', 'text-gray-900', 'shadow-xs');
+                    b.classList.add('text-gray-600');
+                }
+            });
+        }
+
+        function setConsultorioFilter(cons) {
+            if (cons === 'B' && !consultorioBEnabledByDay[currentFechaSeleccionada]) {
+                alert('El Consultorio B no está activado para esta fecha. Habilítelo con el botón "+ Activar Cons. B".');
+                return;
+            }
+            currentConsultorioFilter = cons;
+            updateConsultorioBUI();
+            renderAppointments();
+        }
+
+        function setShiftFilter(shift) {
+            currentShiftFilter = shift;
+            document.querySelectorAll('.shift-filter-btn').forEach(b => {
+                if (b.dataset.shift === shift) {
+                    b.classList.add('bg-white', 'text-gray-900', 'shadow-xs');
+                    b.classList.remove('text-gray-600');
+                } else {
+                    b.classList.remove('bg-white', 'text-gray-900', 'shadow-xs');
+                    b.classList.add('text-gray-600');
+                }
+            });
+            renderAppointments();
+        }
 
         function renderAppointments() {
             const list = document.getElementById('appointmentsList');
-            const dayApps = appointments.filter(a => a.exactDate === currentFechaSeleccionada);
+            const dayApps = appointments
+                .filter(a => a.exactDate === currentFechaSeleccionada)
+                .filter(a => currentConsultorioFilter === 'ALL' || a.consultorio === currentConsultorioFilter)
+                .filter(a => currentShiftFilter === 'ALL' || a.shift === currentShiftFilter);
 
             let atendidosCount = dayApps.filter(a => a.status === 'ATENDIDO').length;
             let totalCount = dayApps.length;
@@ -593,7 +636,7 @@
             document.getElementById('dayProgressBar').style.width = `${pct}%`;
 
             if (dayApps.length === 0) {
-                list.innerHTML = `<div class="bg-white rounded-2xl p-6 text-center text-xs text-gray-500">No hay citas para el ${currentFechaSeleccionada}.</div>`;
+                list.innerHTML = `<div class="bg-white rounded-2xl p-6 text-center text-xs text-gray-500">No hay citas para esta fecha y filtro.</div>`;
                 return;
             }
 
@@ -621,7 +664,7 @@
             document.getElementById('sheetConsBadge').textContent = `CONS. ${app.consultorio}`;
             document.getElementById('sheetChildName').textContent = app.name;
             document.getElementById('sheetChildMeta').textContent = `H.Cl: ${app.hcl} • DNI: ${app.dni}`;
-            document.getElementById('sheetTimeBadge').textContent = app.time;
+            document.getElementById('sheetTimeBadge').textContent = `${app.time} (${app.blocks * 20}m)`;
             document.getElementById('sheetBookedByMeta').textContent = `Agendado por: ${app.bookedBy}`;
 
             const msg = `Hola ${app.parentName}, le recordamos que su menor hijo(a) ${app.name} tiene su cita programada en el C.S. Chilca
@@ -690,7 +733,16 @@
         }
 
         function renderFormConsultorioSelector() {
-            document.getElementById('formConsultorioSelector').innerHTML = `<span class="px-2 py-0.5 bg-gray-900 text-white rounded text-xs font-bold">Consultorio A</span>`;
+            const isB = !!consultorioBEnabledByDay[document.getElementById('inputExactDate').value];
+            const container = document.getElementById('formConsultorioSelector');
+            if (isB) {
+                container.innerHTML = `
+                    <label class="cursor-pointer"><input type="radio" name="formConsultorio" value="A" checked class="sr-only peer"><span class="px-2 py-0.5 bg-gray-200 peer-checked:bg-gray-900 peer-checked:text-white rounded text-[11px] font-bold">Cons. A</span></label>
+                    <label class="cursor-pointer"><input type="radio" name="formConsultorio" value="B" class="sr-only peer"><span class="px-2 py-0.5 bg-gray-200 peer-checked:bg-ios-teal peer-checked:text-gray-900 rounded text-[11px] font-bold">Cons. B</span></label>
+                `;
+            } else {
+                container.innerHTML = `<span class="px-2 py-0.5 bg-gray-900 text-white rounded text-[11px] font-bold">Consultorio A</span>`;
+            }
         }
 
         function renderTimeSlots() {
@@ -699,12 +751,24 @@
             const grid = document.getElementById('timeSlotsGrid');
 
             grid.innerHTML = slotList.map((time, idx) => {
-                if (durationBlocks === 2 && idx + 1 >= slotList.length) return ''; // Needs 2 consecutive slots
+                if (durationBlocks === 2 && idx + 1 >= slotList.length) return '';
+                // Calculate end time or display range for 40 min
+                let label = time;
+                if (durationBlocks === 2) {
+                    const nextTime = slotList[idx + 1];
+                    const [h, m] = nextTime.split(':').map(Number);
+                    const totalM = h * 60 + m + 20;
+                    const endH = String(Math.floor(totalM / 60)).padStart(2, '0');
+                    const endM = String(totalM % 60).padStart(2, '0');
+                    label = `${time} - ${endH}:${endM}`;
+                } else {
+                    label = `${time} (20m)`;
+                }
                 return `
                     <label class="cursor-pointer">
                         <input type="radio" name="timeSlot" value="${time}" class="peer sr-only" ${idx===0?'checked':''}>
-                        <div class="p-2 rounded-xl bg-ios-bg border-2 border-transparent peer-checked:border-ios-blue text-center text-xs font-bold">
-                            ${time} ${durationBlocks === 2 ? '(40m)' : ''}
+                        <div class="p-2 rounded-xl bg-ios-bg border-2 border-transparent peer-checked:border-ios-blue text-center text-xs font-bold truncate">
+                            ${label}
                         </div>
                     </label>
                 `;
@@ -726,18 +790,26 @@
         }
 
         function onFormScheduleChange() {
+            renderFormConsultorioSelector();
             renderTimeSlots();
+        }
+
+        function onExactDateChanged() {
+            onFormScheduleChange();
         }
 
         function saveNewAppointment(e) {
             e.preventDefault();
             const slotInput = document.querySelector('input[name="timeSlot"]:checked');
             if (!slotInput) { alert('Seleccione un horario'); return; }
+            const exactDate = document.getElementById('inputExactDate').value;
+            const consRadio = document.querySelector('input[name="formConsultorio"]:checked');
+            const consultorio = consRadio ? consRadio.value : 'A';
 
             appointments.push({
                 id: Date.now(),
-                exactDate: currentFechaSeleccionada,
-                consultorio: 'A',
+                exactDate: exactDate,
+                consultorio: consultorio,
                 shift: formShift,
                 time: slotInput.value,
                 blocks: parseInt(document.querySelector('input[name="blockDuration"]:checked').value, 10),
@@ -751,6 +823,8 @@
                 bookedBy: document.getElementById('inputBookedByStaff').value || 'Lic. Carmen Rosa Mendoza',
                 status: 'PENDIENTE'
             });
+            currentFechaSeleccionada = exactDate;
+            renderWeekStrip();
             renderAppointments();
             switchScreen('agenda');
             alert('¡Cita guardada correctamente y sincronizada!');
@@ -781,6 +855,10 @@
             document.getElementById('inputName').value = p.name || '';
             document.getElementById('inputParentName').value = p.parentName || '';
             document.getElementById('inputPhone1').value = p.phone1 || '';
+            if(p.exactDate) {
+                document.getElementById('inputExactDate').value = p.exactDate;
+                currentFechaSeleccionada = p.exactDate;
+            }
         }
 
         function switchAlertTab(tab) {

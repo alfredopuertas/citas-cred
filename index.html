@@ -738,13 +738,26 @@
             );
 
             grid.innerHTML = slotList.map((time, idx) => {
-                if (durationBlocks === 2 && idx + 1 >= slotList.length) return '';
-                const isBooked = bookedTimes.has(time);
-                if (isBooked) return ''; 
+                // If 2 blocks (40m), we need idx + 1 to be within bounds and neither idx nor idx+1 is booked
+                if (durationBlocks === 2) {
+                    if (idx + 1 >= slotList.length) return '';
+                    const nextTime = slotList[idx + 1];
+                    if (bookedTimes.has(time) || bookedTimes.has(nextTime)) return '';
+                } else {
+                    if (bookedTimes.has(time)) return '';
+                }
 
                 return `
                     <label class="cursor-pointer">
                         <input type="radio" name="timeSlot" value="${time}" class="peer sr-only">
+                        <div class="p-2 rounded-xl bg-ios-bg border-2 border-transparent peer-checked:border-ios-blue text-center text-xs font-bold truncate">
+                            ${time} ${durationBlocks === 2 ? '(40m)' : ''}
+                        </div>
+                    </label>
+                `;
+            }).join('');
+        }
+" class="peer sr-only">
                         <div class="p-2 rounded-xl bg-ios-bg border-2 border-transparent peer-checked:border-ios-blue text-center text-xs font-bold truncate">
                             ${time}
                         </div>
@@ -820,12 +833,40 @@
             lookupDni();
         }
 
+        
         function calculateExactAge() {
-            const dob = document.getElementById('inputDob').value;
-            if(!dob) return;
-            document.getElementById('calculatedAgeText').textContent = "4 meses, 2 días";
+            const dobVal = document.getElementById('inputDob').value;
+            const refVal = document.getElementById('inputExactDate').value || new Date().toISOString().split('T')[0];
+            if (!dobVal) return;
+
+            const dob = new Date(dobVal + 'T00:00:00');
+            const ref = new Date(refVal + 'T00:00:00');
+
+            let years = ref.getFullYear() - dob.getFullYear();
+            let months = ref.getMonth() - dob.getMonth();
+            let days = ref.getDate() - dob.getDate();
+
+            if (days < 0) {
+                months--;
+                // Get days in previous month
+                const prevMonthDate = new Date(ref.getFullYear(), ref.getMonth(), 0);
+                days += prevMonthDate.getDate();
+            }
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+
+            let parts = [];
+            if (years > 0) parts.push(`${years} año${years > 1 ? 's' : ''}`);
+            if (months > 0 || years > 0) parts.push(`${months} mes${months !== 1 ? 'es' : ''}`);
+            parts.push(`${days} día${days !== 1 ? 's' : ''}`);
+
+            document.getElementById('calculatedAgeText').textContent = parts.join(', ');
             document.getElementById('calculatedAgeBanner').classList.remove('hidden');
         }
+
+        
 
         function preloadFormWithPatient(p) {
             document.getElementById('inputHcl').value = p.hcl || '';

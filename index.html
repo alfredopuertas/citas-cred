@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#007AFF">
     <style>
         :root {
-            --ios-bg: #F2F2F7;
+            --ios-bg: #F4F4F6;
             --ios-card: #FFFFFF;
             --ios-blue: #007AFF;
             --ios-green: #34C759;
@@ -16,52 +16,65 @@
             --ios-red: #FF3B30;
             --ios-gray: #8E8E93;
             --ios-light-gray: #E5E5EA;
-            --ios-text: #000000;
+            --ios-text: #1C1C1E;
             --ios-secondary: #3C3C43;
-            --ios-border: #C6C6C8;
-            --ios-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            --ios-border: #D1D1D6;
+            --ios-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--ios-bg); color: var(--ios-text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
+        /* Top Navigation Bar */
         .top-mode-bar { background: #1c1c1e; color: white; display: flex; justify-content: space-between; align-items: center; padding: 6px 16px; font-size: 12px; font-weight: 500; z-index: 1000; }
         .top-mode-bar span { opacity: 0.85; }
         .top-links { display: flex; gap: 8px; }
         .top-links a { background: rgba(255,255,255,0.2); color: white; border: none; padding: 3px 8px; border-radius: 6px; font-size: 11px; text-decoration: none; }
 
-        .app-container { flex: 1; display: flex; flex-direction: column; max-width: 480px; width: 100%; margin: 0 auto; background: var(--ios-card); position: relative; overflow: hidden; box-shadow: 0 0 30px rgba(0,0,0,0.12); }
+        /* Main App Container */
+        .app-container { flex: 1; display: flex; flex-direction: column; max-width: 480px; width: 100%; margin: 0 auto; background: var(--ios-card); position: relative; overflow: hidden; box-shadow: 0 0 30px rgba(0,0,0,0.15); }
         
+        /* iOS Header */
         .app-header { background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 0.5px solid var(--ios-border); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
         .user-badge { font-size: 12px; background: rgba(0,122,255,0.1); color: var(--ios-blue); padding: 6px 10px; border-radius: 14px; font-weight: 600; display: flex; align-items: center; gap: 5px; cursor: pointer; border: 0.5px solid rgba(0,122,255,0.2); }
 
+        /* Content Views */
         .view-content { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 100px; display: none; }
         .view-content.active { display: block; }
 
-        .tab-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 83px; background: rgba(255,255,255,0.88); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-top: 0.5px solid var(--ios-border); display: flex; justify-content: space-around; padding-top: 8px; z-index: 100; }
+        /* iOS Bottom Tab Bar */
+        .tab-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 83px; background: rgba(255,255,255,0.92); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-top: 0.5px solid var(--ios-border); display: flex; justify-content: space-around; padding-top: 8px; z-index: 100; }
         .tab-item { display: flex; flex-direction: column; align-items: center; color: var(--ios-gray); text-decoration: none; font-size: 10px; font-weight: 500; cursor: pointer; flex: 1; transition: color 0.2s; }
         .tab-item.active { color: var(--ios-blue); font-weight: 600; }
         .tab-item svg { width: 24px; height: 24px; margin-bottom: 3px; }
 
-        .card { background: #FFFFFF; border: 0.5px solid rgba(0,0,0,0.06); border-radius: 14px; padding: 16px; margin-bottom: 14px; box-shadow: var(--ios-shadow); }
-        .btn { background: var(--ios-blue); color: white; border: none; border-radius: 12px; padding: 13px 18px; font-size: 15px; font-weight: 600; width: 100%; cursor: pointer; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,122,255,0.3); transition: transform 0.1s, opacity 0.2s; }
+        /* Colored Cards & UI Elements */
+        .card { background: #FFFFFF; border: 0.5px solid var(--ios-border); border-radius: 14px; padding: 16px; margin-bottom: 14px; box-shadow: var(--ios-shadow); position: relative; }
+        .card-left-border-blue { border-left: 5px solid var(--ios-blue); }
+        .card-left-border-orange { border-left: 5px solid var(--ios-orange); }
+        .card-left-border-red { border-left: 5px solid var(--ios-red); }
+        .card-left-border-green { border-left: 5px solid var(--ios-green); }
+
+        .btn { background: var(--ios-blue); color: white; border: none; border-radius: 12px; padding: 12px 16px; font-size: 14px; font-weight: 600; width: 100%; cursor: pointer; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,122,255,0.25); transition: transform 0.1s, opacity 0.2s; }
         .btn:active { transform: scale(0.98); opacity: 0.85; }
-        .btn-green { background: var(--ios-green); box-shadow: 0 4px 12px rgba(52,199,89,0.3); }
-        .btn-orange { background: var(--ios-orange); box-shadow: 0 4px 12px rgba(255,149,0,0.3); }
+        .btn-green { background: var(--ios-green); box-shadow: 0 4px 12px rgba(52,199,89,0.25); }
+        .btn-orange { background: var(--ios-orange); box-shadow: 0 4px 12px rgba(255,149,0,0.25); }
+        .btn-red { background: var(--ios-red); box-shadow: 0 4px 12px rgba(255,59,48,0.25); }
         .btn-secondary { background: var(--ios-light-gray); color: var(--ios-text); box-shadow: none; font-weight: 500; }
         
         .form-group { margin-bottom: 16px; }
-        .form-label { font-size: 13px; font-weight: 600; color: var(--ios-secondary); margin-bottom: 6px; display: block; letter-spacing: -0.2px; }
-        .form-input, .form-select { width: 100%; padding: 12px 14px; border: 0.5px solid var(--ios-border); border-radius: 10px; font-size: 16px; background: #FAFAFC; color: var(--ios-text); outline: none; transition: all 0.2s; }
+        .form-label { font-size: 13px; font-weight: 600; color: var(--ios-secondary); margin-bottom: 6px; display: block; }
+        .form-input, .form-select { width: 100%; padding: 12px 14px; border: 0.5px solid var(--ios-border); border-radius: 10px; font-size: 15px; background: #FAFAFC; color: var(--ios-text); outline: none; transition: all 0.2s; }
         .form-input:focus, .form-select:focus { border-color: var(--ios-blue); background: #FFFFFF; box-shadow: 0 0 0 3px rgba(0,122,255,0.15); }
 
+        /* Date selector pills */
         .date-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 16px; scrollbar-width: none; }
         .date-pills::-webkit-scrollbar { display: none; }
-        .date-pill { min-width: 58px; padding: 10px 4px; border-radius: 12px; background: var(--ios-light-gray); text-align: center; cursor: pointer; font-size: 11px; font-weight: 500; color: var(--ios-secondary); border: 1.5px solid transparent; transition: all 0.2s; }
+        .date-pill { min-width: 56px; padding: 10px 4px; border-radius: 12px; background: var(--ios-light-gray); text-align: center; cursor: pointer; font-size: 11px; font-weight: 600; color: var(--ios-secondary); border: 1.5px solid transparent; transition: all 0.2s; }
         .date-pill.active { background: var(--ios-blue); color: white; border-color: #005ec4; box-shadow: 0 4px 12px rgba(0,122,255,0.3); }
         .date-pill .day-num { font-size: 18px; font-weight: 700; display: block; margin-top: 2px; }
 
         .back-nav-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
-        .back-btn { background: none; border: none; color: var(--ios-blue); font-size: 16px; font-weight: 600; display: flex; align-items: center; cursor: pointer; padding: 4px 0; }
+        .back-btn { background: none; border: none; color: var(--ios-blue); font-size: 15px; font-weight: 600; display: flex; align-items: center; cursor: pointer; padding: 4px 0; }
         
         .badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; }
         .badge-prematuro { background: #E0F2FE; color: #0369A1; border: 0.5px solid #BAE6FD; }
@@ -79,8 +92,8 @@
         <!-- Header with CITEN and Subtitle -->
         <header class="app-header">
             <div style="display: flex; flex-direction: column;">
-                <h1 class="app-title" style="font-size: 19px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.1;">CITEN</h1>
-                <span style="font-size: 11px; font-weight: 500; color: var(--ios-secondary); letter-spacing: -0.1px;">Citas de CRED - Enfermería</span>
+                <h1 style="font-size: 20px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.1; color: var(--ios-text);">CITEN</h1>
+                <span style="font-size: 11px; font-weight: 600; color: var(--ios-blue); letter-spacing: -0.1px;">Citas de CRED - Enfermería</span>
             </div>
             <div class="user-badge" id="userBadge" onclick="cambiarUsuario()">
                 👤 <span id="currentUserName">Lic. Carmen Mendoza</span>
@@ -113,7 +126,7 @@
             </div>
             <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 18px; letter-spacing: -0.5px;">Agendar Nueva Cita</h2>
             
-            <div class="card">
+            <div class="card card-left-border-blue">
                 <div class="form-group">
                     <label class="form-label">N° H.Cl. (Historia Clínica)</label>
                     <input type="text" id="newHcl" class="form-input" placeholder="Ej. HC-40892">
@@ -132,7 +145,7 @@
                 <div class="form-group">
                     <label class="form-label">Fecha de Nacimiento</label>
                     <input type="date" id="newNac" class="form-input" onchange="calcularEdadExacta()">
-                    <span id="edadCalculadaText" style="font-size: 12px; color: var(--ios-blue); margin-top: 6px; display: block; font-weight: 500;"></span>
+                    <span id="edadCalculadaText" style="font-size: 12px; color: var(--ios-blue); margin-top: 6px; display: block; font-weight: 600;"></span>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Nombre del Padre o Madre</label>
@@ -188,13 +201,13 @@
         <!-- VIEW 4: ESTADISTICAS -->
         <div id="view-estadisticas" class="view-content">
             <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 18px; letter-spacing: -0.5px;">Estadísticas & Reportes HIS</h2>
-            <div class="card" style="text-align: center; padding: 24px;">
+            <div class="card card-left-border-blue" style="text-align: center; padding: 24px;">
                 <h3 style="font-size: 14px; font-weight: 600; color: var(--ios-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Total Citados del Mes</h3>
                 <div style="font-size: 42px; font-weight: 800; color: var(--ios-blue); letter-spacing: -1px;" id="statTotal">142</div>
-                <div style="display: flex; justify-content: space-around; margin-top: 20px; font-size: 13px; font-weight: 500;">
-                    <div>✅ Atendidos: <strong id="statAtendidos" style="font-size: 15px;">118</strong></div>
-                    <div>⚠️ Pendientes: <strong id="statPendientes" style="font-size: 15px;">14</strong></div>
-                    <div>❌ Inasistentes: <strong id="statInasistentes" style="font-size: 15px;">10</strong></div>
+                <div style="display: flex; justify-content: space-around; margin-top: 20px; font-size: 13px; font-weight: 600;">
+                    <div>✅ Atendidos: <strong id="statAtendidos" style="font-size: 15px; color: var(--ios-green);">118</strong></div>
+                    <div>⚠️ Pendientes: <strong id="statPendientes" style="font-size: 15px; color: var(--ios-orange);">14</strong></div>
+                    <div>❌ Inasistentes: <strong id="statInasistentes" style="font-size: 15px; color: var(--ios-red);">10</strong></div>
                 </div>
             </div>
         </div>
@@ -224,7 +237,14 @@
         let currentFechaSeleccionada = new Date().toISOString().split('T')[0];
         let usuarioActual = { nombre: "Lic. Carmen Mendoza" };
         let filtroServicioActual = "TODOS";
-        let citasData = JSON.parse(localStorage.getItem('CITEN_CITAS_CHILCA')) || [];
+        let citasData = JSON.parse(localStorage.getItem('CITEN_CITAS_CHILCA')) || [
+            {
+                id: "CIT-1001", fecha: currentFechaSeleccionada, turno: "Mañana", hora: "08:30", bloques: 2,
+                consultorio: "Consultorio A", hcl: "HC-40892", dni: "81459230", nombreMenor: "Mateo Valentina Quispe",
+                fechaNac: "2026-07-15", servicio: "CRED + Sulfato", prematuro: "NO", nombrePadre: "María Quispe Rojas",
+                celular1: "987654321", celular2: "912345678", estado: "PENDIENTE", registradoPor: "Lic. Carmen Mendoza"
+            }
+        ];
 
         function guardarEnStorage() {
             localStorage.setItem('CITEN_CITAS_CHILCA', JSON.stringify(citasData));
@@ -259,7 +279,7 @@
                 let fechaIso = d.toISOString().split('T')[0];
                 let pill = document.createElement('div');
                 pill.className = `date-pill ${fechaIso === currentFechaSeleccionada ? 'active' : ''}`;
-                pill.innerHTML = `<span style="font-size:10px; text-transform:uppercase; font-weight:600;">${diasSemana[d.getDay()]}</span><span class="day-num">${d.getDate()}</span>`;
+                pill.innerHTML = `<span style="font-size:10px; text-transform:uppercase; font-weight:700;">${diasSemana[d.getDay()]}</span><span class="day-num">${d.getDate()}</span>`;
                 pill.onclick = () => {
                     currentFechaSeleccionada = fechaIso;
                     document.getElementById('calendarPicker').value = fechaIso;
@@ -290,15 +310,16 @@
             }
 
             filtradas.forEach(cita => {
+                let borderClass = cita.estado === 'ATENDIDO' ? 'card-left-border-green' : (cita.estado === 'INASISTENTE' ? 'card-left-border-red' : 'card-left-border-blue');
                 let card = document.createElement('div');
-                card.className = 'card';
+                card.className = `card ${borderClass}`;
                 card.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
                         <span style="font-size:12px; font-weight:700; color:var(--ios-blue); letter-spacing: -0.2px;">${cita.hora} • ${cita.consultorio}</span>
                         <span style="font-size:11px; padding:3px 10px; border-radius:8px; background:${cita.estado==='ATENDIDO'?'#DCFCE7':cita.estado==='INASISTENTE'?'#FEE2E2':'#FEF3C7'}; color:${cita.estado==='ATENDIDO'?'#166534':cita.estado==='INASISTENTE'?'#991B1B':'#92400E'}; font-weight:700;">${cita.estado}</span>
                     </div>
                     <div style="font-size:16px; font-weight:700; margin-bottom:4px; letter-spacing: -0.3px;">${cita.nombreMenor}</div>
-                    <div style="font-size:13px; color:var(--ios-secondary); margin-bottom:6px; font-weight:500;">H.Cl: <strong>${cita.hcl}</strong> | DNI: ${cita.dni} | Serv: ${cita.servicio} ${cita.prematuro==='SI'?'<span class="badge badge-prematuro">Prematuro</span>':''}</div>
+                    <div style="font-size:13px; color:var(--ios-secondary); margin-bottom:6px; font-weight:600;">H.Cl: <strong>${cita.hcl}</strong> | DNI: ${cita.dni} | Serv: ${cita.servicio} ${cita.prematuro==='SI'?'<span class="badge badge-prematuro">Prematuro</span>':''}</div>
                     <div style="font-size:12px; color:var(--ios-secondary); margin-bottom:12px; font-weight:500;">Apoderado: ${cita.nombrePadre} | Cel: ${cita.celular1}</div>
                     <div style="display:flex; gap:8px;">
                         <button class="btn btn-green" style="font-size:12px; padding:10px;" onclick="enviarWhatsApp('${cita.id}')">💬 WhatsApp</button>
@@ -364,7 +385,7 @@
                 hcl: hcl, dni: dni, nombreMenor: nombreMenor,
                 fechaNac: document.getElementById('newNac').value || '2026-01-01',
                 servicio: document.getElementById('newServicio').value,
-                prematuro: document.getElementById('newPrematuro')->checked ? 'SI' : 'NO',
+                prematuro: document.getElementById('newPrematuro').checked ? 'SI' : 'NO',
                 nombrePadre: document.getElementById('newPadre').value.trim() || 'Apoderado',
                 celular1: celular1, celular2: '', estado: 'PENDIENTE'
             });
@@ -379,16 +400,17 @@
             container.innerHTML = '';
             const pendientes = citasData.filter(c => c.estado !== 'ATENDIDO');
             if (pendientes.length === 0) {
-                container.innerHTML = `<div class="card" style="text-align:center; color:var(--ios-gray); font-weight: 500;">No hay alertas pendientes. ¡Excelente labor!</div>`;
+                container.innerHTML = `<div class="card card-left-border-green" style="text-align:center; color:var(--ios-gray); font-weight: 500;">No hay alertas pendientes. ¡Excelente labor!</div>`;
                 return;
             }
             pendientes.forEach(cita => {
                 let card = document.createElement('div');
-                card.className = 'card';
+                card.className = 'card card-left-border-orange';
                 card.innerHTML = `
                     <div style="font-size:13px; font-weight:700; color:var(--ios-orange); margin-bottom:4px;">⚠️ Pendiente / Seguimiento</div>
                     <div style="font-size:16px; font-weight:700; margin-bottom:2px; letter-spacing: -0.3px;">${cita.nombreMenor} (H.Cl: ${cita.hcl})</div>
-                    <div style="font-size:13px; color:var(--ios-secondary); margin-bottom:10px; font-weight:500;">Fecha: ${cita.fecha} | Tel: ${cita.celular1}</div>
+                    <div style="font-size:13px; color:var(--ios-secondary); margin-bottom:10px; font-weight:600;">Fecha: ${cita.fecha} | Tel: ${cita.celular1}</div>
+                    <button class="btn btn-green" style="font-size:12px; padding:8px;" onclick="enviarWhatsApp('${cita.id}')">💬 Enviar Recordatorio WhatsApp</button>
                 `;
                 container.appendChild(card);
             });

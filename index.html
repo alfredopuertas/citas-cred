@@ -19,48 +19,52 @@
             --ios-text: #000000;
             --ios-secondary: #3C3C43;
             --ios-border: #C6C6C8;
+            --ios-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--ios-bg); color: var(--ios-text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        .top-mode-bar { background: #1c1c1e; color: white; display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; font-size: 13px; font-weight: 500; z-index: 1000; }
-        .top-mode-bar span { opacity: 0.8; }
-        .top-links { display: flex; gap: 10px; }
-        .top-links a { background: rgba(255,255,255,0.2); color: white; border: none; padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; text-decoration: none; }
+        .top-mode-bar { background: #1c1c1e; color: white; display: flex; justify-content: space-between; align-items: center; padding: 6px 16px; font-size: 12px; font-weight: 500; z-index: 1000; }
+        .top-mode-bar span { opacity: 0.85; }
+        .top-links { display: flex; gap: 8px; }
+        .top-links a { background: rgba(255,255,255,0.2); color: white; border: none; padding: 3px 8px; border-radius: 6px; font-size: 11px; text-decoration: none; }
 
-        .app-container { flex: 1; display: flex; flex-direction: column; max-width: 480px; width: 100%; margin: 0 auto; background: var(--ios-card); position: relative; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .app-container { flex: 1; display: flex; flex-direction: column; max-width: 480px; width: 100%; margin: 0 auto; background: var(--ios-card); position: relative; overflow: hidden; box-shadow: 0 0 30px rgba(0,0,0,0.12); }
         
-        .app-header { background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); border-bottom: 0.5px solid var(--ios-border); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
-        .app-title { font-size: 15px; font-weight: 600; letter-spacing: -0.4px; color: var(--ios-text); }
-        .user-badge { font-size: 12px; background: var(--ios-light-gray); padding: 4px 8px; border-radius: 12px; font-weight: 500; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+        .app-header { background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 0.5px solid var(--ios-border); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .user-badge { font-size: 12px; background: rgba(0,122,255,0.1); color: var(--ios-blue); padding: 6px 10px; border-radius: 14px; font-weight: 600; display: flex; align-items: center; gap: 5px; cursor: pointer; border: 0.5px solid rgba(0,122,255,0.2); }
 
-        .view-content { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 90px; display: none; }
+        .view-content { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 100px; display: none; }
         .view-content.active { display: block; }
 
-        .tab-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 83px; background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); border-top: 0.5px solid var(--ios-border); display: flex; justify-content: space-around; padding-top: 8px; z-index: 100; }
-        .tab-item { display: flex; flex-direction: column; align-items: center; color: var(--ios-gray); text-decoration: none; font-size: 10px; font-weight: 500; cursor: pointer; flex: 1; }
-        .tab-item.active { color: var(--ios-blue); }
-        .tab-item svg { width: 24px; height: 24px; margin-bottom: 2px; }
+        .tab-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 83px; background: rgba(255,255,255,0.88); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-top: 0.5px solid var(--ios-border); display: flex; justify-content: space-around; padding-top: 8px; z-index: 100; }
+        .tab-item { display: flex; flex-direction: column; align-items: center; color: var(--ios-gray); text-decoration: none; font-size: 10px; font-weight: 500; cursor: pointer; flex: 1; transition: color 0.2s; }
+        .tab-item.active { color: var(--ios-blue); font-weight: 600; }
+        .tab-item svg { width: 24px; height: 24px; margin-bottom: 3px; }
 
-        .card { background: #FFFFFF; border: 0.5px solid var(--ios-light-gray); border-radius: 12px; padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-        .btn { background: var(--ios-blue); color: white; border: none; border-radius: 10px; padding: 12px 16px; font-size: 15px; font-weight: 600; width: 100%; cursor: pointer; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
-        .btn:active { opacity: 0.7; }
-        .btn-green { background: var(--ios-green); }
-        .btn-orange { background: var(--ios-orange); }
-        .btn-secondary { background: var(--ios-light-gray); color: var(--ios-text); }
+        .card { background: #FFFFFF; border: 0.5px solid rgba(0,0,0,0.06); border-radius: 14px; padding: 16px; margin-bottom: 14px; box-shadow: var(--ios-shadow); }
+        .btn { background: var(--ios-blue); color: white; border: none; border-radius: 12px; padding: 13px 18px; font-size: 15px; font-weight: 600; width: 100%; cursor: pointer; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,122,255,0.3); transition: transform 0.1s, opacity 0.2s; }
+        .btn:active { transform: scale(0.98); opacity: 0.85; }
+        .btn-green { background: var(--ios-green); box-shadow: 0 4px 12px rgba(52,199,89,0.3); }
+        .btn-orange { background: var(--ios-orange); box-shadow: 0 4px 12px rgba(255,149,0,0.3); }
+        .btn-secondary { background: var(--ios-light-gray); color: var(--ios-text); box-shadow: none; font-weight: 500; }
         
-        .form-group { margin-bottom: 14px; }
-        .form-label { font-size: 13px; font-weight: 500; color: var(--ios-secondary); margin-bottom: 6px; display: block; }
-        .form-input, .form-select { width: 100%; padding: 10px 12px; border: 0.5px solid var(--ios-border); border-radius: 8px; font-size: 15px; background: #FAFAFC; color: var(--ios-text); outline: none; }
-        
-        .date-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 14px; scrollbar-width: none; }
+        .form-group { margin-bottom: 16px; }
+        .form-label { font-size: 13px; font-weight: 600; color: var(--ios-secondary); margin-bottom: 6px; display: block; letter-spacing: -0.2px; }
+        .form-input, .form-select { width: 100%; padding: 12px 14px; border: 0.5px solid var(--ios-border); border-radius: 10px; font-size: 16px; background: #FAFAFC; color: var(--ios-text); outline: none; transition: all 0.2s; }
+        .form-input:focus, .form-select:focus { border-color: var(--ios-blue); background: #FFFFFF; box-shadow: 0 0 0 3px rgba(0,122,255,0.15); }
+
+        .date-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 16px; scrollbar-width: none; }
         .date-pills::-webkit-scrollbar { display: none; }
-        .date-pill { min-width: 54px; padding: 8px 4px; border-radius: 10px; background: var(--ios-light-gray); text-align: center; cursor: pointer; font-size: 11px; font-weight: 500; color: var(--ios-secondary); border: 1.5px solid transparent; }
-        .date-pill.active { background: var(--ios-blue); color: white; border-color: #005ec4; }
-        .date-pill .day-num { font-size: 16px; font-weight: 700; display: block; }
+        .date-pill { min-width: 58px; padding: 10px 4px; border-radius: 12px; background: var(--ios-light-gray); text-align: center; cursor: pointer; font-size: 11px; font-weight: 500; color: var(--ios-secondary); border: 1.5px solid transparent; transition: all 0.2s; }
+        .date-pill.active { background: var(--ios-blue); color: white; border-color: #005ec4; box-shadow: 0 4px 12px rgba(0,122,255,0.3); }
+        .date-pill .day-num { font-size: 18px; font-weight: 700; display: block; margin-top: 2px; }
 
-        .back-nav-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-        .back-btn { background: none; border: none; color: var(--ios-blue); font-size: 16px; font-weight: 500; display: flex; align-items: center; cursor: pointer; padding: 4px 0; }
+        .back-nav-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+        .back-btn { background: none; border: none; color: var(--ios-blue); font-size: 16px; font-weight: 600; display: flex; align-items: center; cursor: pointer; padding: 4px 0; }
+        
+        .badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; }
+        .badge-prematuro { background: #E0F2FE; color: #0369A1; border: 0.5px solid #BAE6FD; }
     </style>
 </head>
 <body>
@@ -72,38 +76,42 @@
     </div>
 
     <div class="app-container">
+        <!-- Header with CITEN and Subtitle -->
         <header class="app-header">
-            <h1 class="app-title">CITEN: Agenda de Citas Enfermería-CRED</h1>
+            <div style="display: flex; flex-direction: column;">
+                <h1 class="app-title" style="font-size: 19px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.1;">CITEN</h1>
+                <span style="font-size: 11px; font-weight: 500; color: var(--ios-secondary); letter-spacing: -0.1px;">Citas de CRED - Enfermería</span>
+            </div>
             <div class="user-badge" id="userBadge" onclick="cambiarUsuario()">
                 👤 <span id="currentUserName">Lic. Carmen Mendoza</span>
             </div>
         </header>
 
-        <!-- AGENDA -->
+        <!-- VIEW 1: AGENDA -->
         <div id="view-agenda" class="view-content active">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <h3 style="font-size: 15px; font-weight: 600;">Calendario de Citas</h3>
-                <input type="date" id="calendarPicker" style="font-size: 13px; padding: 4px 8px; border-radius: 6px; border: 0.5px solid var(--ios-border);" onchange="seleccionarFechaCalendario(this.value)">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h3 style="font-size: 16px; font-weight: 700; letter-spacing: -0.3px;">Calendario Diario</h3>
+                <input type="date" id="calendarPicker" style="font-size: 13px; padding: 6px 10px; border-radius: 8px; border: 0.5px solid var(--ios-border); background: #FAFAFC;" onchange="seleccionarFechaCalendario(this.value)">
             </div>
             
             <div class="date-pills" id="datePillsContainer"></div>
 
-            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                <button class="btn btn-secondary" style="font-size: 13px; padding: 8px;" onclick="filtrarServicio('TODOS')">Todos</button>
-                <button class="btn btn-secondary" style="font-size: 13px; padding: 8px;" onclick="filtrarServicio('CRED')">CRED</button>
-                <button class="btn btn-secondary" style="font-size: 13px; padding: 8px;" onclick="filtrarServicio('Sulfato')">Sulfato</button>
-                <button class="btn btn-secondary" style="font-size: 13px; padding: 8px;" onclick="imprimirListaArchivo()">🖨️ Lista H.Cl.</button>
+            <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                <button class="btn btn-secondary" style="font-size: 13px; padding: 8px 12px;" onclick="filtrarServicio('TODOS')">Todos</button>
+                <button class="btn btn-secondary" style="font-size: 13px; padding: 8px 12px;" onclick="filtrarServicio('CRED')">CRED</button>
+                <button class="btn btn-secondary" style="font-size: 13px; padding: 8px 12px;" onclick="filtrarServicio('Sulfato')">Sulfato</button>
+                <button class="btn btn-secondary" style="font-size: 13px; padding: 8px 12px;" onclick="imprimirListaArchivo()">🖨️ H.Cl.</button>
             </div>
 
             <div id="agendaListContainer"></div>
         </div>
 
-        <!-- NUEVA CITA -->
+        <!-- VIEW 2: NUEVA CITA -->
         <div id="view-nueva" class="view-content">
             <div class="back-nav-bar">
                 <button class="back-btn" onclick="switchView('agenda')">◀ Atrás</button>
             </div>
-            <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">Agendar Nueva Cita</h2>
+            <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 18px; letter-spacing: -0.5px;">Agendar Nueva Cita</h2>
             
             <div class="card">
                 <div class="form-group">
@@ -114,7 +122,7 @@
                     <label class="form-label">DNI del Menor</label>
                     <div style="display: flex; gap: 8px;">
                         <input type="text" id="newDni" class="form-input" placeholder="8 dígitos" maxlength="8">
-                        <button class="btn" style="width: 110px; font-size: 13px;" onclick="autocompletarDemo()">Demo</button>
+                        <button class="btn" style="width: 110px; font-size: 13px; padding: 10px;" onclick="autocompletarDemo()">Demo</button>
                     </div>
                 </div>
                 <div class="form-group">
@@ -124,7 +132,7 @@
                 <div class="form-group">
                     <label class="form-label">Fecha de Nacimiento</label>
                     <input type="date" id="newNac" class="form-input" onchange="calcularEdadExacta()">
-                    <span id="edadCalculadaText" style="font-size: 12px; color: var(--ios-blue); margin-top: 4px; display: block;"></span>
+                    <span id="edadCalculadaText" style="font-size: 12px; color: var(--ios-blue); margin-top: 6px; display: block; font-weight: 500;"></span>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Nombre del Padre o Madre</label>
@@ -148,9 +156,9 @@
                         <option value="CRED + Sulfato">CRED + Sulfato Ferroso</option>
                     </select>
                 </div>
-                <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; background: #F8FAFC; padding: 10px; border-radius: 8px;">
-                    <span style="font-size: 14px; font-weight: 550;">¿Es CRED Prematuro?</span>
-                    <input type="checkbox" id="newPrematuro" style="width: 20px; height: 20px;">
+                <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; background: #F8FAFC; padding: 12px 14px; border-radius: 10px; border: 0.5px solid var(--ios-border);">
+                    <span style="font-size: 14px; font-weight: 600;">¿Es CRED Prematuro?</span>
+                    <input type="checkbox" id="newPrematuro" style="width: 22px; height: 22px; accent-color: var(--ios-blue);">
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <div class="form-group" style="flex:1;">
@@ -160,38 +168,38 @@
                     <div class="form-group" style="flex:1;">
                         <label class="form-label">Turno y Consultorio</label>
                         <select id="newTurnoConsulta" class="form-select">
-                            <option value="Mañana|Consultorio A">Mañana (08:30) - Consultorio A</option>
-                            <option value="Mañana|Consultorio B">Mañana (08:30) - Consultorio B</option>
-                            <option value="Tarde|Consultorio A">Tarde (14:00) - Consultorio A</option>
-                            <option value="Tarde|Consultorio B">Tarde (14:00) - Consultorio B</option>
+                            <option value="Mañana|Consultorio A">Mañana (08:30) - A</option>
+                            <option value="Mañana|Consultorio B">Mañana (08:30) - B</option>
+                            <option value="Tarde|Consultorio A">Tarde (14:00) - A</option>
+                            <option value="Tarde|Consultorio B">Tarde (14:00) - B</option>
                         </select>
                     </div>
                 </div>
-                <button class="btn btn-green" style="margin-top: 10px;" onclick="guardarNuevaCita()">💾 Guardar Cita</button>
+                <button class="btn btn-green" style="margin-top: 10px;" onclick="guardarNuevaCita()">💾 Guardar Cita Segura</button>
             </div>
         </div>
 
-        <!-- ALERTAS -->
+        <!-- VIEW 3: ALERTAS -->
         <div id="view-alertas" class="view-content">
-            <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">Seguimiento y Alertas</h2>
+            <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 18px; letter-spacing: -0.5px;">Seguimiento y Alertas</h2>
             <div id="alertasContainer"></div>
         </div>
 
-        <!-- REPORTES -->
+        <!-- VIEW 4: ESTADISTICAS -->
         <div id="view-estadisticas" class="view-content">
-            <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">Estadísticas & Reportes HIS</h2>
-            <div class="card" style="text-align: center; padding: 20px;">
-                <h3 style="font-size: 15px; color: var(--ios-secondary); margin-bottom: 10px;">Total Citados del Mes</h3>
-                <div style="font-size: 36px; font-weight: 700; color: var(--ios-blue);" id="statTotal">142</div>
-                <div style="display: flex; justify-content: space-around; margin-top: 15px; font-size: 13px;">
-                    <div>✅ Atendidos: <strong id="statAtendidos">118</strong></div>
-                    <div>⚠️ Pendientes: <strong id="statPendientes">14</strong></div>
-                    <div>❌ Inasistentes: <strong id="statInasistentes">10</strong></div>
+            <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 18px; letter-spacing: -0.5px;">Estadísticas & Reportes HIS</h2>
+            <div class="card" style="text-align: center; padding: 24px;">
+                <h3 style="font-size: 14px; font-weight: 600; color: var(--ios-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Total Citados del Mes</h3>
+                <div style="font-size: 42px; font-weight: 800; color: var(--ios-blue); letter-spacing: -1px;" id="statTotal">142</div>
+                <div style="display: flex; justify-content: space-around; margin-top: 20px; font-size: 13px; font-weight: 500;">
+                    <div>✅ Atendidos: <strong id="statAtendidos" style="font-size: 15px;">118</strong></div>
+                    <div>⚠️ Pendientes: <strong id="statPendientes" style="font-size: 15px;">14</strong></div>
+                    <div>❌ Inasistentes: <strong id="statInasistentes" style="font-size: 15px;">10</strong></div>
                 </div>
             </div>
         </div>
 
-        <!-- TAB BAR -->
+        <!-- iOS Bottom Tab Bar -->
         <nav class="tab-bar">
             <div class="tab-item active" onclick="switchView('agenda')">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM5 8V6h14v2H5z"/></svg>
@@ -251,7 +259,7 @@
                 let fechaIso = d.toISOString().split('T')[0];
                 let pill = document.createElement('div');
                 pill.className = `date-pill ${fechaIso === currentFechaSeleccionada ? 'active' : ''}`;
-                pill.innerHTML = `<span style="font-size:10px; text-transform:uppercase;">${diasSemana[d.getDay()]}</span><span class="day-num">${d.getDate()}</span>`;
+                pill.innerHTML = `<span style="font-size:10px; text-transform:uppercase; font-weight:600;">${diasSemana[d.getDay()]}</span><span class="day-num">${d.getDate()}</span>`;
                 pill.onclick = () => {
                     currentFechaSeleccionada = fechaIso;
                     document.getElementById('calendarPicker').value = fechaIso;
@@ -277,7 +285,7 @@
             const filtradas = citasData.filter(c => c.fecha === currentFechaSeleccionada && (filtroServicioActual === 'TODOS' || c.servicio.includes(filtroServicioActual)));
 
             if (filtradas.length === 0) {
-                container.innerHTML = `<div class="card" style="text-align:center; color:var(--ios-gray); padding: 30px;">No hay citas agendadas para el ${currentFechaSeleccionada}.</div>`;
+                container.innerHTML = `<div class="card" style="text-align:center; color:var(--ios-gray); padding: 40px 20px; font-weight: 500;">No hay citas agendadas para el ${currentFechaSeleccionada}.</div>`;
                 return;
             }
 
@@ -285,17 +293,17 @@
                 let card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
-                        <span style="font-size:12px; font-weight:600; color:var(--ios-blue);">${cita.hora} • ${cita.consultorio}</span>
-                        <span style="font-size:11px; padding:2px 8px; border-radius:6px; background:${cita.estado==='ATENDIDO'?'#DCFCE7':cita.estado==='INASISTENTE'?'#FEE2E2':'#FEF3C7'}; color:${cita.estado==='ATENDIDO'?'#166534':cita.estado==='INASISTENTE'?'#991B1B':'#92400E'}; font-weight:600;">${cita.estado}</span>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+                        <span style="font-size:12px; font-weight:700; color:var(--ios-blue); letter-spacing: -0.2px;">${cita.hora} • ${cita.consultorio}</span>
+                        <span style="font-size:11px; padding:3px 10px; border-radius:8px; background:${cita.estado==='ATENDIDO'?'#DCFCE7':cita.estado==='INASISTENTE'?'#FEE2E2':'#FEF3C7'}; color:${cita.estado==='ATENDIDO'?'#166534':cita.estado==='INASISTENTE'?'#991B1B':'#92400E'}; font-weight:700;">${cita.estado}</span>
                     </div>
-                    <div style="font-size:15px; font-weight:700; margin-bottom:2px;">${cita.nombreMenor}</div>
-                    <div style="font-size:13px; color:var(--ios-secondary); margin-bottom:6px;">H.Cl: <strong>${cita.hcl}</strong> | DNI: ${cita.dni} | Serv: ${cita.servicio}</div>
-                    <div style="font-size:12px; color:var(--ios-secondary); margin-bottom:10px;">Apoderado: ${cita.nombrePadre} | Cel: ${cita.celular1}</div>
+                    <div style="font-size:16px; font-weight:700; margin-bottom:4px; letter-spacing: -0.3px;">${cita.nombreMenor}</div>
+                    <div style="font-size:13px; color:var(--ios-secondary); margin-bottom:6px; font-weight:500;">H.Cl: <strong>${cita.hcl}</strong> | DNI: ${cita.dni} | Serv: ${cita.servicio} ${cita.prematuro==='SI'?'<span class="badge badge-prematuro">Prematuro</span>':''}</div>
+                    <div style="font-size:12px; color:var(--ios-secondary); margin-bottom:12px; font-weight:500;">Apoderado: ${cita.nombrePadre} | Cel: ${cita.celular1}</div>
                     <div style="display:flex; gap:8px;">
-                        <button class="btn btn-green" style="font-size:12px; padding:8px;" onclick="enviarWhatsApp('${cita.id}')">💬 WhatsApp</button>
-                        <button class="btn btn-secondary" style="font-size:12px; padding:8px;" onclick="cambiarEstadoCita('${cita.id}', 'ATENDIDO')">✅ Atendido</button>
-                        <button class="btn btn-secondary" style="font-size:12px; padding:8px; color:var(--ios-red);" onclick="cambiarEstadoCita('${cita.id}', 'INASISTENTE')">❌ Inasistente</button>
+                        <button class="btn btn-green" style="font-size:12px; padding:10px;" onclick="enviarWhatsApp('${cita.id}')">💬 WhatsApp</button>
+                        <button class="btn btn-secondary" style="font-size:12px; padding:10px;" onclick="cambiarEstadoCita('${cita.id}', 'ATENDIDO')">✅ Atendido</button>
+                        <button class="btn btn-secondary" style="font-size:12px; padding:10px; color:var(--ios-red);" onclick="cambiarEstadoCita('${cita.id}', 'INASISTENTE')">❌ Inasistente</button>
                     </div>
                 `;
                 container.appendChild(card);
@@ -356,7 +364,7 @@
                 hcl: hcl, dni: dni, nombreMenor: nombreMenor,
                 fechaNac: document.getElementById('newNac').value || '2026-01-01',
                 servicio: document.getElementById('newServicio').value,
-                prematuro: document.getElementById('newPrematuro').checked ? 'SI' : 'NO',
+                prematuro: document.getElementById('newPrematuro')->checked ? 'SI' : 'NO',
                 nombrePadre: document.getElementById('newPadre').value.trim() || 'Apoderado',
                 celular1: celular1, celular2: '', estado: 'PENDIENTE'
             });
@@ -371,16 +379,16 @@
             container.innerHTML = '';
             const pendientes = citasData.filter(c => c.estado !== 'ATENDIDO');
             if (pendientes.length === 0) {
-                container.innerHTML = `<div class="card" style="text-align:center; color:var(--ios-gray);">No hay alertas pendientes.</div>`;
+                container.innerHTML = `<div class="card" style="text-align:center; color:var(--ios-gray); font-weight: 500;">No hay alertas pendientes. ¡Excelente labor!</div>`;
                 return;
             }
             pendientes.forEach(cita => {
                 let card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <div style="font-size:13px; font-weight:600; color:var(--ios-orange); margin-bottom:4px;">⚠️ Pendiente</div>
-                    <div style="font-size:15px; font-weight:700;">${cita.nombreMenor} (H.Cl: ${cita.hcl})</div>
-                    <div style="font-size:13px; color:var(--ios-secondary); margin-bottom:8px;">Fecha: ${cita.fecha} | Tel: ${cita.celular1}</div>
+                    <div style="font-size:13px; font-weight:700; color:var(--ios-orange); margin-bottom:4px;">⚠️ Pendiente / Seguimiento</div>
+                    <div style="font-size:16px; font-weight:700; margin-bottom:2px; letter-spacing: -0.3px;">${cita.nombreMenor} (H.Cl: ${cita.hcl})</div>
+                    <div style="font-size:13px; color:var(--ios-secondary); margin-bottom:10px; font-weight:500;">Fecha: ${cita.fecha} | Tel: ${cita.celular1}</div>
                 `;
                 container.appendChild(card);
             });

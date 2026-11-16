@@ -62,7 +62,7 @@
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-2 sm:p-4">
 
-    <!-- MOBILE APP VIEW (IPHONE FRAME) -->
+    <!-- MOBILE APP VIEW (IPHONE FRAME) - NO EXTERNAL TOP BAR -->
     <div id="workspaceMobile" class="w-full max-w-6xl flex items-center justify-center py-1">
         <div class="relative w-full max-w-[404px] h-[840px] max-h-[92vh] bg-ios-bg rounded-[52px] shadow-iphone overflow-hidden flex flex-col border-[4px] border-black select-none">
             
@@ -82,12 +82,12 @@
                 </div>
             </div>
 
-            <!-- UNIFIED SCROLLABLE VIEWPORT -->
+            <!-- UNIFIED SCROLLABLE VIEWPORT (Full screen scrolls together smoothly) -->
             <main id="appViewport" class="flex-1 overflow-y-auto no-scrollbar pb-28 relative">
                 
                 <!-- ================= SCREEN 1: AGENDA ================= -->
                 <section id="screen-agenda" class="p-4 space-y-3">
-                    <!-- Top Header Row -->
+                    <!-- Top Header Row matching image_c595d8.png -->
                     <div class="flex items-center justify-between gap-2">
                         <button onclick="openInstallModal()" class="bg-ios-blue text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow-xs ios-tap">
                             <i class="ph-bold ph-download-simple"></i> Instalar
@@ -97,7 +97,7 @@
                             <span class="text-[10px] font-bold text-ios-blue">Citas de CRED - Enfermería</span>
                         </div>
                         <button onclick="openLoginModal()" class="bg-blue-50 text-ios-blue border border-blue-200 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 ios-tap">
-                            👤 <span id="currentRoleLabel">Lic. Carmen</span>
+                            👤 <span id="currentRoleLabel">Lic. Carmen (1001)</span>
                         </button>
                     </div>
 
@@ -150,13 +150,13 @@
                             </div>
                             <div>
                                 <div class="text-[11px] text-gray-400 font-bold uppercase">Avance del día <span class="text-ios-blue font-semibold lowercase" id="activeConsBadge">Solo Cons. A</span></div>
-                                <div class="text-xs font-extrabold text-gray-900" id="dayProgressText">0 de 0 atendidos</div>
+                                <div class="text-xs font-extrabold text-gray-900" id="dayProgressText">2 de 5 atendidos</div>
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="text-xs font-extrabold text-ios-green" id="dayProgressPct">0%</span>
+                            <span class="text-xs font-extrabold text-ios-green" id="dayProgressPct">40%</span>
                             <div class="w-16 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                <div id="dayProgressBar" class="h-full bg-ios-green rounded-full transition-all" style="width: 0%"></div>
+                                <div id="dayProgressBar" class="h-full bg-ios-green rounded-full transition-all" style="width: 40%"></div>
                             </div>
                         </div>
                     </div>
@@ -170,7 +170,7 @@
                     <div class="flex items-center justify-between pb-2 border-b border-gray-200">
                         <div>
                             <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Nueva Cita</h1>
-                            <p class="text-[11px] text-gray-500">Recálculo automático de espacios hasta 17:20h</p>
+                            <p class="text-[11px] text-gray-500">Recalculo automático de espacios hasta 17:20h</p>
                         </div>
                         <button onclick="fillDemoChild()" class="bg-ios-blue/10 text-ios-blue px-3 py-1.5 rounded-xl text-xs font-bold ios-tap">Demo Rápido</button>
                     </div>
@@ -250,14 +250,14 @@
                                     </span>
                                 </label>
                             </div>
-                            <select id="newServicio" class="w-full text-xs font-bold bg-ios-bg p-2.5 rounded-xl focus:outline-none">
+                            <select id="newServicio" class="w-full text-xs font-bold bg-ios-bg p-2.5 rounded-xl focus:outline-none" onchange="onServiceChanged()">
                                 <option value="CRED">Solo CRED (20 min)</option>
                                 <option value="SULFATO">Sulfato Ferroso (20 min)</option>
                                 <option value="CRED_SULFATO">CRED + Sulfato Ferroso (40 min)</option>
                             </select>
                         </div>
 
-                        <!-- 4. Horarios y Bloques -->
+                        <!-- 4. Horarios y Bloques (Clean slot buttons without trailing end time text) -->
                         <div class="bg-white rounded-2xl p-3.5 shadow-ios-card space-y-2.5">
                             <span class="text-[11px] font-extrabold uppercase text-gray-400 block">4. Bloques de Tiempo (20m / 40m)</span>
                             <div class="grid grid-cols-2 gap-2">
@@ -317,16 +317,6 @@
                             <span class="text-ios-red">🔴 Inasist.: <strong id="statInasistentes">22</strong></span>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-2.5">
-                        <div class="bg-white rounded-2xl p-3.5 shadow-ios-card text-center">
-                            <span class="text-xs font-semibold text-gray-500">Total Agendados</span>
-                            <div class="text-2xl font-extrabold text-ios-blue mt-1" id="statTotal">408</div>
-                        </div>
-                        <div class="bg-white rounded-2xl p-3.5 shadow-ios-card text-center">
-                            <span class="text-xs font-semibold text-gray-500">CRED-Prematuro</span>
-                            <div class="text-2xl font-extrabold text-purple-700 mt-1">27</div>
-                        </div>
-                    </div>
                 </section>
 
             </main>
@@ -371,16 +361,16 @@
                         </div>
                     </div>
 
-                    <!-- WhatsApp Box -->
+                    <!-- WhatsApp Box with soft green compact button -->
                     <div class="bg-[#E7FFDB] border border-[#25D366]/30 rounded-2xl p-3 space-y-2">
                         <span class="text-xs font-bold text-[#075E54] flex items-center gap-1.5"><i class="ph-fill ph-whatsapp-logo text-base text-[#25D366]"></i> Recordatorio a Padres</span>
                         <p id="whatsappPreviewText" class="text-[11px] text-gray-800 bg-white/85 p-2 rounded-xl italic"></p>
-                        <button onclick="triggerWhatsAppSend()" class="py-1.5 px-3 rounded-xl bg-[#25D366] text-white font-bold text-[11px] shadow-xs ios-tap flex items-center gap-1 mx-auto">
+                        <button onclick="triggerWhatsAppSend()" class="py-1 px-3 rounded-xl bg-[#25D366]/90 text-white font-bold text-[11px] shadow-xs ios-tap flex items-center gap-1 mx-auto">
                             <i class="ph-bold ph-whatsapp-logo text-xs"></i> WhatsApp
                         </button>
                     </div>
 
-                    <!-- Action buttons -->
+                    <!-- Action buttons: Marcar como atendido in refined Apple secondary/blue tone -->
                     <div class="space-y-2">
                         <button onclick="markAsAttended()" class="w-full py-2.5 rounded-2xl bg-ios-blue text-white font-bold text-xs shadow-sm">✓ Marcar como Atendido</button>
                         <div class="grid grid-cols-3 gap-1.5">
@@ -454,6 +444,7 @@
         let currentShiftFilter = 'ALL';
         let formShift = 'MANANA';
         let activeAppointmentId = null;
+        let editingAppointmentId = null;
         let currentAlertTab = 'AMBER';
         let currentUserIndex = 0;
 
@@ -509,6 +500,7 @@
         }
 
         function switchScreen(screenName) {
+            if (screenName !== 'new') editingAppointmentId = null;
             ['agenda', 'new', 'alerts', 'stats'].forEach(s => document.getElementById(`screen-${s}`).classList.add('hidden'));
             document.getElementById(`screen-${screenName}`).classList.remove('hidden');
             document.querySelectorAll('.nav-tab').forEach(t => {
@@ -683,6 +675,7 @@
         function openEditAppointment() {
             const app = appointments.find(a => a.id === activeAppointmentId);
             if (!app) return;
+            editingAppointmentId = activeAppointmentId;
             closeActionSheet();
             preloadFormWithPatient(app);
             switchScreen('new');
@@ -727,8 +720,8 @@
             const container = document.getElementById('formConsultorioSelector');
             if (isB) {
                 container.innerHTML = `
-                    <label class="cursor-pointer"><input type="radio" name="formConsultorio" value="A" checked class="sr-only peer"><span class="px-2 py-0.5 bg-gray-200 peer-checked:bg-gray-900 peer-checked:text-white rounded text-[11px] font-bold">Cons. A</span></label>
-                    <label class="cursor-pointer"><input type="radio" name="formConsultorio" value="B" class="sr-only peer"><span class="px-2 py-0.5 bg-gray-200 peer-checked:bg-ios-teal peer-checked:text-gray-900 rounded text-[11px] font-bold">Cons. B</span></label>
+                    <label class="cursor-pointer"><input type="radio" name="formConsultorio" value="A" checked class="sr-only peer" onchange="renderTimeSlots()"><span class="px-2 py-0.5 bg-gray-200 peer-checked:bg-gray-900 peer-checked:text-white rounded text-[11px] font-bold">Cons. A</span></label>
+                    <label class="cursor-pointer"><input type="radio" name="formConsultorio" value="B" class="sr-only peer" onchange="renderTimeSlots()"><span class="px-2 py-0.5 bg-gray-200 peer-checked:bg-ios-teal peer-checked:text-gray-900 rounded text-[11px] font-bold">Cons. B</span></label>
                 `;
             } else {
                 container.innerHTML = `<span class="px-2 py-0.5 bg-gray-900 text-white rounded text-[11px] font-bold">Consultorio A</span>`;
@@ -741,10 +734,11 @@
             const grid = document.getElementById('timeSlotsGrid');
 
             const targetDate = document.getElementById('inputExactDate').value;
+            const consRadio = document.querySelector('input[name="formConsultorio"]:checked');
+            const targetCons = consRadio ? consRadio.value : 'A';
             
-            // Check booked times, considering that a 40m appointment occupies 2 contiguous slots
             const bookedTimes = new Set();
-            appointments.filter(a => a.exactDate === targetDate && a.shift === formShift && a.status !== 'NO_ASISTIO').forEach(a => {
+            appointments.filter(a => a.exactDate === targetDate && a.shift === formShift && a.status !== 'NO_ASISTIO' && a.consultorio === targetCons && a.id !== editingAppointmentId).forEach(a => {
                 bookedTimes.add(a.time);
                 if (a.blocks === 2) {
                     const idx = slotList.indexOf(a.time);
@@ -755,7 +749,6 @@
             });
 
             grid.innerHTML = slotList.map((time, idx) => {
-                // If user selects 40m, they cannot select the very last slot
                 if (durationBlocks === 2 && idx + 1 >= slotList.length) return '';
                 
                 const isBooked = bookedTimes.has(time);
@@ -764,25 +757,44 @@
                     isNextBooked = bookedTimes.has(slotList[idx + 1]);
                 }
 
-                // If this slot is booked, OR they want 40m and the next slot is booked, hide it
                 if (isBooked || (durationBlocks === 2 && isNextBooked)) return ''; 
+                
+                let label = time;
+                if (durationBlocks === 2) {
+                    const nextTime = slotList[idx + 1];
+                    const [h, m] = nextTime.split(':').map(Number);
+                    const totalM = h * 60 + m + 20;
+                    const endH = String(Math.floor(totalM / 60)).padStart(2, '0');
+                    const endM = String(totalM % 60).padStart(2, '0');
+                    label = `${time} - ${endH}:${endM}`;
+                }
 
                 return `
                     <label class="cursor-pointer">
                         <input type="radio" name="timeSlot" value="${time}" class="peer sr-only">
                         <div class="p-2 rounded-xl bg-ios-bg border-2 border-transparent peer-checked:border-ios-blue text-center text-xs font-bold truncate">
-                            ${time}
+                            ${label}
                         </div>
                     </label>
                 `;
             }).join('');
 
-            // Check first available if none is checked
             const firstAvailable = document.querySelector('input[name="timeSlot"]:not(:checked)');
             const checkedSlot = document.querySelector('input[name="timeSlot"]:checked');
             if(!checkedSlot && firstAvailable) {
                  firstAvailable.checked = true;
             }
+        }
+
+        function onServiceChanged() {
+            const srv = document.getElementById('newServicio').value;
+            const radios = document.querySelectorAll('input[name="blockDuration"]');
+            if (srv === 'CRED' || srv === 'CRED_SULFATO') {
+                radios[1].checked = true; // 2 Bloques (40m)
+            } else {
+                radios[0].checked = true; // 1 Bloque (20m)
+            }
+            renderTimeSlots();
         }
 
         function setFormShift(shift) {
@@ -816,6 +828,10 @@
             const consRadio = document.querySelector('input[name="formConsultorio"]:checked');
             const consultorio = consRadio ? consRadio.value : 'A';
 
+            if (editingAppointmentId) {
+                appointments = appointments.filter(a => a.id !== editingAppointmentId);
+                editingAppointmentId = null;
+            }
             appointments.push({
                 id: Date.now(),
                 exactDate: exactDate,
@@ -852,6 +868,7 @@
             lookupDni();
         }
 
+        
         function calculateExactAge() {
             const dobVal = document.getElementById('inputDob').value;
             const refVal = document.getElementById('inputExactDate').value || new Date().toISOString().split('T')[0];
@@ -883,6 +900,8 @@
             document.getElementById('calculatedAgeText').textContent = parts.join(', ');
             document.getElementById('calculatedAgeBanner').classList.remove('hidden');
         }
+
+        
 
         function preloadFormWithPatient(p) {
             document.getElementById('inputHcl').value = p.hcl || '';

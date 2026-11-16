@@ -52,8 +52,8 @@
         body { background: radial-gradient(circle at top left, #e2e8f0, #cbd5e1); font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .ios-glass { background: rgba(242, 242, 247, 0.86); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-        .ios-glass-white { background: rgba(255, 255, 255, 0.90); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .ios-glass { background: rgba(242, 242, 247, 0.90); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .ios-glass-white { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
         .ios-tap { transition: transform 0.14s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.14s ease; }
         .ios-tap:active { transform: scale(0.97); opacity: 0.85; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -82,108 +82,101 @@
                 </div>
             </div>
 
-            <!-- VIEWPORT -->
-            <main id="appViewport" class="flex-1 overflow-y-auto no-scrollbar pb-24 relative">
+            <!-- UNIFIED SCROLLABLE VIEWPORT (Full screen scrolls together smoothly) -->
+            <main id="appViewport" class="flex-1 overflow-y-auto no-scrollbar pb-28 relative">
                 
                 <!-- ================= SCREEN 1: AGENDA ================= -->
-                <section id="screen-agenda" class="space-y-3">
-                    <div class="sticky top-0 z-30 ios-glass px-4 pt-2 pb-3 border-b border-gray-200/60 space-y-2">
-                        <!-- Top Header Row matching image_c595d8.png -->
-                        <div class="flex items-center justify-between gap-2">
-                            <button onclick="openInstallModal()" class="bg-ios-blue text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow-xs ios-tap">
-                                <i class="ph-bold ph-download-simple"></i> Instalar
-                            </button>
-                            <div class="text-center leading-tight">
-                                <h1 class="text-xl font-extrabold text-gray-900 tracking-tight">CITEN</h1>
-                                <span class="text-[10px] font-bold text-ios-blue">Citas de CRED - Enfermería</span>
-                            </div>
-                            <button onclick="openLoginModal()" class="bg-blue-50 text-ios-blue border border-blue-200 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 ios-tap">
-                                👤 <span id="currentRoleLabel">Lic. Carmen (1001)</span>
-                            </button>
+                <section id="screen-agenda" class="p-4 space-y-3">
+                    <!-- Top Header Row matching image_c595d8.png -->
+                    <div class="flex items-center justify-between gap-2">
+                        <button onclick="openInstallModal()" class="bg-ios-blue text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow-xs ios-tap">
+                            <i class="ph-bold ph-download-simple"></i> Instalar
+                        </button>
+                        <div class="text-center leading-tight">
+                            <h1 class="text-xl font-extrabold text-gray-900 tracking-tight">CITEN</h1>
+                            <span class="text-[10px] font-bold text-ios-blue">Citas de CRED - Enfermería</span>
                         </div>
+                        <button onclick="openLoginModal()" class="bg-blue-50 text-ios-blue border border-blue-200 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 ios-tap">
+                            👤 <span id="currentRoleLabel">Lic. Carmen (1001)</span>
+                        </button>
+                    </div>
 
-                        <!-- Sync Status Bar + Print H.Cl -->
-                        <div class="flex items-center justify-between text-xs pt-1">
-                            <span class="text-gray-500 font-semibold" id="syncText">🟢 G.Drive Sync • 14 KB</span>
-                            <button onclick="openPrintHclModal()" class="bg-gray-900 text-white px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1 shadow-sm ios-tap">
-                                <i class="ph-bold ph-printer text-ios-teal"></i> Imprimir Lista H.Cl.
-                            </button>
-                        </div>
+                    <!-- Sync Status Bar + Print H.Cl -->
+                    <div class="flex items-center justify-between text-xs pt-1">
+                        <span class="text-gray-500 font-semibold" id="syncText">🟢 G.Drive Sync • 14 KB</span>
+                        <button onclick="openPrintHclModal()" class="bg-gray-900 text-white px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1 shadow-sm ios-tap">
+                            <i class="ph-bold ph-printer text-ios-teal"></i> Imprimir Lista H.Cl.
+                        </button>
+                    </div>
 
-                        <!-- Title + Date subtitle -->
-                        <div>
-                            <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">Agenda C.S. Chilca</h2>
-                            <p class="text-xs text-gray-500 font-medium" id="selectedDateLabel">Fecha seleccionada</p>
-                        </div>
+                    <!-- Title + Date subtitle -->
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">Agenda C.S. Chilca</h2>
+                        <p class="text-xs text-gray-500 font-medium" id="selectedDateLabel">Fecha seleccionada</p>
+                    </div>
 
-                        <!-- Horizontal Scrollable Date Pills with Calendar Picker -->
-                        <div class="flex items-center gap-2">
-                            <div class="flex-1 flex items-center gap-1 overflow-x-auto no-scrollbar py-1" id="weekStrip">
-                                <!-- Rendered dynamically -->
-                            </div>
-                            <input type="date" id="inlineDatePicker" onchange="onCalendarDatePicked(this.value)" class="p-1.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-ios-blue shadow-2xs cursor-pointer" title="Seleccionar en Calendario">
-                        </div>
+                    <!-- Horizontal Scrollable Date Pills with Calendar Picker -->
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1 flex items-center gap-1 overflow-x-auto no-scrollbar py-1" id="weekStrip"></div>
+                        <input type="date" id="inlineDatePicker" onchange="onCalendarDatePicked(this.value)" class="p-1.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-ios-blue shadow-2xs cursor-pointer" title="Seleccionar en Calendario">
+                    </div>
 
-                        <!-- Consultorio Filters (Fully Interactive) + Toggle B -->
-                        <div class="flex items-center justify-between gap-2 pt-1">
-                            <div class="flex-1 grid grid-cols-3 bg-gray-200/80 p-0.5 rounded-xl text-xs font-semibold">
-                                <button onclick="setConsultorioFilter('ALL')" class="cons-filter-btn py-1 rounded-[9px] bg-white text-gray-900 shadow-xs" data-cons="ALL">Todos</button>
-                                <button onclick="setConsultorioFilter('A')" class="cons-filter-btn py-1 rounded-[9px] text-gray-600" data-cons="A">Cons. A</button>
-                                <button onclick="setConsultorioFilter('B')" class="cons-filter-btn py-1 rounded-[9px] text-gray-600 flex items-center justify-center gap-1" data-cons="B">
-                                    <span>Cons. B</span> <span class="w-1.5 h-1.5 rounded-full bg-gray-400" id="consBStatusDot"></span>
-                                </button>
-                            </div>
-                            <button onclick="toggleConsultorioBForCurrentDay()" id="btnToggleConsB" class="px-2.5 py-1.5 rounded-xl text-xs font-bold border bg-white text-gray-700 border-gray-200 ios-tap">
-                                + Activar Cons. B
+                    <!-- Consultorio Filters (Consultorio A highlighted by default) + Toggle B -->
+                    <div class="flex items-center justify-between gap-2 pt-1">
+                        <div class="flex-1 grid grid-cols-3 bg-gray-200/80 p-0.5 rounded-xl text-xs font-semibold">
+                            <button onclick="setConsultorioFilter('ALL')" class="cons-filter-btn py-1 rounded-[9px] text-gray-600" data-cons="ALL">Todos</button>
+                            <button onclick="setConsultorioFilter('A')" class="cons-filter-btn py-1 rounded-[9px] bg-white text-gray-900 shadow-xs" data-cons="A">Cons. A</button>
+                            <button onclick="setConsultorioFilter('B')" class="cons-filter-btn py-1 rounded-[9px] text-gray-600 flex items-center justify-center gap-1" data-cons="B">
+                                <span>Cons. B</span> <span class="w-1.5 h-1.5 rounded-full bg-gray-400" id="consBStatusDot"></span>
                             </button>
                         </div>
+                        <button onclick="toggleConsultorioBForCurrentDay()" id="btnToggleConsB" class="px-2.5 py-1.5 rounded-xl text-xs font-bold border bg-white text-gray-700 border-gray-200 ios-tap">
+                            + Activar Cons. B
+                        </button>
+                    </div>
 
-                        <!-- Shift Filter -->
-                        <div class="grid grid-cols-3 bg-gray-200/80 p-0.5 rounded-xl text-[11px] font-semibold">
-                            <button onclick="setShiftFilter('ALL')" class="shift-filter-btn py-1 rounded-[9px] bg-white text-gray-900 shadow-xs" data-shift="ALL">Todo el día</button>
-                            <button onclick="setShiftFilter('MANANA')" class="shift-filter-btn py-1 rounded-[9px] text-gray-600" data-shift="MANANA">Mañana (8:30-11:50)</button>
-                            <button onclick="setShiftFilter('TARDE')" class="shift-filter-btn py-1 rounded-[9px] text-gray-600" data-shift="TARDE">Tarde (2:00-5:30)</button>
-                        </div>
+                    <!-- Shift Filter -->
+                    <div class="grid grid-cols-3 bg-gray-200/80 p-0.5 rounded-xl text-[11px] font-semibold">
+                        <button onclick="setShiftFilter('ALL')" class="shift-filter-btn py-1 rounded-[9px] bg-white text-gray-900 shadow-xs" data-shift="ALL">Todo el día</button>
+                        <button onclick="setShiftFilter('MANANA')" class="shift-filter-btn py-1 rounded-[9px] text-gray-600" data-shift="MANANA">Mañana (8:30-11:50)</button>
+                        <button onclick="setShiftFilter('TARDE')" class="shift-filter-btn py-1 rounded-[9px] text-gray-600" data-shift="TARDE">Tarde (2:00-5:30)</button>
                     </div>
 
                     <!-- Avance del día card -->
-                    <div class="px-4">
-                        <div class="bg-white rounded-2xl p-3 shadow-ios-card flex items-center justify-between">
-                            <div class="flex items-center gap-2.5">
-                                <div class="w-9 h-9 rounded-xl bg-ios-blue/10 text-ios-blue flex items-center justify-center">
-                                    <i class="ph-fill ph-calendar-check text-lg"></i>
-                                </div>
-                                <div>
-                                    <div class="text-[11px] text-gray-400 font-bold uppercase">Avance del día <span class="text-ios-blue font-semibold lowercase" id="activeConsBadge">Solo Cons. A</span></div>
-                                    <div class="text-xs font-extrabold text-gray-900" id="dayProgressText">2 de 5 atendidos</div>
-                                </div>
+                    <div class="bg-white rounded-2xl p-3 shadow-ios-card flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-9 h-9 rounded-xl bg-ios-blue/10 text-ios-blue flex items-center justify-center">
+                                <i class="ph-fill ph-calendar-check text-lg"></i>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs font-extrabold text-ios-green" id="dayProgressPct">40%</span>
-                                <div class="w-16 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                    <div id="dayProgressBar" class="h-full bg-ios-green rounded-full transition-all" style="width: 40%"></div>
-                                </div>
+                            <div>
+                                <div class="text-[11px] text-gray-400 font-bold uppercase">Avance del día <span class="text-ios-blue font-semibold lowercase" id="activeConsBadge">Solo Cons. A</span></div>
+                                <div class="text-xs font-extrabold text-gray-900" id="dayProgressText">2 de 5 atendidos</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-extrabold text-ios-green" id="dayProgressPct">40%</span>
+                            <div class="w-16 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                <div id="dayProgressBar" class="h-full bg-ios-green rounded-full transition-all" style="width: 40%"></div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Appointments List -->
-                    <div class="px-4 space-y-2.5" id="appointmentsList"></div>
+                    <div class="space-y-2.5" id="appointmentsList"></div>
                 </section>
 
                 <!-- ================= SCREEN 2: NUEVA CITA ================= -->
-                <section id="screen-new" class="hidden space-y-3.5 pb-8 px-4 pt-2">
+                <section id="screen-new" class="hidden space-y-3.5 pb-8 p-4">
                     <div class="flex items-center justify-between pb-2 border-b border-gray-200">
                         <div>
                             <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Nueva Cita</h1>
-                            <p class="text-[11px] text-gray-500">Programación flexible (incluye meses adelante)</p>
+                            <p class="text-[11px] text-gray-500">Recalculo automático de espacios hasta 17:20h</p>
                         </div>
                         <button onclick="fillDemoChild()" class="bg-ios-blue/10 text-ios-blue px-3 py-1.5 rounded-xl text-xs font-bold ios-tap">Demo Rápido</button>
                     </div>
 
                     <form id="newAppointmentForm" onsubmit="saveNewAppointment(event)" class="space-y-3">
                         <div class="bg-white rounded-2xl p-3 shadow-ios-card space-y-2.5 text-xs font-semibold">
-                            <!-- Full Calendar Date Picker for scheduling months in advance -->
                             <div class="flex items-center justify-between">
                                 <span class="text-gray-600">Fecha Exacta Cita:</span>
                                 <input type="date" id="inputExactDate" onchange="onExactDateChanged()" class="text-ios-blue bg-ios-blue/10 px-2.5 py-1 rounded-lg focus:outline-none font-bold cursor-pointer">
@@ -264,7 +257,7 @@
                             </select>
                         </div>
 
-                        <!-- 4. Horarios y Bloques (Automatic slot recalculation for 20m vs 40m) -->
+                        <!-- 4. Horarios y Bloques (Clean slot buttons without trailing end time text) -->
                         <div class="bg-white rounded-2xl p-3.5 shadow-ios-card space-y-2.5">
                             <span class="text-[11px] font-extrabold uppercase text-gray-400 block">4. Bloques de Tiempo (20m / 40m)</span>
                             <div class="grid grid-cols-2 gap-2">
@@ -290,8 +283,8 @@
                     </form>
                 </section>
 
-                <!-- ================= SCREEN 3: ALERTAS (Fully Interactive) ================= -->
-                <section id="screen-alerts" class="hidden space-y-3.5 pb-8 px-4 pt-2">
+                <!-- ================= SCREEN 3: ALERTAS ================= -->
+                <section id="screen-alerts" class="hidden space-y-3.5 pb-8 p-4">
                     <div class="flex items-center justify-between pb-2 border-b border-gray-200">
                         <div>
                             <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Alertas</h1>
@@ -299,7 +292,6 @@
                         </div>
                         <span class="bg-red-100 text-red-700 px-2.5 py-1 rounded-full text-xs font-extrabold">Seguimiento</span>
                     </div>
-                    <!-- Fully interactive alert tabs -->
                     <div class="grid grid-cols-2 bg-gray-200 p-0.5 rounded-xl text-xs font-bold">
                         <button onclick="switchAlertTab('AMBER')" id="tabAmber" class="py-2 rounded-lg bg-white shadow-xs">Próx. a vencer (3)</button>
                         <button onclick="switchAlertTab('RED')" id="tabRed" class="py-2 rounded-lg text-gray-600">Inasistentes (2)</button>
@@ -308,11 +300,11 @@
                 </section>
 
                 <!-- ================= SCREEN 4: ESTADÍSTICAS ================= -->
-                <section id="screen-stats" class="hidden space-y-4 pb-8 px-4 pt-2">
+                <section id="screen-stats" class="hidden space-y-4 pb-8 p-4">
                     <div class="flex items-center justify-between pb-2 border-b border-gray-200">
                         <div>
                             <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Estadísticas</h1>
-                            <p class="text-[11px] text-gray-500">Cortes en vivo HIS (con trazabilidad del personal)</p>
+                            <p class="text-[11px] text-gray-500">Cortes en vivo HIS</p>
                         </div>
                         <span class="bg-purple-100 text-purple-800 px-2.5 py-1 rounded-full text-xs font-extrabold">Cortes en Vivo</span>
                     </div>
@@ -323,16 +315,6 @@
                             <span class="text-ios-green">🟢 Atendidos: <strong id="statAtendidos">342</strong></span>
                             <span class="text-ios-blue">🔵 Pendientes: <strong id="statPendientes">44</strong></span>
                             <span class="text-ios-red">🔴 Inasist.: <strong id="statInasistentes">22</strong></span>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2.5">
-                        <div class="bg-white rounded-2xl p-3.5 shadow-ios-card text-center">
-                            <span class="text-xs font-semibold text-gray-500">Total Agendados</span>
-                            <div class="text-2xl font-extrabold text-ios-blue mt-1" id="statTotal">408</div>
-                        </div>
-                        <div class="bg-white rounded-2xl p-3.5 shadow-ios-card text-center">
-                            <span class="text-xs font-semibold text-gray-500">CRED-Prematuro</span>
-                            <div class="text-2xl font-extrabold text-purple-700 mt-1">27</div>
                         </div>
                     </div>
                 </section>
@@ -379,16 +361,16 @@
                         </div>
                     </div>
 
-                    <!-- WhatsApp Box with compact green button (not overwhelming) -->
+                    <!-- WhatsApp Box with soft green compact button -->
                     <div class="bg-[#E7FFDB] border border-[#25D366]/30 rounded-2xl p-3 space-y-2">
                         <span class="text-xs font-bold text-[#075E54] flex items-center gap-1.5"><i class="ph-fill ph-whatsapp-logo text-base text-[#25D366]"></i> Recordatorio a Padres</span>
                         <p id="whatsappPreviewText" class="text-[11px] text-gray-800 bg-white/85 p-2 rounded-xl italic"></p>
-                        <button onclick="triggerWhatsAppSend()" class="py-1.5 px-3 rounded-xl bg-[#25D366] text-white font-bold text-xs shadow-xs ios-tap flex items-center gap-1 mx-auto">
-                            <i class="ph-bold ph-whatsapp-logo text-sm"></i> WhatsApp
+                        <button onclick="triggerWhatsAppSend()" class="py-1 px-3 rounded-xl bg-[#25D366]/90 text-white font-bold text-[11px] shadow-xs ios-tap flex items-center gap-1 mx-auto">
+                            <i class="ph-bold ph-whatsapp-logo text-xs"></i> WhatsApp
                         </button>
                     </div>
 
-                    <!-- Action buttons: Refined Apple secondary tone for Atendido, plus Edit / Reschedule / Delete -->
+                    <!-- Action buttons: Marcar como atendido in refined Apple secondary/blue tone -->
                     <div class="space-y-2">
                         <button onclick="markAsAttended()" class="w-full py-2.5 rounded-2xl bg-ios-blue text-white font-bold text-xs shadow-sm">✓ Marcar como Atendido</button>
                         <div class="grid grid-cols-3 gap-1.5">
@@ -433,8 +415,6 @@
                 <div onclick="event.stopPropagation()" class="w-full bg-white rounded-t-[32px] p-5 space-y-3 text-xs">
                     <h2 class="text-sm font-extrabold">¿A qué se refiere el botón 'Instalar'?</h2>
                     <p class="leading-relaxed text-gray-700">Sirve para convertir la web en una <strong>PWA (App instalable)</strong> directamente en los celulares del personal del C.S. Chilca sin pasar por tiendas oficiales. Queda con su propio ícono en la pantalla de inicio para abrirse a pantalla completa rápidamente con datos móviles.</p>
-                    <p><strong>Android:</strong> 3 puntos (⋮) ➔ "Agregar a pantalla principal".</p>
-                    <p><strong>iPhone:</strong> Compartir ➔ "Agregar a Inicio".</p>
                     <button onclick="closeInstallModal()" class="w-full py-2.5 rounded-xl bg-ios-blue text-white font-bold">Entendido</button>
                 </div>
             </div>
@@ -532,7 +512,7 @@
             const container = document.getElementById('weekStrip');
             const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
             let html = '';
-            for(let i = -2; i <= 4; i++) {
+            for(let i = -3; i <= 14; i++) {
                 let d = new Date(currentFechaSeleccionada + 'T00:00:00');
                 d.setDate(d.getDate() + i);
                 let iso = d.toISOString().split('T')[0];
@@ -750,25 +730,23 @@
             const slotList = formShift === 'MANANA' ? MORNING_SLOTS : AFTERNOON_SLOTS;
             const grid = document.getElementById('timeSlotsGrid');
 
+            const targetDate = document.getElementById('inputExactDate').value;
+            const bookedTimes = new Set(
+                appointments
+                    .filter(a => a.exactDate === targetDate && a.shift === formShift)
+                    .map(a => a.time)
+            );
+
             grid.innerHTML = slotList.map((time, idx) => {
                 if (durationBlocks === 2 && idx + 1 >= slotList.length) return '';
-                // Calculate end time or display range for 40 min
-                let label = time;
-                if (durationBlocks === 2) {
-                    const nextTime = slotList[idx + 1];
-                    const [h, m] = nextTime.split(':').map(Number);
-                    const totalM = h * 60 + m + 20;
-                    const endH = String(Math.floor(totalM / 60)).padStart(2, '0');
-                    const endM = String(totalM % 60).padStart(2, '0');
-                    label = `${time} - ${endH}:${endM}`;
-                } else {
-                    label = `${time} (20m)`;
-                }
+                const isBooked = bookedTimes.has(time);
+                if (isBooked) return ''; 
+
                 return `
                     <label class="cursor-pointer">
-                        <input type="radio" name="timeSlot" value="${time}" class="peer sr-only" ${idx===0?'checked':''}>
+                        <input type="radio" name="timeSlot" value="${time}" class="peer sr-only">
                         <div class="p-2 rounded-xl bg-ios-bg border-2 border-transparent peer-checked:border-ios-blue text-center text-xs font-bold truncate">
-                            ${label}
+                            ${time}
                         </div>
                     </label>
                 `;
@@ -801,7 +779,7 @@
         function saveNewAppointment(e) {
             e.preventDefault();
             const slotInput = document.querySelector('input[name="timeSlot"]:checked');
-            if (!slotInput) { alert('Seleccione un horario'); return; }
+            if (!slotInput) { alert('Seleccione un horario disponible'); return; }
             const exactDate = document.getElementById('inputExactDate').value;
             const consRadio = document.querySelector('input[name="formConsultorio"]:checked');
             const consultorio = consRadio ? consRadio.value : 'A';

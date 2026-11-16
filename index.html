@@ -2,2415 +2,408 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="CRED Chilca">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CITEN: Agenda de Citas Enfermería-CRED</title>
+    <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#007AFF">
-    <title>C.S. Chilca • Citas CRED y Sulfato Ferroso</title>
-
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Phosphor Icons -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['-apple-system', 'BlinkMacSystemFont', 'Inter', 'Segoe UI', 'Roboto', 'sans-serif'],
-                    },
-                    colors: {
-                        ios: {
-                            bg: '#F2F2F7',
-                            card: '#FFFFFF',
-                            blue: '#007AFF',
-                            green: '#34C759',
-                            orange: '#FF9500',
-                            red: '#FF3B30',
-                            teal: '#30B0C7',
-                            indigo: '#5856D6',
-                            purple: '#AF52DE',
-                            gray1: '#8E8E93',
-                            gray2: '#AEAEB2',
-                            gray3: '#C7C7CC',
-                            gray4: '#D1D1D6',
-                            gray5: '#E5E5EA',
-                            gray6: '#F2F2F7'
-                        }
-                    },
-                    boxShadow: {
-                        'ios': '0 2px 10px rgba(0, 0, 0, 0.04)',
-                        'ios-card': '0 4px 16px rgba(0, 0, 0, 0.05)',
-                        'ios-bar': '0 -1px 0 rgba(0, 0, 0, 0.08), 0 -4px 16px rgba(0, 0, 0, 0.02)',
-                        'ios-top': '0 1px 0 rgba(0, 0, 0, 0.08)'
-                    }
-                }
-            }
-        }
-    </script>
-
     <style>
-        body {
-            background-color: #F2F2F7;
-            font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
+        :root {
+            --ios-bg: #F2F2F7;
+            --ios-card: #FFFFFF;
+            --ios-blue: #007AFF;
+            --ios-green: #34C759;
+            --ios-orange: #FF9500;
+            --ios-red: #FF3B30;
+            --ios-gray: #8E8E93;
+            --ios-light-gray: #E5E5EA;
+            --ios-text: #000000;
+            --ios-secondary: #3C3C43;
+            --ios-border: #C6C6C8;
         }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--ios-bg); color: var(--ios-text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        .top-mode-bar { background: #1c1c1e; color: white; display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; font-size: 13px; font-weight: 500; z-index: 1000; }
+        .top-mode-bar span { opacity: 0.8; }
+        .top-links { display: flex; gap: 10px; }
+        .top-links a { background: rgba(255,255,255,0.2); color: white; border: none; padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; text-decoration: none; }
 
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .app-container { flex: 1; display: flex; flex-direction: column; max-width: 480px; width: 100%; margin: 0 auto; background: var(--ios-card); position: relative; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        
+        .app-header { background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); border-bottom: 0.5px solid var(--ios-border); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .app-title { font-size: 15px; font-weight: 600; letter-spacing: -0.4px; color: var(--ios-text); }
+        .user-badge { font-size: 12px; background: var(--ios-light-gray); padding: 4px 8px; border-radius: 12px; font-weight: 500; display: flex; align-items: center; gap: 4px; cursor: pointer; }
 
-        .ios-blur {
-            background: rgba(249, 249, 251, 0.88);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
+        .view-content { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 90px; display: none; }
+        .view-content.active { display: block; }
 
-        .ios-tap {
-            transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.12s ease;
-        }
-        .ios-tap:active {
-            transform: scale(0.97);
-            opacity: 0.82;
-        }
+        .tab-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 83px; background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); border-top: 0.5px solid var(--ios-border); display: flex; justify-content: space-around; padding-top: 8px; z-index: 100; }
+        .tab-item { display: flex; flex-direction: column; align-items: center; color: var(--ios-gray); text-decoration: none; font-size: 10px; font-weight: 500; cursor: pointer; flex: 1; }
+        .tab-item.active { color: var(--ios-blue); }
+        .tab-item svg { width: 24px; height: 24px; margin-bottom: 2px; }
 
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-        .animate-slide-up {
-            animation: slideUp 0.26s cubic-bezier(0.32, 0.72, 0, 1) forwards;
-        }
+        .card { background: #FFFFFF; border: 0.5px solid var(--ios-light-gray); border-radius: 12px; padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .btn { background: var(--ios-blue); color: white; border: none; border-radius: 10px; padding: 12px 16px; font-size: 15px; font-weight: 600; width: 100%; cursor: pointer; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+        .btn:active { opacity: 0.7; }
+        .btn-green { background: var(--ios-green); }
+        .btn-orange { background: var(--ios-orange); }
+        .btn-secondary { background: var(--ios-light-gray); color: var(--ios-text); }
+        
+        .form-group { margin-bottom: 14px; }
+        .form-label { font-size: 13px; font-weight: 500; color: var(--ios-secondary); margin-bottom: 6px; display: block; }
+        .form-input, .form-select { width: 100%; padding: 10px 12px; border: 0.5px solid var(--ios-border); border-radius: 8px; font-size: 15px; background: #FAFAFC; color: var(--ios-text); outline: none; }
+        
+        .date-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 14px; scrollbar-width: none; }
+        .date-pills::-webkit-scrollbar { display: none; }
+        .date-pill { min-width: 54px; padding: 8px 4px; border-radius: 10px; background: var(--ios-light-gray); text-align: center; cursor: pointer; font-size: 11px; font-weight: 500; color: var(--ios-secondary); border: 1.5px solid transparent; }
+        .date-pill.active { background: var(--ios-blue); color: white; border-color: #005ec4; }
+        .date-pill .day-num { font-size: 16px; font-weight: 700; display: block; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .animate-fade-in {
-            animation: fadeIn 0.18s ease-out forwards;
-        }
-
-        @media print {
-            body * { visibility: hidden; }
-            #printableHclSheet, #printableHclSheet * { visibility: visible; }
-            #printableHclSheet {
-                position: fixed;
-                left: 0;
-                top: 0;
-                width: 100%;
-                background: white !important;
-                padding: 20px !important;
-                margin: 0 !important;
-            }
-            .no-print { display: none !important; }
-        }
+        .back-nav-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .back-btn { background: none; border: none; color: var(--ios-blue); font-size: 16px; font-weight: 500; display: flex; align-items: center; cursor: pointer; padding: 4px 0; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between max-w-lg mx-auto bg-[#F2F2F7] text-gray-900 pb-20">
-
-    <!-- ======================================================== -->
-    <!-- TOP NATIVE APP BAR (IOS HEADER)                          -->
-    <!-- ======================================================== -->
-    <header class="sticky top-0 z-40 ios-blur shadow-ios-top px-4 pt-3 pb-2.5 border-b border-gray-200/70">
-        <div class="flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2.5 min-w-0">
-                <div class="w-8 h-8 rounded-xl bg-ios-blue text-white flex items-center justify-center flex-shrink-0 shadow-xs">
-                    <i class="ph-fill ph-first-aid text-lg"></i>
-                </div>
-                <div class="truncate">
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-xs font-extrabold text-gray-900 truncate">C.S. CHILCA</span>
-                        <span id="syncPill" onclick="syncWithCloudNow()" class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800 cursor-pointer ios-tap" title="Toca para sincronizar">
-                            <span id="syncDot" class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-                            <span id="syncText">Sincronizado</span>
-                        </span>
-                    </div>
-                    <div class="text-[10px] text-gray-500 font-medium truncate">Enfermería • CRED y Sulfato Ferroso</div>
-                </div>
-            </div>
-
-            <!-- Header Right: User Switcher & Discrete Admin Settings -->
-            <div class="flex items-center gap-1.5 flex-shrink-0">
-                <button onclick="openLoginModal()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-ios-blue/10 text-ios-blue text-[11px] font-bold ios-tap">
-                    <i class="ph-fill ph-user-circle text-sm"></i>
-                    <span id="currentUserPill" class="max-w-[105px] truncate">Lic. Carmen</span>
-                </button>
-
-                <!-- Discrete Settings Button for Admin (PIN 9999) -->
-                <button onclick="handleAdminSettingsClick()" class="w-7 h-7 rounded-full bg-gray-200/80 text-gray-600 flex items-center justify-center text-xs ios-tap" title="Configuración / Nube">
-                    <i class="ph-bold ph-gear"></i>
-                </button>
-            </div>
+<body>
+    <div class="top-mode-bar">
+        <span>🏥 C.S. Chilca — Consultorio de Enfermería</span>
+        <div class="top-links">
+            <a href="https://citen.vercel.app" target="_blank">🌐 Vercel App</a>
         </div>
-    </header>
+    </div>
 
-    <!-- ======================================================== -->
-    <!-- MAIN CONTAINER (SCREENS)                                 -->
-    <!-- ======================================================== -->
-    <main class="flex-1 w-full p-3.5 space-y-3.5">
+    <div class="app-container">
+        <header class="app-header">
+            <h1 class="app-title">CITEN: Agenda de Citas Enfermería-CRED</h1>
+            <div class="user-badge" id="userBadge" onclick="cambiarUsuario()">
+                👤 <span id="currentUserName">Lic. Carmen Mendoza</span>
+            </div>
+        </header>
 
-        <!-- ==================================================== -->
-        <!-- SCREEN 1: AGENDA DE CITAS                            -->
-        <!-- ==================================================== -->
-        <section id="screen-agenda" class="space-y-3">
-            <!-- Date Title & Print Button -->
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-xl font-extrabold tracking-tight text-gray-900">Agenda de Citas</h1>
-                    <p id="agendaDateDisplay" class="text-xs font-semibold text-ios-blue">Hoy</p>
-                </div>
-                <button onclick="openPrintModal()" class="px-2.5 py-1.5 rounded-xl bg-gray-900 text-white text-xs font-bold shadow-xs flex items-center gap-1 ios-tap">
-                    <i class="ph-bold ph-printer text-ios-teal"></i>
-                    <span>Imprimir H.Cl.</span>
-                </button>
+        <!-- AGENDA -->
+        <div id="view-agenda" class="view-content active">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="font-size: 15px; font-weight: 600;">Calendario de Citas</h3>
+                <input type="date" id="calendarPicker" style="font-size: 13px; padding: 4px 8px; border-radius: 6px; border: 0.5px solid var(--ios-border);" onchange="seleccionarFechaCalendario(this.value)">
+            </div>
+            
+            <div class="date-pills" id="datePillsContainer"></div>
+
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                <button class="btn btn-secondary" style="font-size: 13px; padding: 8px;" onclick="filtrarServicio('TODOS')">Todos</button>
+                <button class="btn btn-secondary" style="font-size: 13px; padding: 8px;" onclick="filtrarServicio('CRED')">CRED</button>
+                <button class="btn btn-secondary" style="font-size: 13px; padding: 8px;" onclick="filtrarServicio('Sulfato')">Sulfato</button>
+                <button class="btn btn-secondary" style="font-size: 13px; padding: 8px;" onclick="imprimirListaArchivo()">🖨️ Lista H.Cl.</button>
             </div>
 
-            <!-- Date Selector Row: Day Strip + Real Calendar Picker -->
-            <div class="bg-white rounded-2xl p-2.5 shadow-ios space-y-2">
-                <div class="flex items-center justify-between gap-1.5">
-                    <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1">
-                        <i class="ph-bold ph-calendar text-ios-blue"></i> Fecha:
-                    </span>
-                    <input type="date" id="calendarPicker" onchange="onCalendarDatePicked(this.value)"
-                        class="text-xs font-bold text-ios-blue bg-ios-blue/10 px-2 py-1 rounded-lg focus:outline-none">
-                </div>
-                <!-- 5 Quick Day Pills -->
-                <div class="grid grid-cols-5 gap-1" id="quickDaysStrip">
-                    <!-- Rendered by JS -->
-                </div>
+            <div id="agendaListContainer"></div>
+        </div>
+
+        <!-- NUEVA CITA -->
+        <div id="view-nueva" class="view-content">
+            <div class="back-nav-bar">
+                <button class="back-btn" onclick="switchView('agenda')">◀ Atrás</button>
             </div>
-
-            <!-- Real-time Search Box (DNI, Historia Clínica, Apellido) -->
-            <div class="relative">
-                <i class="ph-bold ph-magnifying-glass absolute left-3 top-2.5 text-gray-400 text-sm"></i>
-                <input type="text" id="agendaSearchInput" oninput="renderAppointments()" placeholder="Buscar por DNI, N° Historia o Apellido..."
-                    class="w-full bg-white pl-9 pr-8 py-2 rounded-xl text-xs font-semibold shadow-ios placeholder-gray-400 border border-transparent focus:border-ios-blue focus:outline-none">
-                <button onclick="clearSearchInput()" id="btnClearSearch" class="hidden absolute right-2.5 top-2.5 text-gray-400 text-xs">
-                    <i class="ph-fill ph-x-circle"></i>
-                </button>
-            </div>
-
-            <!-- Filters: Consultorio + Shift -->
-            <div class="space-y-1.5">
-                <div class="flex items-center gap-2">
-                    <div class="flex-1 grid grid-cols-3 bg-gray-200/80 p-0.5 rounded-xl text-[11px] font-semibold">
-                        <button onclick="setConsultorioFilter('ALL')" id="consFilter-ALL" class="cons-pill py-1 rounded-lg bg-white text-gray-900 shadow-2xs font-bold">Todos</button>
-                        <button onclick="setConsultorioFilter('A')" id="consFilter-A" class="cons-pill py-1 rounded-lg text-gray-600 font-bold">Cons. A</button>
-                        <button onclick="setConsultorioFilter('B')" id="consFilter-B" class="cons-pill py-1 rounded-lg text-gray-600 font-bold flex items-center justify-center gap-1">
-                            <span>Cons. B</span>
-                            <span id="consBDot" class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
-                        </button>
-                    </div>
-                    <button onclick="toggleConsultorioB()" id="btnToggleConsB" class="px-2 py-1.5 rounded-xl text-[10px] font-bold bg-white text-gray-700 border border-gray-200 ios-tap whitespace-nowrap">
-                        Activar B
-                    </button>
+            <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">Agendar Nueva Cita</h2>
+            
+            <div class="card">
+                <div class="form-group">
+                    <label class="form-label">N° H.Cl. (Historia Clínica)</label>
+                    <input type="text" id="newHcl" class="form-input" placeholder="Ej. HC-40892">
                 </div>
-
-                <div class="grid grid-cols-3 bg-gray-200/80 p-0.5 rounded-xl text-[10px] font-semibold">
-                    <button onclick="setShiftFilter('ALL')" id="shiftFilter-ALL" class="shift-pill py-1 rounded-lg bg-white text-gray-900 shadow-2xs font-bold">Todo el día</button>
-                    <button onclick="setShiftFilter('MANANA')" id="shiftFilter-MANANA" class="shift-pill py-1 rounded-lg text-gray-600 font-bold">Mañana (8:30-11:50)</button>
-                    <button onclick="setShiftFilter('TARDE')" id="shiftFilter-TARDE" class="shift-pill py-1 rounded-lg text-gray-600 font-bold">Tarde (14:00-17:20)</button>
-                </div>
-            </div>
-
-            <!-- Day Progress Card -->
-            <div class="bg-white rounded-2xl p-2.5 shadow-ios flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-xl bg-ios-blue/10 text-ios-blue flex items-center justify-center text-base">
-                        <i class="ph-fill ph-check-circle"></i>
-                    </div>
-                    <div>
-                        <span id="agendaProgressCount" class="text-xs font-bold text-gray-900">0 de 0 atendidos</span>
-                        <div class="text-[10px] text-gray-500" id="agendaActiveConsLabel">Consultorio A</div>
+                <div class="form-group">
+                    <label class="form-label">DNI del Menor</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="newDni" class="form-input" placeholder="8 dígitos" maxlength="8">
+                        <button class="btn" style="width: 110px; font-size: 13px;" onclick="autocompletarDemo()">Demo</button>
                     </div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <div class="w-16 h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div id="agendaProgressBar" class="h-full bg-ios-green transition-all" style="width: 0%"></div>
-                    </div>
-                    <span id="agendaProgressPct" class="text-xs font-extrabold text-ios-green">0%</span>
+                <div class="form-group">
+                    <label class="form-label">Apellidos y Nombres del Menor</label>
+                    <input type="text" id="newNombre" class="form-input" placeholder="Nombre completo">
                 </div>
-            </div>
-
-            <!-- Appointments List Container -->
-            <div id="appointmentsList" class="space-y-2.5">
-                <!-- Populated dynamically -->
-            </div>
-        </section>
-
-        <!-- ==================================================== -->
-        <!-- SCREEN 2: NUEVA CITA                                 -->
-        <!-- ==================================================== -->
-        <section id="screen-new" class="hidden space-y-3 pb-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-xl font-extrabold tracking-tight text-gray-900">Nueva Cita</h1>
-                    <p class="text-xs text-gray-500">Agendar control o sulfato en cualquier fecha</p>
+                <div class="form-group">
+                    <label class="form-label">Fecha de Nacimiento</label>
+                    <input type="date" id="newNac" class="form-input" onchange="calcularEdadExacta()">
+                    <span id="edadCalculadaText" style="font-size: 12px; color: var(--ios-blue); margin-top: 4px; display: block;"></span>
                 </div>
-                <button type="button" onclick="fillDemoPatient()" class="text-[11px] font-bold text-ios-blue bg-ios-blue/10 px-2 py-1 rounded-lg ios-tap">
-                    Ejemplo
-                </button>
-            </div>
-
-            <form id="newAppointmentForm" onsubmit="saveAppointment(event)" class="space-y-3">
-                <!-- Search existing patient first -->
-                <div class="bg-white rounded-2xl p-3 shadow-ios space-y-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1">
-                            <i class="ph-fill ph-magnifying-glass text-ios-blue"></i> Buscar Paciente Previsto:
-                        </span>
-                        <span class="text-[10px] text-gray-400">Autocompleta si ya vino</span>
+                <div class="form-group">
+                    <label class="form-label">Nombre del Padre o Madre</label>
+                    <input type="text" id="newPadre" class="form-input" placeholder="Nombre del apoderado">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <div class="form-group" style="flex:1;">
+                        <label class="form-label">Celular Principal (WhatsApp)</label>
+                        <input type="tel" id="newCel1" class="form-input" placeholder="9xxxxxxxx" maxlength="9">
                     </div>
-                    <div class="flex gap-1.5">
-                        <input type="text" id="inputFastSearch" placeholder="Ingresa DNI o N° Historia Clínica..."
-                            class="flex-1 bg-ios-bg px-3 py-2 rounded-xl text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-ios-blue">
-                        <button type="button" onclick="lookupPatient()" class="px-3 py-2 rounded-xl bg-ios-blue text-white text-xs font-bold ios-tap">
-                            Buscar
-                        </button>
+                    <div class="form-group" style="flex:1;">
+                        <label class="form-label">Celular Secundario</label>
+                        <input type="tel" id="newCel2" class="form-input" placeholder="Opcional" maxlength="9">
                     </div>
                 </div>
-
-                <!-- 1. Patient Data & Medical Record -->
-                <div class="bg-white rounded-2xl shadow-ios divide-y divide-gray-100 overflow-hidden">
-                    <div class="px-3 py-2 bg-gray-50/70 text-[11px] font-bold text-gray-600 uppercase tracking-wider">
-                        1. Datos del Niño(a) y Madre / Padre
-                    </div>
-
-                    <div class="grid grid-cols-2 divide-x divide-gray-100">
-                        <div class="p-2.5">
-                            <label class="block text-[10px] font-extrabold text-ios-blue mb-0.5">N° Historia Clínica *</label>
-                            <input type="text" id="inputHcl" required placeholder="Ej. 45892"
-                                class="w-full text-xs font-extrabold text-gray-900 focus:outline-none bg-transparent">
-                        </div>
-                        <div class="p-2.5">
-                            <label class="block text-[10px] font-semibold text-gray-500 mb-0.5">DNI del Menor *</label>
-                            <input type="text" id="inputDni" maxlength="8" required placeholder="8 dígitos"
-                                class="w-full text-xs font-bold text-gray-900 focus:outline-none bg-transparent">
-                        </div>
-                    </div>
-
-                    <div class="p-2.5">
-                        <label class="block text-[10px] font-semibold text-gray-500 mb-0.5">Nombres y Apellidos del Menor *</label>
-                        <input type="text" id="inputName" required placeholder="Ej. Mateo Sebastián Quispe Huamán"
-                            class="w-full text-xs font-bold text-gray-900 focus:outline-none bg-transparent">
-                    </div>
-
-                    <div class="p-2.5 flex items-center justify-between gap-2">
-                        <div class="flex-1">
-                            <label class="block text-[10px] font-semibold text-gray-500 mb-0.5">Fecha de Nacimiento *</label>
-                            <input type="date" id="inputDob" required onchange="calculatePatientAge()"
-                                class="w-full text-xs font-semibold text-gray-900 focus:outline-none bg-transparent">
-                        </div>
-                        <div id="badgeAgeCalculated" class="hidden text-right bg-ios-blue/10 px-2.5 py-1 rounded-xl">
-                            <span class="text-[9px] text-gray-500 block">Edad:</span>
-                            <span id="textAgeCalculated" class="text-[11px] font-extrabold text-ios-blue">--</span>
-                        </div>
-                    </div>
-
-                    <div class="p-2.5">
-                        <label class="block text-[10px] font-semibold text-gray-500 mb-0.5">Nombre de Padre, Madre o Apoderado *</label>
-                        <input type="text" id="inputParentName" required placeholder="Ej. Rosa Huamán Quispe"
-                            class="w-full text-xs font-semibold text-gray-900 focus:outline-none bg-transparent">
-                    </div>
-
-                    <div class="grid grid-cols-2 divide-x divide-gray-100">
-                        <div class="p-2.5">
-                            <label class="block text-[10px] font-extrabold text-ios-green mb-0.5">Celular Principal (WhatsApp) *</label>
-                            <input type="tel" id="inputPhone1" maxlength="9" required placeholder="987654321"
-                                class="w-full text-xs font-bold text-gray-900 focus:outline-none bg-transparent">
-                        </div>
-                        <div class="p-2.5">
-                            <label class="block text-[10px] font-semibold text-gray-500 mb-0.5">Celular Secundario</label>
-                            <input type="tel" id="inputPhone2" maxlength="9" placeholder="Opcional"
-                                class="w-full text-xs font-medium text-gray-900 focus:outline-none bg-transparent">
-                        </div>
-                    </div>
+                <div class="form-group">
+                    <label class="form-label">Servicio</label>
+                    <select id="newServicio" class="form-select">
+                        <option value="CRED">CRED</option>
+                        <option value="Sulfato Ferroso">Sulfato Ferroso</option>
+                        <option value="CRED + Sulfato">CRED + Sulfato Ferroso</option>
+                    </select>
                 </div>
-
-                <!-- 2. Service to deliver -->
-                <div class="bg-white rounded-2xl p-3 shadow-ios space-y-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-bold text-gray-600 uppercase tracking-wider">2. Servicio a Brindar</span>
-                        <!-- CRED-Prematuro Tag -->
-                        <label class="cursor-pointer inline-flex items-center gap-1.5">
-                            <input type="checkbox" id="inputPrematuro" class="sr-only peer">
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border border-ios-purple/40 text-ios-purple peer-checked:bg-ios-purple peer-checked:text-white transition-all">
-                                CRED-Prematuro
-                            </span>
-                        </label>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-2">
-                        <label class="cursor-pointer">
-                            <input type="radio" name="formService" value="CRED" checked class="peer sr-only">
-                            <div class="p-2 rounded-xl text-center border-2 border-transparent bg-ios-bg peer-checked:border-ios-blue peer-checked:bg-ios-blue/10 transition-all ios-tap">
-                                <i class="ph-fill ph-ruler text-base text-ios-blue mb-0.5 block"></i>
-                                <span class="text-xs font-bold block">CRED</span>
-                            </div>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="formService" value="SULFATO" class="peer sr-only">
-                            <div class="p-2 rounded-xl text-center border-2 border-transparent bg-ios-bg peer-checked:border-ios-orange peer-checked:bg-ios-orange/10 transition-all ios-tap">
-                                <i class="ph-fill ph-drop text-base text-ios-orange mb-0.5 block"></i>
-                                <span class="text-xs font-bold block">Sulfato</span>
-                            </div>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="formService" value="CRED_SULFATO" class="peer sr-only">
-                            <div class="p-2 rounded-xl text-center border-2 border-transparent bg-ios-bg peer-checked:border-ios-green peer-checked:bg-ios-green/10 transition-all ios-tap">
-                                <i class="ph-fill ph-first-aid-kit text-base text-ios-green mb-0.5 block"></i>
-                                <span class="text-xs font-bold block">Ambos</span>
-                            </div>
-                        </label>
-                    </div>
-
-                    <div class="pt-1">
-                        <input type="text" id="inputDetail" placeholder="Detalle (ej. Control 4m + Sulfato gotas)"
-                            class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-medium focus:outline-none">
-                    </div>
+                <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; background: #F8FAFC; padding: 10px; border-radius: 8px;">
+                    <span style="font-size: 14px; font-weight: 550;">¿Es CRED Prematuro?</span>
+                    <input type="checkbox" id="newPrematuro" style="width: 20px; height: 20px;">
                 </div>
-
-                <!-- 3. Date, Consultorio, Duration & Time Slot -->
-                <div class="bg-white rounded-2xl p-3 shadow-ios space-y-2.5">
-                    <span class="text-[11px] font-bold text-gray-600 uppercase tracking-wider block">3. Programación de la Cita</span>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Fecha de la Cita:</label>
-                            <input type="date" id="inputFormDate" required onchange="onFormDateOrConsChange()"
-                                class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-bold text-ios-blue focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Consultorio:</label>
-                            <div class="grid grid-cols-2 gap-1" id="formConsGroup">
-                                <button type="button" onclick="setFormConsultorio('A')" id="btnFormConsA" class="py-1.5 rounded-xl text-xs font-bold bg-gray-900 text-white">Cons. A</button>
-                                <button type="button" onclick="setFormConsultorio('B')" id="btnFormConsB" class="py-1.5 rounded-xl text-xs font-bold bg-gray-200 text-gray-600">Cons. B</button>
-                            </div>
-                        </div>
+                <div style="display: flex; gap: 10px;">
+                    <div class="form-group" style="flex:1;">
+                        <label class="form-label">Fecha Cita</label>
+                        <input type="date" id="newFechaCita" class="form-input">
                     </div>
-
-                    <!-- Duration: 1 block (20m) vs 2 blocks (40m) -->
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-500 mb-1">Duración:</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <label class="cursor-pointer">
-                                <input type="radio" name="formDuration" value="1" checked onchange="renderTimeSlotsGrid()" class="peer sr-only">
-                                <div class="p-2 rounded-xl bg-ios-bg border-2 border-transparent peer-checked:border-ios-blue peer-checked:bg-ios-blue/10 flex items-center justify-between ios-tap">
-                                    <span class="text-xs font-bold">1 Bloque</span>
-                                    <span class="text-[10px] font-extrabold text-gray-500">20 min</span>
-                                </div>
-                            </label>
-                            <label class="cursor-pointer">
-                                <input type="radio" name="formDuration" value="2" onchange="renderTimeSlotsGrid()" class="peer sr-only">
-                                <div class="p-2 rounded-xl bg-ios-bg border-2 border-transparent peer-checked:border-ios-indigo peer-checked:bg-ios-indigo/10 flex items-center justify-between ios-tap">
-                                    <span class="text-xs font-bold">2 Bloques</span>
-                                    <span class="text-[10px] font-extrabold text-ios-indigo">40 min</span>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Shift selection -->
-                    <div class="grid grid-cols-2 bg-gray-200/80 p-0.5 rounded-xl text-xs font-semibold">
-                        <button type="button" onclick="setFormShift('MANANA')" id="btnFormShiftManana" class="py-1.5 rounded-lg bg-white text-gray-900 font-bold shadow-2xs">Mañana (08:30 - 11:50)</button>
-                        <button type="button" onclick="setFormShift('TARDE')" id="btnFormShiftTarde" class="py-1.5 rounded-lg text-gray-600 font-bold">Tarde (14:00 - 17:20)</button>
-                    </div>
-
-                    <!-- Time Slots Grid -->
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-500 mb-1">Selecciona la Hora de Inicio:</label>
-                        <div class="grid grid-cols-3 gap-1.5" id="formSlotsGrid">
-                            <!-- Populated dynamically -->
-                        </div>
-                    </div>
-
-                    <!-- Registered By (Nurse) -->
-                    <div class="pt-1 flex items-center justify-between text-xs">
-                        <span class="font-bold text-gray-600 flex items-center gap-1">
-                            <i class="ph-fill ph-user-check text-ios-green"></i> Agendado por:
-                        </span>
-                        <select id="selectBookedBy" class="font-bold text-gray-900 bg-ios-bg px-2 py-1 rounded-lg focus:outline-none max-w-[190px] truncate">
-                            <!-- Populated by JS -->
+                    <div class="form-group" style="flex:1;">
+                        <label class="form-label">Turno y Consultorio</label>
+                        <select id="newTurnoConsulta" class="form-select">
+                            <option value="Mañana|Consultorio A">Mañana (08:30) - Consultorio A</option>
+                            <option value="Mañana|Consultorio B">Mañana (08:30) - Consultorio B</option>
+                            <option value="Tarde|Consultorio A">Tarde (14:00) - Consultorio A</option>
+                            <option value="Tarde|Consultorio B">Tarde (14:00) - Consultorio B</option>
                         </select>
                     </div>
                 </div>
-
-                <button type="submit" class="w-full py-3.5 rounded-2xl bg-ios-blue text-white font-extrabold text-sm shadow-md shadow-ios-blue/30 flex items-center justify-center gap-2 ios-tap">
-                    <i class="ph-bold ph-check-circle text-base"></i>
-                    <span>Guardar Cita</span>
-                </button>
-            </form>
-        </section>
-
-        <!-- ==================================================== -->
-        <!-- SCREEN 3: ALERTAS (SEGUIMIENTO Y RECORDATORIOS)      -->
-        <!-- ==================================================== -->
-        <section id="screen-alerts" class="hidden space-y-3 pb-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-xl font-extrabold tracking-tight text-gray-900">Alertas y Recordatorios</h1>
-                    <p class="text-xs text-gray-500">Recordatorios WhatsApp y pacientes inasistentes</p>
-                </div>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-ios-orange/15 text-ios-orange" id="totalAlertsBadge">0 alertas</span>
+                <button class="btn btn-green" style="margin-top: 10px;" onclick="guardarNuevaCita()">💾 Guardar Cita</button>
             </div>
-
-            <!-- Segmented Control: Próximos a Vencer (Ámbar) vs Inasistentes (Rojo) -->
-            <div class="grid grid-cols-2 bg-gray-200/80 p-0.5 rounded-xl text-xs font-semibold">
-                <button onclick="setAlertTab('AMBER')" id="btnAlertTabAmber" class="py-2 rounded-lg bg-white text-gray-900 shadow-2xs font-extrabold flex items-center justify-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-ios-orange"></span>
-                    <span id="labelTabAmber">Próximos 3 días (0)</span>
-                </button>
-                <button onclick="setAlertTab('RED')" id="btnAlertTabRed" class="py-2 rounded-lg text-gray-600 font-extrabold flex items-center justify-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-ios-red"></span>
-                    <span id="labelTabRed">Inasistentes (0)</span>
-                </button>
-            </div>
-
-            <div id="alertsContainer" class="space-y-2.5">
-                <!-- Rendered dynamically -->
-            </div>
-        </section>
-
-        <!-- ==================================================== -->
-        <!-- SCREEN 4: ESTADÍSTICAS Y REPORTES HIS                -->
-        <!-- ==================================================== -->
-        <section id="screen-stats" class="hidden space-y-3.5 pb-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-xl font-extrabold tracking-tight text-gray-900">Estadísticas y Reportes</h1>
-                    <p class="text-xs text-gray-500">Avance de atenciones C.S. Chilca</p>
-                </div>
-                <button onclick="downloadCsvReport()" class="px-3 py-1.5 rounded-xl bg-emerald-700 text-white text-xs font-bold shadow-xs flex items-center gap-1 ios-tap">
-                    <i class="ph-bold ph-download-simple"></i>
-                    <span>Exportar Excel</span>
-                </button>
-            </div>
-
-            <!-- Filter Period -->
-            <div class="grid grid-cols-3 bg-gray-200/80 p-0.5 rounded-xl text-[11px] font-semibold">
-                <button onclick="setStatsPeriod('HOY')" id="statPeriod-HOY" class="stat-pill py-1.5 rounded-lg text-gray-600 font-bold">Hoy</button>
-                <button onclick="setStatsPeriod('SEMANA')" id="statPeriod-SEMANA" class="stat-pill py-1.5 rounded-lg text-gray-600 font-bold">Esta Semana</button>
-                <button onclick="setStatsPeriod('MES')" id="statPeriod-MES" class="stat-pill py-1.5 rounded-lg bg-white text-gray-900 shadow-2xs font-bold">Este Mes</button>
-            </div>
-
-            <!-- KPI Cards -->
-            <div class="grid grid-cols-2 gap-2.5">
-                <div class="bg-white rounded-2xl p-3 shadow-ios">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase">Total Citas</span>
-                    <div id="statTotal" class="text-2xl font-extrabold text-gray-900 mt-0.5">0</div>
-                    <span class="text-[10px] font-semibold text-ios-blue">Agendadas en la app</span>
-                </div>
-                <div class="bg-white rounded-2xl p-3 shadow-ios">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase">Atendidos</span>
-                    <div id="statAttended" class="text-2xl font-extrabold text-ios-green mt-0.5">0</div>
-                    <span id="statAttendedPct" class="text-[10px] font-semibold text-ios-green">0% cumplimiento</span>
-                </div>
-                <div class="bg-white rounded-2xl p-3 shadow-ios">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase">Pendientes</span>
-                    <div id="statPending" class="text-2xl font-extrabold text-ios-orange mt-0.5">0</div>
-                    <span class="text-[10px] font-semibold text-gray-500">Por atender</span>
-                </div>
-                <div class="bg-white rounded-2xl p-3 shadow-ios">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase">Inasistentes</span>
-                    <div id="statNoShow" class="text-2xl font-extrabold text-ios-red mt-0.5">0</div>
-                    <span id="statNoShowPct" class="text-[10px] font-semibold text-ios-red">0% deserción</span>
-                </div>
-            </div>
-
-            <!-- Services Breakdown -->
-            <div class="bg-white rounded-2xl p-3.5 shadow-ios space-y-2.5">
-                <h3 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Desglose por Servicio</h3>
-                <div class="space-y-2">
-                    <div>
-                        <div class="flex items-center justify-between text-xs font-bold mb-1">
-                            <span class="text-ios-blue flex items-center gap-1"><i class="ph-fill ph-ruler"></i> Control CRED</span>
-                            <span id="countCredOnly">0</span>
-                        </div>
-                        <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                            <div id="barCredOnly" class="h-full bg-ios-blue rounded-full" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex items-center justify-between text-xs font-bold mb-1">
-                            <span class="text-ios-orange flex items-center gap-1"><i class="ph-fill ph-drop"></i> Sulfato Ferroso</span>
-                            <span id="countSulfatoOnly">0</span>
-                        </div>
-                        <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                            <div id="barSulfatoOnly" class="h-full bg-ios-orange rounded-full" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex items-center justify-between text-xs font-bold mb-1">
-                            <span class="text-ios-green flex items-center gap-1"><i class="ph-fill ph-first-aid-kit"></i> CRED + Sulfato</span>
-                            <span id="countCredAndSulfato">0</span>
-                        </div>
-                        <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                            <div id="barCredAndSulfato" class="h-full bg-ios-green rounded-full" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    <div class="pt-1 border-t border-gray-100 flex items-center justify-between text-xs">
-                        <span class="font-bold text-ios-purple flex items-center gap-1"><i class="ph-fill ph-sparkle"></i> Total CRED-Prematuro:</span>
-                        <span id="countPrematuroTotal" class="font-extrabold text-ios-purple">0</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- ======================================================== -->
-    <!-- IOS NATIVE BOTTOM NAVIGATION TAB BAR                     -->
-    <!-- ======================================================== -->
-    <nav class="fixed bottom-0 inset-x-0 z-40 max-w-lg mx-auto ios-blur shadow-ios-bar px-4 pt-1.5 pb-4 flex items-center justify-around border-t border-gray-200/80">
-        <button onclick="switchScreen('agenda')" id="tabNav-agenda" class="flex flex-col items-center gap-0.5 text-ios-blue ios-tap">
-            <i class="ph-fill ph-calendar-blank text-2xl"></i>
-            <span class="text-[10px] font-bold">Agenda</span>
-        </button>
-
-        <button onclick="switchScreen('new')" id="tabNav-new" class="flex flex-col items-center gap-0.5 text-ios-gray1 ios-tap">
-            <i class="ph-fill ph-plus-circle text-2xl"></i>
-            <span class="text-[10px] font-bold">Nueva Cita</span>
-        </button>
-
-        <button onclick="switchScreen('alerts')" id="tabNav-alerts" class="relative flex flex-col items-center gap-0.5 text-ios-gray1 ios-tap">
-            <span id="tabNavAlertBadge" class="hidden absolute -top-1 right-2 px-1.5 py-0.2 rounded-full bg-ios-red text-white text-[9px] font-extrabold">0</span>
-            <i class="ph-fill ph-bell-ringing text-2xl"></i>
-            <span class="text-[10px] font-bold">Alertas</span>
-        </button>
-
-        <button onclick="switchScreen('stats')" id="tabNav-stats" class="flex flex-col items-center gap-0.5 text-ios-gray1 ios-tap">
-            <i class="ph-fill ph-chart-pie-slice text-2xl"></i>
-            <span class="text-[10px] font-bold">Estadísticas</span>
-        </button>
-    </nav>
-
-    <!-- ======================================================== -->
-    <!-- MODAL 1: ACTION SHEET DE CITA (DETALLE + WHATSAPP)       -->
-    <!-- ======================================================== -->
-    <div id="modalActionSheet" onclick="closeActionSheet()" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end">
-        <div onclick="event.stopPropagation()" class="w-full max-w-lg mx-auto bg-[#F2F2F7] rounded-t-[32px] p-4 pb-7 space-y-3 animate-slide-up shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
-            <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto"></div>
-
-            <!-- Patient Card Header -->
-            <div class="bg-white rounded-2xl p-3.5 shadow-ios space-y-2">
-                <div class="flex items-start justify-between gap-2">
-                    <div>
-                        <div class="flex items-center gap-1.5 mb-1 flex-wrap">
-                            <span id="sheetConsBadge" class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-gray-900 text-white">Cons. A</span>
-                            <span id="sheetServiceBadge" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-ios-blue/10 text-ios-blue">CRED</span>
-                            <span id="sheetPremBadge" class="hidden px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-ios-purple/15 text-ios-purple">CRED-Prematuro</span>
-                        </div>
-                        <h2 id="sheetChildName" class="text-base font-extrabold text-gray-900 leading-tight">Nombre del Niño</h2>
-                        <p id="sheetChildMeta" class="text-xs text-gray-500 font-semibold mt-0.5">H.Cl: -- • DNI: -- • --</p>
-                    </div>
-                    <div class="text-right flex-shrink-0">
-                        <span id="sheetTimeBadge" class="text-xs font-extrabold text-gray-900 bg-ios-bg px-2.5 py-1 rounded-xl block">08:30</span>
-                        <span id="sheetDurationBadge" class="text-[10px] font-bold text-ios-indigo mt-0.5 block">20 min</span>
-                    </div>
-                </div>
-
-                <div class="bg-ios-bg rounded-xl p-2.5 text-xs space-y-1">
-                    <div class="flex items-center justify-between">
-                        <span class="text-gray-500">Padre/Madre:</span>
-                        <span id="sheetParentName" class="font-bold text-gray-900">--</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-gray-500">Teléfonos:</span>
-                        <span id="sheetPhones" class="font-bold text-ios-blue font-mono">--</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-gray-500">Nota:</span>
-                        <span id="sheetDetail" class="font-medium text-gray-700">--</span>
-                    </div>
-                    <div class="flex items-center justify-between text-[11px] pt-1 border-t border-gray-200/60">
-                        <span class="text-gray-400">Agendó:</span>
-                        <span id="sheetBookedBy" class="font-semibold text-gray-600">--</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- WhatsApp Message Preview & Trigger -->
-            <div class="bg-[#E7FFDB] border border-[#25D366]/30 rounded-2xl p-3 space-y-2">
-                <div class="flex items-center justify-between text-xs font-bold text-[#075E54]">
-                    <span class="flex items-center gap-1.5"><i class="ph-fill ph-whatsapp-logo text-base text-[#25D366]"></i> Recordatorio Gratuito:</span>
-                    <span class="text-[10px] bg-white px-2 py-0.5 rounded-full font-bold">Costo S/ 0.00</span>
-                </div>
-                <p id="sheetWaPreview" class="text-[11px] text-gray-800 bg-white/90 p-2 rounded-xl italic leading-relaxed">
-                    "Hola..."
-                </p>
-                <div class="grid grid-cols-2 gap-2" id="sheetWaButtons">
-                    <button onclick="sendAppointmentWhatsApp(1)" class="py-2 px-2 rounded-xl bg-[#25D366] text-white font-bold text-xs flex items-center justify-center gap-1 shadow-xs ios-tap">
-                        <i class="ph-bold ph-whatsapp-logo"></i> Celular 1
-                    </button>
-                    <button onclick="sendAppointmentWhatsApp(2)" id="btnSheetWa2" class="py-2 px-2 rounded-xl bg-[#128C7E] text-white font-bold text-xs flex items-center justify-center gap-1 shadow-xs ios-tap">
-                        <i class="ph-bold ph-whatsapp-logo"></i> Celular 2
-                    </button>
-                </div>
-            </div>
-
-            <!-- Status Buttons -->
-            <div class="space-y-2">
-                <button onclick="markCurrentAsAttended()" class="w-full py-3 rounded-2xl bg-ios-green text-white font-bold text-xs shadow-xs flex items-center justify-center gap-1.5 ios-tap">
-                    <i class="ph-bold ph-check-circle text-base"></i>
-                    <span>Marcar como Atendido</span>
-                </button>
-
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="openEditModal()" class="py-2.5 rounded-2xl bg-white text-ios-blue border border-gray-200 font-bold text-xs flex items-center justify-center gap-1.5 ios-tap">
-                        <i class="ph-bold ph-pencil-simple text-sm"></i> Editar Datos
-                    </button>
-                    <button onclick="rescheduleCurrentAppointment()" class="py-2.5 rounded-2xl bg-white text-ios-orange border border-gray-200 font-bold text-xs flex items-center justify-center gap-1.5 ios-tap">
-                        <i class="ph-bold ph-clock-clockwise text-sm"></i> Reprogramar
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="markCurrentAsNoShow()" class="py-2 rounded-2xl bg-white text-gray-700 border border-gray-200 font-bold text-xs flex items-center justify-center gap-1 ios-tap">
-                        <i class="ph-bold ph-x-circle text-ios-red"></i> No Asistió
-                    </button>
-                    <button onclick="deleteCurrentAppointment()" class="py-2 rounded-2xl bg-red-50 text-ios-red border border-red-200/60 font-bold text-xs flex items-center justify-center gap-1 ios-tap">
-                        <i class="ph-bold ph-trash text-sm"></i> Eliminar Cita
-                    </button>
-                </div>
-            </div>
-
-            <button onclick="closeActionSheet()" class="w-full py-2.5 rounded-2xl bg-gray-200/80 text-gray-700 font-bold text-xs ios-tap">
-                Cerrar
-            </button>
         </div>
+
+        <!-- ALERTAS -->
+        <div id="view-alertas" class="view-content">
+            <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">Seguimiento y Alertas</h2>
+            <div id="alertasContainer"></div>
+        </div>
+
+        <!-- REPORTES -->
+        <div id="view-estadisticas" class="view-content">
+            <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">Estadísticas & Reportes HIS</h2>
+            <div class="card" style="text-align: center; padding: 20px;">
+                <h3 style="font-size: 15px; color: var(--ios-secondary); margin-bottom: 10px;">Total Citados del Mes</h3>
+                <div style="font-size: 36px; font-weight: 700; color: var(--ios-blue);" id="statTotal">142</div>
+                <div style="display: flex; justify-content: space-around; margin-top: 15px; font-size: 13px;">
+                    <div>✅ Atendidos: <strong id="statAtendidos">118</strong></div>
+                    <div>⚠️ Pendientes: <strong id="statPendientes">14</strong></div>
+                    <div>❌ Inasistentes: <strong id="statInasistentes">10</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB BAR -->
+        <nav class="tab-bar">
+            <div class="tab-item active" onclick="switchView('agenda')">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM5 8V6h14v2H5z"/></svg>
+                Agenda
+            </div>
+            <div class="tab-item" onclick="switchView('nueva')">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                Nueva Cita
+            </div>
+            <div class="tab-item" onclick="switchView('alertas')">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4v6z"/></svg>
+                Alertas
+            </div>
+            <div class="tab-item" onclick="switchView('estadisticas')">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                Reportes
+            </div>
+        </nav>
     </div>
 
-    <!-- ======================================================== -->
-    <!-- MODAL 2: IMPRESIÓN PARA ARCHIVO DE HISTORIAS CLÍNICAS    -->
-    <!-- ======================================================== -->
-    <div id="modalPrintHcl" onclick="closePrintModal()" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end">
-        <div onclick="event.stopPropagation()" class="w-full max-w-lg mx-auto h-[92vh] bg-white rounded-t-[32px] p-4 flex flex-col animate-slide-up shadow-2xl">
-            <div class="flex items-center justify-between pb-2 border-b border-gray-200 no-print">
-                <div>
-                    <h2 class="text-sm font-extrabold text-gray-900">Lista para Archivo H.Cl.</h2>
-                    <p class="text-[11px] text-gray-500">Para extraer las carpetas físicas</p>
-                </div>
-                <button onclick="closePrintModal()" class="w-7 h-7 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center">
-                    <i class="ph-bold ph-x"></i>
-                </button>
-            </div>
-
-            <div id="printableHclSheet" class="flex-1 overflow-y-auto my-3 border border-gray-200 rounded-2xl p-3 bg-gray-50/50 space-y-2.5 text-xs">
-                <div class="border-b-2 border-gray-900 pb-2 flex items-start justify-between">
-                    <div>
-                        <p class="text-[9px] font-extrabold text-ios-blue uppercase">C.S. CHILCA • CONSULTORIO DE ENFERMERÍA</p>
-                        <h3 class="text-sm font-extrabold text-gray-900">LISTA DE CITADOS PARA ARCHIVO DE HISTORIAS</h3>
-                        <p id="printHeaderDate" class="text-[11px] font-bold text-gray-700">Fecha: --</p>
-                    </div>
-                    <span id="printTotalBadge" class="bg-gray-900 text-white font-bold text-[10px] px-2 py-0.5 rounded">Total: 0</span>
-                </div>
-
-                <table class="w-full text-left border-collapse text-[11px]">
-                    <thead>
-                        <tr class="border-b border-gray-400 bg-gray-100 font-bold text-gray-700">
-                            <th class="py-1 px-1">Hora / Cons</th>
-                            <th class="py-1 px-1">N° H.Cl.</th>
-                            <th class="py-1 px-1">Niño(a) / DNI</th>
-                            <th class="py-1 px-1">Servicio</th>
-                            <th class="py-1 px-1 text-center">Listo</th>
-                        </tr>
-                    </thead>
-                    <tbody id="printTableBody" class="divide-y divide-gray-200 bg-white">
-                        <!-- Populated dynamically -->
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 no-print">
-                <button onclick="closePrintModal()" class="py-2.5 rounded-xl bg-gray-100 font-bold text-xs text-gray-700 ios-tap">
-                    Volver
-                </button>
-                <button onclick="window.print()" class="py-2.5 rounded-xl bg-ios-blue text-white font-bold text-xs flex items-center justify-center gap-1 shadow-sm ios-tap">
-                    <i class="ph-bold ph-printer"></i> Imprimir / PDF
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ======================================================== -->
-    <!-- MODAL 3: INICIAR SESIÓN / CAMBIO DE ENFERMERA (PIN)      -->
-    <!-- ======================================================== -->
-    <div id="modalLogin" onclick="closeLoginModal()" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end">
-        <div onclick="event.stopPropagation()" class="w-full max-w-lg mx-auto bg-[#F2F2F7] rounded-t-[32px] p-4 pb-6 space-y-3 animate-slide-up shadow-2xl max-h-[85vh] overflow-y-auto no-scrollbar">
-            <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto"></div>
-
-            <div class="flex items-center justify-between">
-                <div>
-                    <h2 class="text-sm font-extrabold text-gray-900">Personal de Turno</h2>
-                    <p class="text-[11px] text-gray-500">Selecciona tu usuario o ingresa tu PIN</p>
-                </div>
-                <button onclick="closeLoginModal()" class="w-7 h-7 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center">
-                    <i class="ph-bold ph-x"></i>
-                </button>
-            </div>
-
-            <!-- PIN input -->
-            <div class="bg-white rounded-2xl p-2.5 shadow-ios flex items-center gap-2">
-                <input type="password" id="inputLoginPin" maxlength="4" placeholder="Ingresa tu PIN de 4 dígitos..."
-                    class="flex-1 bg-ios-bg px-3 py-2 rounded-xl text-xs font-mono font-bold focus:outline-none">
-                <button onclick="verifyPinDirect()" class="px-3.5 py-2 rounded-xl bg-ios-blue text-white font-bold text-xs ios-tap">
-                    Entrar
-                </button>
-            </div>
-
-            <!-- Fast Staff Buttons -->
-            <div class="space-y-1.5" id="staffQuickList">
-                <!-- Populated dynamically -->
-            </div>
-        </div>
-    </div>
-
-    <!-- ======================================================== -->
-    <!-- MODAL 4: PANEL DE AJUSTES ADMINISTRADOR (PIN 9999)       -->
-    <!-- ======================================================== -->
-    <div id="modalAdmin" onclick="closeAdminModal()" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end">
-        <div onclick="event.stopPropagation()" class="w-full max-w-lg mx-auto bg-[#F2F2F7] rounded-t-[32px] p-4 pb-7 space-y-3.5 animate-slide-up shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
-            <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto"></div>
-
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-xl bg-gray-900 text-white flex items-center justify-center">
-                        <i class="ph-fill ph-gear"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-sm font-extrabold text-gray-900">Panel de Ajustes (Jefatura)</h2>
-                        <p class="text-[11px] text-gray-500">Conexión a Google Drive y Firebase</p>
-                    </div>
-                </div>
-                <button onclick="closeAdminModal()" class="w-7 h-7 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center">
-                    <i class="ph-bold ph-x"></i>
-                </button>
-            </div>
-
-            <!-- 1. Google Drive Script URL -->
-            <div class="bg-white rounded-2xl p-3 shadow-ios space-y-2">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-gray-800 flex items-center gap-1.5">
-                        <i class="ph-fill ph-google-drive-logo text-[#107C41]"></i> URL de Google Apps Script:
-                    </span>
-                    <span id="gdriveStatusBadge" class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">No vinculada</span>
-                </div>
-                <input type="url" id="adminGScriptUrl" placeholder="https://script.google.com/macros/s/AKfycb.../exec"
-                    class="w-full bg-ios-bg px-2.5 py-2 rounded-xl text-xs font-mono border border-gray-200 focus:outline-none focus:border-ios-blue">
-                <p class="text-[10px] text-gray-500 leading-tight">
-                    Pega la URL web de tu Google Apps Script. Todas las enfermeras leerán y escribirán en la misma hoja de cálculo en vivo.
-                </p>
-                <button onclick="saveAdminGScriptUrl()" class="w-full py-2 rounded-xl bg-[#107C41] text-white font-bold text-xs ios-tap">
-                    Guardar URL de Google Drive
-                </button>
-            </div>
-
-            <!-- 2. Firebase Config (Optional) -->
-            <div class="bg-white rounded-2xl p-3 shadow-ios space-y-2">
-                <span class="text-xs font-bold text-gray-800 flex items-center gap-1.5">
-                    <i class="ph-fill ph-fire text-amber-500"></i> Proyecto Firebase (Opcional):
-                </span>
-                <input type="text" id="adminFirebaseProjectId" placeholder="ID de tu proyecto Firebase (ej. cs-chilca-cred)"
-                    class="w-full bg-ios-bg px-2.5 py-2 rounded-xl text-xs font-mono border border-gray-200 focus:outline-none focus:border-amber-500">
-                <button onclick="saveAdminFirebaseProject()" class="w-full py-2 rounded-xl bg-amber-500 text-white font-bold text-xs ios-tap">
-                    Guardar Proyecto Firebase
-                </button>
-            </div>
-
-            <!-- 3. Actions -->
-            <div class="space-y-1.5 pt-1">
-                <button onclick="syncWithCloudNow()" class="w-full py-2.5 rounded-xl bg-ios-blue text-white font-bold text-xs flex items-center justify-center gap-1.5 ios-tap">
-                    <i class="ph-bold ph-arrows-clockwise"></i> Forzar Sincronización Ahora
-                </button>
-                <button onclick="resetDemoData()" class="w-full py-2 rounded-xl bg-red-50 text-ios-red font-bold text-xs ios-tap">
-                    Restablecer Datos de Demostración
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ======================================================== -->
-    <!-- MODAL 5: EDITAR CITA COMPLETA                            -->
-    <!-- ======================================================== -->
-    <div id="modalEditAppointment" onclick="closeEditModal()" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end">
-        <div onclick="event.stopPropagation()" class="w-full max-w-lg mx-auto bg-[#F2F2F7] rounded-t-[32px] p-4 pb-7 space-y-3 animate-slide-up shadow-2xl max-h-[92vh] overflow-y-auto no-scrollbar">
-            <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto"></div>
-
-            <div class="flex items-center justify-between pb-2 border-b border-gray-200">
-                <div class="flex items-center gap-2">
-                    <div class="w-7 h-7 rounded-xl bg-ios-blue text-white flex items-center justify-center">
-                        <i class="ph-bold ph-pencil-simple"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-sm font-extrabold text-gray-900">Editar Datos de la Cita</h2>
-                        <p class="text-[10px] text-gray-500">Modifica cualquier dato y guarda los cambios</p>
-                    </div>
-                </div>
-                <button onclick="closeEditModal()" class="w-7 h-7 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center">
-                    <i class="ph-bold ph-x text-xs"></i>
-                </button>
-            </div>
-
-            <form id="editAppointmentForm" onsubmit="saveEditAppointment(event)" class="space-y-3">
-                <input type="hidden" id="editAppId">
-
-                <!-- 1. Patient Data -->
-                <div class="bg-white rounded-2xl p-3 shadow-ios space-y-2">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">1. Datos del Niño / Historia</span>
-                    
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">N° Historia Clínica</label>
-                            <input type="text" id="editHcl" required class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-bold text-ios-blue focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">DNI del Menor</label>
-                            <input type="text" id="editDni" maxlength="8" required class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-bold text-gray-900 focus:outline-none">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Nombres y Apellidos del Menor</label>
-                        <input type="text" id="editName" required class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-bold text-gray-900 focus:outline-none">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">F. Nacimiento</label>
-                            <input type="date" id="editDob" required class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-semibold focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Estado de la Cita</label>
-                            <select id="editStatus" class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-bold text-gray-900 focus:outline-none">
-                                <option value="PENDIENTE">Pendiente</option>
-                                <option value="ATENDIDO">Atendido</option>
-                                <option value="NO_ASISTIO">No asistió</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. Parents & Phones -->
-                <div class="bg-white rounded-2xl p-3 shadow-ios space-y-2">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">2. Apoderado y Teléfonos</span>
-                    
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Padre, Madre o Apoderado</label>
-                        <input type="text" id="editParentName" required class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-semibold focus:outline-none">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-[10px] font-bold text-ios-green mb-0.5">Celular Principal (WhatsApp)</label>
-                            <input type="tel" id="editPhone1" maxlength="9" required class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Celular Secundario</label>
-                            <input type="tel" id="editPhone2" maxlength="9" placeholder="Opcional" class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-mono font-medium focus:outline-none">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3. Programación -->
-                <div class="bg-white rounded-2xl p-3 shadow-ios space-y-2">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">3. Fecha, Hora y Consultorio</span>
-                    
-                    <div class="grid grid-cols-3 gap-1.5">
-                        <div class="col-span-1">
-                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Fecha</label>
-                            <input type="date" id="editDate" required class="w-full bg-ios-bg px-2 py-1.5 rounded-xl text-xs font-bold text-ios-blue focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Hora (HH:mm)</label>
-                            <input type="time" id="editTime" required class="w-full bg-ios-bg px-2 py-1.5 rounded-xl text-xs font-bold focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Consultorio</label>
-                            <select id="editConsultorio" class="w-full bg-ios-bg px-2 py-1.5 rounded-xl text-xs font-bold focus:outline-none">
-                                <option value="A">Cons. A</option>
-                                <option value="B">Cons. B</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2 pt-1">
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Servicio</label>
-                            <select id="editService" class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-bold focus:outline-none">
-                                <option value="CRED">Control CRED</option>
-                                <option value="SULFATO">Sulfato Ferroso</option>
-                                <option value="CRED_SULFATO">CRED + Sulfato</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Duración</label>
-                            <select id="editBlocks" class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-bold focus:outline-none">
-                                <option value="1">1 bloque (20 min)</option>
-                                <option value="2">2 bloques (40 min)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between pt-1">
-                        <label class="cursor-pointer inline-flex items-center gap-2">
-                            <input type="checkbox" id="editPrematuro" class="w-4 h-4 rounded text-ios-purple focus:ring-0">
-                            <span class="text-xs font-bold text-ios-purple">¿Es niño prematuro? (CRED-Prematuro)</span>
-                        </label>
-                    </div>
-
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-500 mb-0.5">Detalle / Nota</label>
-                        <input type="text" id="editDetail" class="w-full bg-ios-bg px-2.5 py-1.5 rounded-xl text-xs font-medium focus:outline-none">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2 pt-1">
-                    <button type="button" onclick="closeEditModal()" class="py-3 rounded-2xl bg-gray-200/80 font-bold text-xs text-gray-700 ios-tap">
-                        Cancelar
-                    </button>
-                    <button type="submit" class="py-3 rounded-2xl bg-ios-blue text-white font-extrabold text-xs shadow-md flex items-center justify-center gap-1.5 ios-tap">
-                        <i class="ph-bold ph-check"></i>
-                        <span>Guardar Cambios</span>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Toast Notification -->
-    <div id="iosToast" class="hidden fixed top-16 inset-x-4 max-w-sm mx-auto z-50 bg-gray-900/95 backdrop-blur-md text-white px-3.5 py-2.5 rounded-2xl shadow-xl flex items-center gap-2.5">
-        <div id="toastIcon" class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0">
-            <i class="ph-bold ph-check text-sm"></i>
-        </div>
-        <div class="flex-1 min-w-0">
-            <p id="toastTitle" class="text-xs font-bold truncate">Notificación</p>
-            <p id="toastSubtitle" class="text-[11px] text-gray-300 truncate">Mensaje</p>
-        </div>
-    </div>
-
-    <!-- ======================================================== -->
-    <!-- LOGICA JAVASCRIPT DEL APLICATIVO                         -->
-    <!-- ======================================================== -->
     <script>
-        // Slots configuration (20 minutes per slot)
-        const MORNING_SLOTS = ['08:30', '08:50', '09:10', '09:30', '09:50', '10:10', '10:30', '10:50', '11:10', '11:30', '11:50'];
-        const AFTERNOON_SLOTS = ['14:00', '14:20', '14:40', '15:00', '15:20', '15:40', '16:00', '16:20', '16:40', '17:00', '17:20'];
+        let currentFechaSeleccionada = new Date().toISOString().split('T')[0];
+        let usuarioActual = { nombre: "Lic. Carmen Mendoza" };
+        let filtroServicioActual = "TODOS";
+        let citasData = JSON.parse(localStorage.getItem('CITEN_CITAS_CHILCA')) || [];
 
-        // Initial default staff of C.S. Chilca
-        const DEFAULT_STAFF = [
-            { id: 'U1', name: 'Lic. Carmen Rosa Mendoza', role: 'Enfermera', pin: '1001', code: 'CEP 84920', active: true },
-            { id: 'U2', name: 'Lic. Patricia Salazar Vega', role: 'Enfermera', pin: '1002', code: 'CEP 91034', active: true },
-            { id: 'U3', name: 'Lic. Milagros Quispe Huamán', role: 'Enfermera', pin: '1003', code: 'CEP 65432', active: true },
-            { id: 'U4', name: 'Lic. Rosaura Paredes Soto', role: 'Enfermera', pin: '1004', code: 'CEP 77812', active: true },
-            { id: 'U5', name: 'Lic. Gabriela Torres Flores', role: 'Enfermera', pin: '1005', code: 'CEP 88321', active: true },
-            { id: 'U6', name: 'Lic. Diana Castro Chávez', role: 'Enfermera', pin: '1006', code: 'CEP 90411', active: true },
-            { id: 'U7', name: 'Lic. Elena Vargas Rojas', role: 'Enfermera', pin: '1007', code: 'CEP 95102', active: true },
-            { id: 'U8', name: 'Téc. Marisol Ramos Luján', role: 'Técnica de Enfermería', pin: '2001', code: 'DNI 43219876', active: true },
-            { id: 'U9', name: 'Srta. Lucía Gómez', role: 'Secretaria / Admisión', pin: '3001', code: 'DNI 71234567', active: true },
-            { id: 'U10', name: 'Jefatura de Enfermería', role: 'Administrador / Jefatura', pin: '9999', code: 'JEFATURA', active: true }
-        ];
-
-        // Demo sample appointments
-        const DEFAULT_APPOINTMENTS = [
-            {
-                id: 1001,
-                date: getTodayIsoString(),
-                shift: 'MANANA',
-                time: '08:30',
-                blocks: 2,
-                consultorio: 'A',
-                hcl: '45892',
-                dni: '81459230',
-                name: 'Mateo Sebastián Quispe Huamán',
-                dob: '2026-07-15',
-                parentName: 'Rosa Huamán Quispe',
-                phone1: '987654321',
-                phone2: '912345678',
-                service: 'CRED_SULFATO',
-                isPrematuro: false,
-                detail: 'Control 4m + Entrega Sulfato Ferroso gotas',
-                bookedBy: 'Lic. Carmen Rosa Mendoza',
-                status: 'ATENDIDO'
-            },
-            {
-                id: 1002,
-                date: getTodayIsoString(),
-                shift: 'MANANA',
-                time: '09:10',
-                blocks: 1,
-                consultorio: 'A',
-                hcl: '46105',
-                dni: '82569314',
-                name: 'Liam Sebastián Flores Vega',
-                dob: '2026-05-10',
-                parentName: 'Jorge Flores Vega',
-                phone1: '945612378',
-                phone2: '',
-                service: 'SULFATO',
-                isPrematuro: false,
-                detail: 'Entrega Sulfato Ferroso',
-                bookedBy: 'Téc. Marisol Ramos Luján',
-                status: 'PENDIENTE'
-            },
-            {
-                id: 1003,
-                date: getDayOffsetIsoString(1), // Tomorrow
-                shift: 'MANANA',
-                time: '08:30',
-                blocks: 2,
-                consultorio: 'A',
-                hcl: '44910',
-                dni: '81902344',
-                name: 'Camila Valentina Flores Mamani',
-                dob: '2026-09-10',
-                parentName: 'Elena Mamani Cruz',
-                phone1: '945128904',
-                phone2: '976543210',
-                service: 'CRED',
-                isPrematuro: true,
-                detail: 'Control CRED-Prematuro 2m',
-                bookedBy: 'Srta. Lucía Gómez',
-                status: 'PENDIENTE'
-            },
-            {
-                id: 1004,
-                date: getDayOffsetIsoString(-2), // 2 days ago (No show)
-                shift: 'TARDE',
-                time: '14:20',
-                blocks: 1,
-                consultorio: 'A',
-                hcl: '43877',
-                dni: '80876543',
-                name: 'Iker Matías Palomino Ortiz',
-                dob: '2025-08-05',
-                parentName: 'Sofía Ortiz Delgado',
-                phone1: '977889900',
-                phone2: '',
-                service: 'CRED_SULFATO',
-                isPrematuro: false,
-                detail: 'Control CRED + Dosaje',
-                bookedBy: 'Lic. Patricia Salazar Vega',
-                status: 'NO_ASISTIO'
-            }
-        ];
-
-        // State variables
-        let appointments = [];
-        let staffList = [];
-        let consultorioBEnabledMap = {}; // { 'YYYY-MM-DD': true/false }
-        let currentUserId = 'U1';
-        let selectedDate = getTodayIsoString();
-        let currentConsultorioFilter = 'ALL'; // ALL, A, B
-        let currentShiftFilter = 'ALL'; // ALL, MANANA, TARDE
-        let alertActiveTab = 'AMBER'; // AMBER, RED
-        let statsPeriod = 'MES'; // HOY, SEMANA, MES
-        let activeActionAppointmentId = null;
-
-        // Form state
-        let formSelectedCons = 'A';
-        let formSelectedShift = 'MANANA';
-
-        // Settings
-        let googleScriptUrl = localStorage.getItem('cs_chilca_gscript_url') || '';
-        let firebaseProjectId = localStorage.getItem('cs_chilca_firebase_id') || '';
-
-        // --- HELPER DATES ---
-        function getTodayIsoString() {
-            const now = new Date();
-            const y = now.getFullYear();
-            const m = String(now.getMonth() + 1).padStart(2, '0');
-            const d = String(now.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
+        function guardarEnStorage() {
+            localStorage.setItem('CITEN_CITAS_CHILCA', JSON.stringify(citasData));
         }
 
-        function getDayOffsetIsoString(offsetDays) {
-            const dt = new Date();
-            dt.setDate(dt.getDate() + offsetDays);
-            const y = dt.getFullYear();
-            const m = String(dt.getMonth() + 1).padStart(2, '0');
-            const d = String(dt.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
-        }
-
-        function formatDateFriendly(isoDate) {
-            if (!isoDate) return '';
-            const [y, m, d] = isoDate.split('-').map(Number);
-            const dateObj = new Date(y, m - 1, d);
-            const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-            const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'];
-            return `${dayNames[dateObj.getDay()]} ${d} ${monthNames[dateObj.getMonth()]} ${y}`;
-        }
-
-        function calculateAgeFromDob(dobIso, refDateIso) {
-            if (!dobIso) return '';
-            const dob = new Date(dobIso + 'T00:00:00');
-            const ref = refDateIso ? new Date(refDateIso + 'T00:00:00') : new Date();
-
-            let years = ref.getFullYear() - dob.getFullYear();
-            let months = ref.getMonth() - dob.getMonth();
-            let days = ref.getDate() - dob.getDate();
-
-            if (days < 0) {
-                months--;
-                days += 30;
-            }
-            if (months < 0) {
-                years--;
-                months += 12;
-            }
-
-            if (years > 0) return `${years}a ${months}m ${days}d`;
-            return `${months}m ${days}d`;
-        }
-
-        // --- INITIALIZATION ---
-        window.addEventListener('DOMContentLoaded', () => {
-            loadLocalState();
-            setupInitialDate();
-            renderQuickDaysStrip();
-            renderStaffSelects();
-            renderAppointments();
-            renderAlerts();
-            renderStats();
-            updateConsultorioBControls();
-            initFormDefaults();
-
-            // Auto-sync in background if Google Drive URL exists
-            if (googleScriptUrl) {
-                syncWithCloudNow(true);
-            }
+        window.addEventListener('popstate', (event) => {
+            if (event.state && event.state.view) switchView(event.state.view, false);
         });
 
-        function loadLocalState() {
-            try {
-                const storedApps = localStorage.getItem('cs_chilca_appointments');
-                appointments = storedApps ? JSON.parse(storedApps) : DEFAULT_APPOINTMENTS;
-
-                const storedStaff = localStorage.getItem('cs_chilca_staff');
-                staffList = storedStaff ? JSON.parse(storedStaff) : DEFAULT_STAFF;
-
-                const storedConsB = localStorage.getItem('cs_chilca_consb_map');
-                consultorioBEnabledMap = storedConsB ? JSON.parse(storedConsB) : {};
-            } catch (e) {
-                appointments = DEFAULT_APPOINTMENTS;
-                staffList = DEFAULT_STAFF;
-            }
-        }
-
-        function saveLocalState() {
-            localStorage.setItem('cs_chilca_appointments', JSON.stringify(appointments));
-            localStorage.setItem('cs_chilca_staff', JSON.stringify(staffList));
-            localStorage.setItem('cs_chilca_consb_map', JSON.stringify(consultorioBEnabledMap));
-        }
-
-        function setupInitialDate() {
-            selectedDate = getTodayIsoString();
-            document.getElementById('calendarPicker').value = selectedDate;
-            updateAgendaDateLabel();
-        }
-
-        function updateAgendaDateLabel() {
-            const today = getTodayIsoString();
-            const label = document.getElementById('agendaDateDisplay');
-            if (selectedDate === today) {
-                label.textContent = `Hoy • ${formatDateFriendly(selectedDate)}`;
-            } else {
-                label.textContent = formatDateFriendly(selectedDate);
-            }
-        }
-
-        // --- QUICK DAYS STRIP ---
-        function renderQuickDaysStrip() {
-            const container = document.getElementById('quickDaysStrip');
-            const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-            const today = new Date();
-
-            let html = '';
-            for (let i = 0; i < 5; i++) {
-                const dt = new Date();
-                dt.setDate(today.getDate() + i);
-                const y = dt.getFullYear();
-                const m = String(dt.getMonth() + 1).padStart(2, '0');
-                const d = String(dt.getDate()).padStart(2, '0');
-                const iso = `${y}-${m}-${d}`;
-                const isSelected = (iso === selectedDate);
-                const isB = !!consultorioBEnabledMap[iso];
-
-                html += `
-                    <button type="button" onclick="onQuickDayClicked('${iso}')"
-                        class="py-1.5 px-1 rounded-xl flex flex-col items-center justify-center transition-all ios-tap ${
-                            isSelected ? 'bg-ios-blue text-white shadow-sm' : 'bg-ios-bg text-gray-700'
-                        }">
-                        <span class="text-[9px] font-bold ${isSelected ? 'text-white/80' : 'text-gray-400'}">${dayNames[dt.getDay()]}</span>
-                        <span class="text-xs font-extrabold">${d}</span>
-                        <span class="text-[8px] font-extrabold ${isB ? (isSelected ? 'text-emerald-200' : 'text-emerald-600') : 'opacity-40'}">${isB ? 'A+B' : 'A'}</span>
-                    </button>
-                `;
-            }
-            container.innerHTML = html;
-        }
-
-        function onQuickDayClicked(iso) {
-            selectedDate = iso;
-            document.getElementById('calendarPicker').value = iso;
-            updateAgendaDateLabel();
-            renderQuickDaysStrip();
-            updateConsultorioBControls();
-            renderAppointments();
-        }
-
-        function onCalendarDatePicked(val) {
-            if (!val) return;
-            selectedDate = val;
-            updateAgendaDateLabel();
-            renderQuickDaysStrip();
-            updateConsultorioBControls();
-            renderAppointments();
-        }
-
-        // --- CONSULTORIO B TOGGLE ---
-        function toggleConsultorioB() {
-            consultorioBEnabledMap[selectedDate] = !consultorioBEnabledMap[selectedDate];
-            saveLocalState();
-            renderQuickDaysStrip();
-            updateConsultorioBControls();
-            renderAppointments();
-
-            const isB = consultorioBEnabledMap[selectedDate];
-            showToast(
-                isB ? 'Consultorio B Habilitado' : 'Solo Consultorio A Activo',
-                `Para la fecha: ${formatDateFriendly(selectedDate)}`,
-                isB ? 'green' : 'orange'
-            );
-
-            // Push to Google Drive backend if configured
-            if (googleScriptUrl) {
-                fetch(googleScriptUrl, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'TOGGLE_CONSULTORIO_B',
-                        fecha: selectedDate,
-                        habilitarB: isB
-                    })
-                }).catch(() => {});
-            }
-        }
-
-        function updateConsultorioBControls() {
-            const isB = !!consultorioBEnabledMap[selectedDate];
-            const btn = document.getElementById('btnToggleConsB');
-            const dot = document.getElementById('consBDot');
-            const badge = document.getElementById('agendaActiveConsLabel');
-
-            if (isB) {
-                btn.className = 'px-2 py-1.5 rounded-xl text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 ios-tap whitespace-nowrap';
-                btn.textContent = 'Cons. B Activo';
-                dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-500';
-                badge.textContent = 'Cons. A y Cons. B activos';
-            } else {
-                btn.className = 'px-2 py-1.5 rounded-xl text-[10px] font-bold bg-white text-gray-700 border border-gray-200 ios-tap whitespace-nowrap';
-                btn.textContent = 'Activar B';
-                dot.className = 'w-1.5 h-1.5 rounded-full bg-gray-400';
-                badge.textContent = 'Solo Consultorio A';
-            }
-        }
-
-        function setConsultorioFilter(cons) {
-            if (cons === 'B' && !consultorioBEnabledMap[selectedDate]) {
-                showToast('Consultorio B No Activo', 'Toca el botón "Activar B" para habilitarlo en esta fecha', 'orange');
-                return;
-            }
-            currentConsultorioFilter = cons;
-            ['ALL', 'A', 'B'].forEach(c => {
-                const el = document.getElementById(`consFilter-${c}`);
-                if (c === cons) {
-                    el.className = 'cons-pill py-1 rounded-lg bg-white text-gray-900 shadow-2xs font-bold';
-                } else {
-                    el.className = 'cons-pill py-1 rounded-lg text-gray-600 font-bold';
-                }
-            });
-            renderAppointments();
-        }
-
-        function setShiftFilter(shift) {
-            currentShiftFilter = shift;
-            ['ALL', 'MANANA', 'TARDE'].forEach(s => {
-                const el = document.getElementById(`shiftFilter-${s}`);
-                if (s === shift) {
-                    el.className = 'shift-pill py-1 rounded-lg bg-white text-gray-900 shadow-2xs font-bold';
-                } else {
-                    el.className = 'shift-pill py-1 rounded-lg text-gray-600 font-bold';
-                }
-            });
-            renderAppointments();
-        }
-
-        function clearSearchInput() {
-            document.getElementById('agendaSearchInput').value = '';
-            document.getElementById('btnClearSearch').classList.add('hidden');
-            renderAppointments();
-        }
-
-        // --- RENDER APPOINTMENTS IN AGENDA ---
-        function renderAppointments() {
-            const listContainer = document.getElementById('appointmentsList');
-            const searchVal = document.getElementById('agendaSearchInput').value.trim().toLowerCase();
-            const btnClear = document.getElementById('btnClearSearch');
-
-            if (searchVal) btnClear.classList.remove('hidden');
-            else btnClear.classList.add('hidden');
-
-            // Filter appointments
-            let filtered = appointments.filter(a => {
-                // If searching, search globally or within the day?
-                // Real UX: If search query has 2+ characters, search across all appointments; otherwise filter by day
-                if (searchVal.length >= 2) {
-                    const matchHcl = String(a.hcl || '').toLowerCase().includes(searchVal);
-                    const matchDni = String(a.dni || '').toLowerCase().includes(searchVal);
-                    const matchName = String(a.name || '').toLowerCase().includes(searchVal);
-                    const matchParent = String(a.parentName || '').toLowerCase().includes(searchVal);
-                    return matchHcl || matchDni || matchName || matchParent;
-                }
-
-                // Normal date view
-                if (a.date !== selectedDate) return false;
-                if (currentConsultorioFilter !== 'ALL' && a.consultorio !== currentConsultorioFilter) return false;
-                if (currentShiftFilter !== 'ALL' && a.shift !== currentShiftFilter) return false;
-                return true;
-            });
-
-            // Sort by time
-            filtered.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
-
-            // Progress bar calculation for the selected day
-            const todayAll = appointments.filter(a => a.date === selectedDate);
-            const attendedCount = todayAll.filter(a => a.status === 'ATENDIDO').length;
-            const totalCount = todayAll.length;
-            const pct = totalCount > 0 ? Math.round((attendedCount / totalCount) * 100) : 0;
-
-            document.getElementById('agendaProgressCount').textContent = `${attendedCount} de ${totalCount} atendidos`;
-            document.getElementById('agendaProgressBar').style.width = `${pct}%`;
-            document.getElementById('agendaProgressPct').textContent = `${pct}%`;
-
-            if (filtered.length === 0) {
-                listContainer.innerHTML = `
-                    <div class="bg-white rounded-2xl p-8 text-center shadow-ios space-y-2">
-                        <div class="w-10 h-10 rounded-full bg-ios-bg text-gray-400 flex items-center justify-center mx-auto text-xl">
-                            <i class="ph-fill ph-calendar-x"></i>
-                        </div>
-                        <p class="text-xs font-bold text-gray-800">No hay citas en este filtro</p>
-                        <p class="text-[11px] text-gray-500">Toca "Nueva Cita" para agendar a un menor.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            listContainer.innerHTML = filtered.map(app => {
-                // Badges
-                let serviceBadge = '';
-                if (app.service === 'CRED') {
-                    serviceBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-ios-blue/10 text-ios-blue">CRED</span>`;
-                } else if (app.service === 'SULFATO') {
-                    serviceBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-ios-orange/15 text-ios-orange">Sulfato</span>`;
-                } else {
-                    serviceBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-ios-green/15 text-ios-green">CRED + Sulfato</span>`;
-                }
-
-                const premBadge = app.isPrematuro
-                    ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-ios-purple/15 text-ios-purple">Prematuro</span>`
-                    : '';
-
-                let statusBadge = '';
-                let borderLeft = 'border-l-4 border-l-ios-blue';
-
-                if (app.status === 'ATENDIDO') {
-                    statusBadge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800">Atendido</span>`;
-                    borderLeft = 'border-l-4 border-l-ios-green';
-                } else if (app.status === 'NO_ASISTIO') {
-                    statusBadge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-red-100 text-red-800">No asistió</span>`;
-                    borderLeft = 'border-l-4 border-l-ios-red';
-                } else {
-                    statusBadge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-800">Pendiente</span>`;
-                    if (app.consultorio === 'B') borderLeft = 'border-l-4 border-l-ios-teal';
-                }
-
-                const ageText = calculateAgeFromDob(app.dob, app.date);
-                const isSearchActive = searchVal.length >= 2;
-
-                return `
-                    <div onclick="openActionSheet(${app.id})"
-                        class="bg-white rounded-2xl p-3 shadow-ios ${borderLeft} space-y-1.5 cursor-pointer ios-tap">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-1.5 flex-wrap">
-                                <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold ${app.consultorio === 'B' ? 'bg-teal-100 text-teal-800' : 'bg-gray-900 text-white'}">
-                                    Cons. ${app.consultorio}
-                                </span>
-                                <span class="text-xs font-extrabold text-gray-900">${app.time}</span>
-                                <span class="text-[9px] font-semibold text-gray-400">(${Number(app.blocks || 1) * 20}m)</span>
-                                ${isSearchActive ? `<span class="text-[9px] font-bold text-ios-blue bg-blue-50 px-1 rounded">${app.date}</span>` : ''}
-                            </div>
-                            ${statusBadge}
-                        </div>
-
-                        <div>
-                            <div class="flex items-center justify-between gap-1">
-                                <h3 class="text-xs font-bold text-gray-900 truncate">${app.name}</h3>
-                                <span class="text-[10px] font-extrabold text-ios-blue bg-ios-blue/10 px-1.5 py-0.2 rounded flex-shrink-0">H.Cl. ${app.hcl}</span>
-                            </div>
-                            <div class="text-[10px] text-gray-500 font-medium flex items-center gap-1.5 flex-wrap mt-0.5">
-                                <span>DNI: ${app.dni}</span>
-                                <span>•</span>
-                                <span>Edad: ${ageText}</span>
-                                <span>•</span>
-                                <span class="truncate">Padre: ${app.parentName}</span>
-                            </div>
-                        </div>
-
-                        <div class="pt-1 border-t border-gray-100 flex items-center justify-between text-[10px]">
-                            <div class="flex items-center gap-1">
-                                ${serviceBadge}
-                                ${premBadge}
-                            </div>
-                            <span class="text-gray-400 font-medium flex items-center gap-0.5">
-                                <i class="ph-bold ph-pencil-simple"></i> ${(app.bookedBy || '').split(' ')[0]}
-                            </span>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // --- ACTION SHEET MODAL ---
-        function openActionSheet(id) {
-            const app = appointments.find(a => a.id === id);
-            if (!app) return;
-            activeActionAppointmentId = id;
-
-            document.getElementById('sheetConsBadge').textContent = `Cons. ${app.consultorio}`;
-            document.getElementById('sheetServiceBadge').textContent = app.service === 'CRED_SULFATO' ? 'CRED + Sulfato' : (app.service === 'SULFATO' ? 'Sulfato Ferroso' : 'CRED');
+        function switchView(viewName, pushHistory = true) {
+            document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + viewName).classList.add('active');
             
-            const premBadge = document.getElementById('sheetPremBadge');
-            if (app.isPrematuro) premBadge.classList.remove('hidden');
-            else premBadge.classList.add('hidden');
+            const tabMap = { 'agenda': 0, 'nueva': 1, 'alertas': 2, 'estadisticas': 3 };
+            if (tabMap[viewName] !== undefined) document.querySelectorAll('.tab-item')[tabMap[viewName]].classList.add('active');
 
-            document.getElementById('sheetChildName').textContent = app.name;
-            const ageStr = calculateAgeFromDob(app.dob, app.date);
-            document.getElementById('sheetChildMeta').textContent = `H.Cl: ${app.hcl} • DNI: ${app.dni} • Edad: ${ageStr}`;
-            document.getElementById('sheetTimeBadge').textContent = `${app.time} (${app.date})`;
-            document.getElementById('sheetDurationBadge').textContent = `${Number(app.blocks || 1) * 20} min`;
+            if (pushHistory) history.pushState({ view: viewName }, '', '#' + viewName);
+            if (viewName === 'agenda') renderAgenda();
+            if (viewName === 'alertas') renderAlertas();
+            if (viewName === 'estadisticas') actualizarEstadisticas();
+        }
 
-            document.getElementById('sheetParentName').textContent = app.parentName || '--';
-            document.getElementById('sheetPhones').textContent = app.phone2 ? `${app.phone1} / ${app.phone2}` : app.phone1;
-            document.getElementById('sheetDetail').textContent = app.detail || '--';
-            document.getElementById('sheetBookedBy').textContent = app.bookedBy || '--';
-
-            // Phone 2 button
-            const btnWa2 = document.getElementById('btnSheetWa2');
-            if (app.phone2) {
-                btnWa2.classList.remove('opacity-40', 'pointer-events-none');
-            } else {
-                btnWa2.classList.add('opacity-40', 'pointer-events-none');
+        function generarPildorasFechas() {
+            const container = document.getElementById('datePillsContainer');
+            container.innerHTML = '';
+            const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            
+            for (let i = -3; i <= 3; i++) {
+                let d = new Date();
+                d.setDate(d.getDate() + i);
+                let fechaIso = d.toISOString().split('T')[0];
+                let pill = document.createElement('div');
+                pill.className = `date-pill ${fechaIso === currentFechaSeleccionada ? 'active' : ''}`;
+                pill.innerHTML = `<span style="font-size:10px; text-transform:uppercase;">${diasSemana[d.getDay()]}</span><span class="day-num">${d.getDate()}</span>`;
+                pill.onclick = () => {
+                    currentFechaSeleccionada = fechaIso;
+                    document.getElementById('calendarPicker').value = fechaIso;
+                    generarPildorasFechas();
+                    renderAgenda();
+                };
+                container.appendChild(pill);
             }
-
-            // WhatsApp Message Text
-            const friendlyDate = formatDateFriendly(app.date);
-            const srvText = app.service === 'CRED_SULFATO' ? 'Control CRED y Entrega de Sulfato Ferroso' : (app.service === 'SULFATO' ? 'Entrega de Sulfato Ferroso' : 'Control CRED');
-            const waMsg = `Estimada madre/padre (${app.parentName}), le saludamos del *Centro de Salud Chilca (Consultorio de Enfermería)*. Le recordamos la cita de su niño(a) *${app.name}* (H.Cl. ${app.hcl}) el día *${friendlyDate}* a las *${app.time} hrs* en el *Consultorio ${app.consultorio}* para su *${srvText}*. Por favor asistir 10 minutos antes con su DNI y Carnet.`;
-            document.getElementById('sheetWaPreview').textContent = `"${waMsg}"`;
-
-            document.getElementById('modalActionSheet').classList.remove('hidden');
+            document.getElementById('calendarPicker').value = currentFechaSeleccionada;
         }
 
-        function closeActionSheet() {
-            document.getElementById('modalActionSheet').classList.add('hidden');
-            activeActionAppointmentId = null;
-        }
-
-        function sendAppointmentWhatsApp(whichPhone) {
-            const app = appointments.find(a => a.id === activeActionAppointmentId);
-            if (!app) return;
-            const phone = (whichPhone === 2 && app.phone2) ? app.phone2 : app.phone1;
-            if (!phone) {
-                showToast('Sin número', 'No hay celular registrado', 'orange');
-                return;
+        function seleccionarFechaCalendario(fechaStr) {
+            if (fechaStr) {
+                currentFechaSeleccionada = fechaStr;
+                generarPildorasFechas();
+                renderAgenda();
             }
-            const rawMsg = document.getElementById('sheetWaPreview').textContent.replace(/^"|"$/g, '');
-            const url = `https://wa.me/51${phone}?text=${encodeURIComponent(rawMsg)}`;
-            window.open(url, '_blank');
-            showToast('Abriendo WhatsApp', `Enviando mensaje a +51 ${phone}`, 'green');
         }
 
-        function markCurrentAsAttended() {
-            const app = appointments.find(a => a.id === activeActionAppointmentId);
-            if (!app) return;
-            app.status = 'ATENDIDO';
-            saveLocalState();
-            renderAppointments();
-            renderAlerts();
-            renderStats();
-            closeActionSheet();
-            showToast('Atención Registrada', `H.Cl. ${app.hcl} marcada como Atendido`, 'green');
-            pushAppointmentUpdateToCloud(app.id, 'ATENDIDO');
-        }
+        function renderAgenda() {
+            const container = document.getElementById('agendaListContainer');
+            container.innerHTML = '';
+            const filtradas = citasData.filter(c => c.fecha === currentFechaSeleccionada && (filtroServicioActual === 'TODOS' || c.servicio.includes(filtroServicioActual)));
 
-        function markCurrentAsNoShow() {
-            const app = appointments.find(a => a.id === activeActionAppointmentId);
-            if (!app) return;
-            app.status = 'NO_ASISTIO';
-            saveLocalState();
-            renderAppointments();
-            renderAlerts();
-            renderStats();
-            closeActionSheet();
-            showToast('Registrado como No Asistió', `Disponible en la pestaña de Alertas`, 'red');
-            pushAppointmentUpdateToCloud(app.id, 'NO_ASISTIO');
-        }
-
-        function rescheduleCurrentAppointment() {
-            const app = appointments.find(a => a.id === activeActionAppointmentId);
-            if (!app) return;
-            closeActionSheet();
-
-            // Preload Form with this patient
-            document.getElementById('inputHcl').value = app.hcl || '';
-            document.getElementById('inputDni').value = app.dni || '';
-            document.getElementById('inputName').value = app.name || '';
-            document.getElementById('inputDob').value = app.dob || '';
-            document.getElementById('inputParentName').value = app.parentName || '';
-            document.getElementById('inputPhone1').value = app.phone1 || '';
-            document.getElementById('inputPhone2').value = app.phone2 || '';
-            document.getElementById('inputDetail').value = 'Reprogramación de cita';
-            document.getElementById('inputPrematuro').checked = !!app.isPrematuro;
-            calculatePatientAge();
-
-            const srvRadio = document.querySelector(`input[name="formService"][value="${app.service}"]`);
-            if (srvRadio) srvRadio.checked = true;
-
-            switchScreen('new');
-            showToast('Datos Cargados', `Selecciona la nueva fecha y hora para ${app.name.split(' ')[0]}`, 'blue');
-        }
-
-        // --- EDITAR Y ELIMINAR CITAS ---
-        function openEditModal() {
-            const app = appointments.find(a => a.id === activeActionAppointmentId);
-            if (!app) return;
-
-            document.getElementById('editAppId').value = app.id;
-            document.getElementById('editHcl').value = app.hcl || '';
-            document.getElementById('editDni').value = app.dni || '';
-            document.getElementById('editName').value = app.name || '';
-            document.getElementById('editDob').value = app.dob || '';
-            document.getElementById('editStatus').value = app.status || 'PENDIENTE';
-            document.getElementById('editParentName').value = app.parentName || '';
-            document.getElementById('editPhone1').value = app.phone1 || '';
-            document.getElementById('editPhone2').value = app.phone2 || '';
-            document.getElementById('editDate').value = app.date || '';
-            document.getElementById('editTime').value = app.time || '';
-            document.getElementById('editConsultorio').value = app.consultorio || 'A';
-            document.getElementById('editService').value = app.service || 'CRED';
-            document.getElementById('editBlocks').value = app.blocks || 1;
-            document.getElementById('editPrematuro').checked = !!app.isPrematuro;
-            document.getElementById('editDetail').value = app.detail || '';
-
-            closeActionSheet();
-            document.getElementById('modalEditAppointment').classList.remove('hidden');
-        }
-
-        function closeEditModal() {
-            document.getElementById('modalEditAppointment').classList.add('hidden');
-        }
-
-        function saveEditAppointment(e) {
-            e.preventDefault();
-            const id = Number(document.getElementById('editAppId').value);
-            const app = appointments.find(a => a.id === id);
-            if (!app) return;
-
-            app.hcl = document.getElementById('editHcl').value.trim();
-            app.dni = document.getElementById('editDni').value.trim();
-            app.name = document.getElementById('editName').value.trim();
-            app.dob = document.getElementById('editDob').value;
-            app.status = document.getElementById('editStatus').value;
-            app.parentName = document.getElementById('editParentName').value.trim();
-            app.phone1 = document.getElementById('editPhone1').value.trim();
-            app.phone2 = document.getElementById('editPhone2').value.trim();
-            app.date = document.getElementById('editDate').value;
-            app.time = document.getElementById('editTime').value;
-            app.consultorio = document.getElementById('editConsultorio').value;
-            app.service = document.getElementById('editService').value;
-            app.blocks = Number(document.getElementById('editBlocks').value);
-            app.isPrematuro = document.getElementById('editPrematuro').checked;
-            app.detail = document.getElementById('editDetail').value.trim();
-
-            const hour = parseInt(app.time.split(':')[0], 10);
-            app.shift = hour >= 13 ? 'TARDE' : 'MANANA';
-
-            saveLocalState();
-            renderAppointments();
-            renderAlerts();
-            renderStats();
-            closeEditModal();
-            showToast('Cita Modificada', `Cambios guardados para ${app.name.split(' ')[0]}`, 'green');
-
-            // Send to Google Drive
-            pushNewAppointmentToCloud(app);
-        }
-
-        function deleteCurrentAppointment() {
-            const app = appointments.find(a => a.id === activeActionAppointmentId);
-            if (!app) return;
-
-            const confirmDelete = confirm(`¿Estás seguro de ELIMINAR la cita de:\n${app.name} (H.Cl. ${app.hcl})?\n\nEsta acción quitará la cita del celular y de Google Drive.`);
-            if (!confirmDelete) return;
-
-            const deletedId = app.id;
-            appointments = appointments.filter(a => a.id !== deletedId);
-            saveLocalState();
-            renderAppointments();
-            renderAlerts();
-            renderStats();
-            closeActionSheet();
-            showToast('Cita Eliminada', `Se eliminó la cita de H.Cl. ${app.hcl}`, 'red');
-
-            // Delete in Google Drive
-            pushDeleteAppointmentToCloud(deletedId);
-        }
-
-        function pushDeleteAppointmentToCloud(id) {
-            if (!googleScriptUrl) return;
-            fetch(googleScriptUrl, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'ELIMINAR_CITA',
-                    id: id
-                })
-            }).catch(() => {});
-        }
-
-        // --- SCREEN 2: NUEVA CITA & TIME SLOTS COLLISION ENGINE ---
-        function initFormDefaults() {
-            // Set form date to today or tomorrow
-            document.getElementById('inputFormDate').value = selectedDate || getTodayIsoString();
-            onFormDateOrConsChange();
-        }
-
-        function setFormConsultorio(cons) {
-            formSelectedCons = cons;
-            document.getElementById('btnFormConsA').className = cons === 'A' ? 'py-1.5 rounded-xl text-xs font-bold bg-gray-900 text-white' : 'py-1.5 rounded-xl text-xs font-bold bg-gray-200 text-gray-600';
-            document.getElementById('btnFormConsB').className = cons === 'B' ? 'py-1.5 rounded-xl text-xs font-bold bg-ios-teal text-gray-900' : 'py-1.5 rounded-xl text-xs font-bold bg-gray-200 text-gray-600';
-            renderTimeSlotsGrid();
-        }
-
-        function setFormShift(shift) {
-            formSelectedShift = shift;
-            document.getElementById('btnFormShiftManana').className = shift === 'MANANA' ? 'py-1.5 rounded-lg bg-white text-gray-900 font-bold shadow-2xs' : 'py-1.5 rounded-lg text-gray-600 font-bold';
-            document.getElementById('btnFormShiftTarde').className = shift === 'TARDE' ? 'py-1.5 rounded-lg bg-white text-gray-900 font-bold shadow-2xs' : 'py-1.5 rounded-lg text-gray-600 font-bold';
-            renderTimeSlotsGrid();
-        }
-
-        function onFormDateOrConsChange() {
-            const formDate = document.getElementById('inputFormDate').value;
-            // Check if Consultorio B is enabled on this date
-            const isBEnabled = !!consultorioBEnabledMap[formDate];
-            const btnB = document.getElementById('btnFormConsB');
-
-            if (!isBEnabled) {
-                btnB.classList.add('opacity-40');
-                if (formSelectedCons === 'B') setFormConsultorio('A');
-            } else {
-                btnB.classList.remove('opacity-40');
-            }
-
-            renderTimeSlotsGrid();
-        }
-
-        function renderTimeSlotsGrid() {
-            const formDate = document.getElementById('inputFormDate').value;
-            const durationRadio = document.querySelector('input[name="formDuration"]:checked');
-            const blocks = durationRadio ? Number(durationRadio.value) : 1;
-            const slotsList = formSelectedShift === 'MANANA' ? MORNING_SLOTS : AFTERNOON_SLOTS;
-
-            // Find all occupied slots for this date, consultorio and shift
-            const occupiedSet = new Set();
-            appointments
-                .filter(a => a.date === formDate && a.consultorio === formSelectedCons && a.shift === formSelectedShift && a.status !== 'NO_ASISTIO')
-                .forEach(a => {
-                    const idx = slotsList.indexOf(a.time);
-                    if (idx !== -1) {
-                        occupiedSet.add(slotsList[idx]);
-                        if (Number(a.blocks || 1) === 2 && idx + 1 < slotsList.length) {
-                            occupiedSet.add(slotsList[idx + 1]);
-                        }
-                    }
-                });
-
-            const grid = document.getElementById('formSlotsGrid');
-            let firstFreeChecked = false;
-
-            grid.innerHTML = slotsList.map((time, idx) => {
-                const isThisOccupied = occupiedSet.has(time);
-                // If 2 blocks (40 min), next slot must also be within range and free
-                const nextSlotOccupied = (idx + 1 >= slotsList.length) || occupiedSet.has(slotsList[idx + 1]);
-                const isAvailable = (blocks === 1) ? !isThisOccupied : (!isThisOccupied && !nextSlotOccupied);
-
-                let checkedAttr = '';
-                if (isAvailable && !firstFreeChecked) {
-                    checkedAttr = 'checked';
-                    firstFreeChecked = true;
-                }
-
-                if (!isAvailable) {
-                    return `
-                        <div class="py-2 px-1 rounded-xl bg-gray-100 border border-gray-200 text-center opacity-45 cursor-not-allowed">
-                            <span class="text-xs font-bold text-gray-400 line-through block">${time}</span>
-                            <span class="text-[9px] text-gray-400 font-semibold block">${isThisOccupied ? 'Ocupado' : 'Sin 2° blq'}</span>
-                        </div>
-                    `;
-                }
-
-                return `
-                    <label class="cursor-pointer">
-                        <input type="radio" name="formTimeSlot" value="${time}" ${checkedAttr} class="peer sr-only">
-                        <div class="py-2 px-1 rounded-xl bg-white border border-gray-200 peer-checked:border-ios-blue peer-checked:bg-ios-blue peer-checked:text-white text-center shadow-2xs transition-all ios-tap">
-                            <span class="text-xs font-extrabold block">${time}</span>
-                            <span class="text-[9px] font-semibold opacity-80 block">${blocks === 2 ? '40 min' : 'Libre'}</span>
-                        </div>
-                    </label>
-                `;
-            }).join('');
-        }
-
-        function calculatePatientAge() {
-            const dob = document.getElementById('inputDob').value;
-            const refDate = document.getElementById('inputFormDate').value || getTodayIsoString();
-            const badge = document.getElementById('badgeAgeCalculated');
-            const text = document.getElementById('textAgeCalculated');
-
-            if (!dob) {
-                badge.classList.add('hidden');
-                return;
-            }
-            const age = calculateAgeFromDob(dob, refDate);
-            text.textContent = age;
-            badge.classList.remove('hidden');
-        }
-
-        function lookupPatient() {
-            const q = document.getElementById('inputFastSearch').value.trim();
-            if (!q) {
-                showToast('Ingresa un dato', 'Escribe el DNI o N° de Historia', 'orange');
+            if (filtradas.length === 0) {
+                container.innerHTML = `<div class="card" style="text-align:center; color:var(--ios-gray); padding: 30px;">No hay citas agendadas para el ${currentFechaSeleccionada}.</div>`;
                 return;
             }
 
-            const found = appointments.find(a => (a.dni === q || a.hcl === q || (a.name || '').toLowerCase().includes(q.toLowerCase())));
-            if (found) {
-                document.getElementById('inputHcl').value = found.hcl || '';
-                document.getElementById('inputDni').value = found.dni || '';
-                document.getElementById('inputName').value = found.name || '';
-                document.getElementById('inputDob').value = found.dob || '';
-                document.getElementById('inputParentName').value = found.parentName || '';
-                document.getElementById('inputPhone1').value = found.phone1 || '';
-                document.getElementById('inputPhone2').value = found.phone2 || '';
-                document.getElementById('inputPrematuro').checked = !!found.isPrematuro;
-                calculatePatientAge();
-                showToast('Paciente Encontrado', `Datos de ${found.name.split(' ')[0]} autocompletados`, 'green');
-            } else {
-                showToast('No encontrado', 'Ingresa los datos para registrarlo por primera vez', 'blue');
-            }
-        }
-
-        function fillDemoPatient() {
-            document.getElementById('inputFastSearch').value = '81459230';
-            lookupPatient();
-        }
-
-        function saveAppointment(e) {
-            e.preventDefault();
-            const slotRadio = document.querySelector('input[name="formTimeSlot"]:checked');
-            if (!slotRadio) {
-                showToast('Selecciona un Horario', 'No hay horario libre seleccionado', 'red');
-                return;
-            }
-
-            const formDate = document.getElementById('inputFormDate').value;
-            const time = slotRadio.value;
-            const blocks = Number(document.querySelector('input[name="formDuration"]:checked').value);
-            const service = document.querySelector('input[name="formService"]:checked').value;
-            const isPrematuro = document.getElementById('inputPrematuro').checked;
-
-            const hcl = document.getElementById('inputHcl').value.trim();
-            const dni = document.getElementById('inputDni').value.trim();
-            const name = document.getElementById('inputName').value.trim();
-            const dob = document.getElementById('inputDob').value;
-            const parentName = document.getElementById('inputParentName').value.trim();
-            const phone1 = document.getElementById('inputPhone1').value.trim();
-            const phone2 = document.getElementById('inputPhone2').value.trim();
-            const detail = document.getElementById('inputDetail').value.trim();
-            const bookedBy = document.getElementById('selectBookedBy').value;
-
-            const newApp = {
-                id: Date.now(),
-                date: formDate,
-                shift: formSelectedShift,
-                time: time,
-                blocks: blocks,
-                consultorio: formSelectedCons,
-                hcl: hcl,
-                dni: dni,
-                name: name,
-                dob: dob,
-                parentName: parentName,
-                phone1: phone1,
-                phone2: phone2,
-                service: service,
-                isPrematuro: isPrematuro,
-                detail: detail || (service === 'CRED' ? 'Control CRED' : (service === 'SULFATO' ? 'Sulfato Ferroso' : 'CRED + Sulfato Ferroso')),
-                bookedBy: bookedBy,
-                status: 'PENDIENTE'
-            };
-
-            appointments.push(newApp);
-            saveLocalState();
-
-            // Set current viewing date to this appointment's date
-            selectedDate = formDate;
-            document.getElementById('calendarPicker').value = formDate;
-            updateAgendaDateLabel();
-            renderQuickDaysStrip();
-            renderAppointments();
-            renderAlerts();
-            renderStats();
-
-            // Reset form
-            document.getElementById('newAppointmentForm').reset();
-            document.getElementById('badgeAgeCalculated').classList.add('hidden');
-            initFormDefaults();
-
-            switchScreen('agenda');
-            showToast('¡Cita Agendada con Éxito!', `H.Cl. ${hcl} • ${formatDateFriendly(formDate)} a las ${time}`, 'green');
-
-            // Send to Google Drive Backend
-            pushNewAppointmentToCloud(newApp);
-        }
-
-        // --- SCREEN 3: ALERTS (PRÓXIMOS 3 DÍAS & INASISTENTES) ---
-        function setAlertTab(tab) {
-            alertActiveTab = tab;
-            const btnAmber = document.getElementById('btnAlertTabAmber');
-            const btnRed = document.getElementById('btnAlertTabRed');
-
-            if (tab === 'AMBER') {
-                btnAmber.className = 'py-2 rounded-lg bg-white text-gray-900 shadow-2xs font-extrabold flex items-center justify-center gap-1.5';
-                btnRed.className = 'py-2 rounded-lg text-gray-600 font-extrabold flex items-center justify-center gap-1.5';
-            } else {
-                btnRed.className = 'py-2 rounded-lg bg-white text-gray-900 shadow-2xs font-extrabold flex items-center justify-center gap-1.5';
-                btnAmber.className = 'py-2 rounded-lg text-gray-600 font-extrabold flex items-center justify-center gap-1.5';
-            }
-            renderAlerts();
-        }
-
-        function renderAlerts() {
-            const container = document.getElementById('alertsContainer');
-            const today = getTodayIsoString();
-
-            // 1. Calculate Próximos a Vencer (Ámbar): Citas en los próximos 3 días con estado PENDIENTE
-            const next3Days = [getDayOffsetIsoString(1), getDayOffsetIsoString(2), getDayOffsetIsoString(3)];
-            const amberList = appointments.filter(a => next3Days.includes(a.date) && a.status === 'PENDIENTE');
-
-            // 2. Calculate Inasistentes (Rojo): Citas con fecha anterior a hoy con estado PENDIENTE o NO_ASISTIO
-            const redList = appointments.filter(a => (a.date < today && a.status === 'PENDIENTE') || a.status === 'NO_ASISTIO');
-
-            // Update Badges
-            document.getElementById('labelTabAmber').textContent = `Próximos 3 días (${amberList.length})`;
-            document.getElementById('labelTabRed').textContent = `Inasistentes (${redList.length})`;
-            const totalAlerts = amberList.length + redList.length;
-            document.getElementById('totalAlertsBadge').textContent = `${totalAlerts} alertas`;
-
-            const navBadge = document.getElementById('tabNavAlertBadge');
-            if (totalAlerts > 0) {
-                navBadge.textContent = totalAlerts;
-                navBadge.classList.remove('hidden');
-            } else {
-                navBadge.classList.add('hidden');
-            }
-
-            const currentList = alertActiveTab === 'AMBER' ? amberList : redList;
-            const isAmber = alertActiveTab === 'AMBER';
-
-            if (currentList.length === 0) {
-                container.innerHTML = `
-                    <div class="bg-white rounded-2xl p-8 text-center shadow-ios space-y-2">
-                        <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto text-xl">
-                            <i class="ph-fill ph-check"></i>
-                        </div>
-                        <p class="text-xs font-bold text-gray-800">${isAmber ? 'No hay citas por vencer en los próximos 3 días' : 'No hay pacientes inasistentes pendientes'}</p>
-                        <p class="text-[11px] text-gray-500">Todo el seguimiento está al día.</p>
+            filtradas.forEach(cita => {
+                let card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
+                        <span style="font-size:12px; font-weight:600; color:var(--ios-blue);">${cita.hora} • ${cita.consultorio}</span>
+                        <span style="font-size:11px; padding:2px 8px; border-radius:6px; background:${cita.estado==='ATENDIDO'?'#DCFCE7':cita.estado==='INASISTENTE'?'#FEE2E2':'#FEF3C7'}; color:${cita.estado==='ATENDIDO'?'#166534':cita.estado==='INASISTENTE'?'#991B1B':'#92400E'}; font-weight:600;">${cita.estado}</span>
+                    </div>
+                    <div style="font-size:15px; font-weight:700; margin-bottom:2px;">${cita.nombreMenor}</div>
+                    <div style="font-size:13px; color:var(--ios-secondary); margin-bottom:6px;">H.Cl: <strong>${cita.hcl}</strong> | DNI: ${cita.dni} | Serv: ${cita.servicio}</div>
+                    <div style="font-size:12px; color:var(--ios-secondary); margin-bottom:10px;">Apoderado: ${cita.nombrePadre} | Cel: ${cita.celular1}</div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn btn-green" style="font-size:12px; padding:8px;" onclick="enviarWhatsApp('${cita.id}')">💬 WhatsApp</button>
+                        <button class="btn btn-secondary" style="font-size:12px; padding:8px;" onclick="cambiarEstadoCita('${cita.id}', 'ATENDIDO')">✅ Atendido</button>
+                        <button class="btn btn-secondary" style="font-size:12px; padding:8px; color:var(--ios-red);" onclick="cambiarEstadoCita('${cita.id}', 'INASISTENTE')">❌ Inasistente</button>
                     </div>
                 `;
-                return;
-            }
-
-            container.innerHTML = currentList.map(item => {
-                const friendlyDate = formatDateFriendly(item.date);
-                return `
-                    <div class="bg-white rounded-2xl p-3.5 shadow-ios border-l-4 ${isAmber ? 'border-l-ios-orange' : 'border-l-ios-red'} space-y-2">
-                        <div class="flex items-start justify-between gap-1">
-                            <div>
-                                <div class="flex items-center gap-1.5 mb-1 flex-wrap">
-                                    <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold ${isAmber ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}">
-                                        ${isAmber ? `Cita: ${friendlyDate}` : `Faltó: ${friendlyDate}`}
-                                    </span>
-                                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold text-ios-blue bg-blue-50">H.Cl. ${item.hcl}</span>
-                                    ${item.isPrematuro ? `<span class="px-1.5 py-0.2 rounded text-[9px] font-bold text-ios-purple bg-purple-50">Prematuro</span>` : ''}
-                                </div>
-                                <h3 class="text-xs font-bold text-gray-900">${item.name}</h3>
-                                <p class="text-[10px] text-gray-500 font-medium">DNI ${item.dni} • Padre/Madre: ${item.parentName}</p>
-                            </div>
-                            <span class="text-xs font-mono font-bold text-gray-700 bg-ios-bg px-2 py-0.5 rounded-lg flex-shrink-0">${item.time}</span>
-                        </div>
-
-                        <div class="flex items-center gap-2 pt-1 border-t border-gray-100">
-                            ${!isAmber ? `
-                                <button onclick="rescheduleAlertPatient(${item.id})"
-                                    class="flex-1 py-1.5 rounded-xl bg-ios-blue text-white font-bold text-xs flex items-center justify-center gap-1 shadow-xs ios-tap">
-                                    <i class="ph-bold ph-calendar-plus"></i> Reprogramar
-                                </button>
-                            ` : ''}
-                            <button onclick="sendAlertPatientWhatsApp(${item.id})"
-                                class="flex-1 py-1.5 rounded-xl bg-[#25D366] text-white font-bold text-xs flex items-center justify-center gap-1 shadow-xs ios-tap">
-                                <i class="ph-fill ph-whatsapp-logo"></i> WhatsApp
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function rescheduleAlertPatient(id) {
-            const app = appointments.find(a => a.id === id);
-            if (!app) return;
-            // Preload Form with this patient
-            document.getElementById('inputHcl').value = app.hcl || '';
-            document.getElementById('inputDni').value = app.dni || '';
-            document.getElementById('inputName').value = app.name || '';
-            document.getElementById('inputDob').value = app.dob || '';
-            document.getElementById('inputParentName').value = app.parentName || '';
-            document.getElementById('inputPhone1').value = app.phone1 || '';
-            document.getElementById('inputPhone2').value = app.phone2 || '';
-            document.getElementById('inputDetail').value = 'Reprogramación de inasistente';
-            document.getElementById('inputPrematuro').checked = !!app.isPrematuro;
-            calculatePatientAge();
-
-            const srvRadio = document.querySelector(`input[name="formService"][value="${app.service}"]`);
-            if (srvRadio) srvRadio.checked = true;
-
-            switchScreen('new');
-            showToast('Reprogramar Inasistente', `Selecciona el nuevo horario para ${app.name.split(' ')[0]}`, 'blue');
-        }
-
-        function sendAlertPatientWhatsApp(id) {
-            const app = appointments.find(a => a.id === id);
-            if (!app) return;
-            const phone = app.phone1 || app.phone2;
-            if (!phone) {
-                showToast('Sin celular', 'El paciente no tiene celular registrado', 'orange');
-                return;
-            }
-            const friendly = formatDateFriendly(app.date);
-            const isAmber = alertActiveTab === 'AMBER';
-            let msg = '';
-            if (isAmber) {
-                msg = `Hola ${app.parentName}, le saludamos del *C.S. Chilca (Enfermería)* para recordarle la cita de control de *${app.name}* (H.Cl. ${app.hcl}) programada para el *${friendly} a las ${app.time} hrs*. Por favor confírmenos su asistencia.`;
-            } else {
-                msg = `Hola ${app.parentName}, le saludamos del *C.S. Chilca (Enfermería)*. Notamos que no pudo asistir a la cita de *${app.name}* (H.Cl. ${app.hcl}) del *${friendly}*. Es muy importante para su crecimiento. ¿En qué turno (mañana o tarde) podemos reprogramarle su atención?`;
-            }
-
-            const url = `https://wa.me/51${phone}?text=${encodeURIComponent(msg)}`;
-            window.open(url, '_blank');
-        }
-
-        // --- SCREEN 4: STATS & HIS EXPORT ---
-        function setStatsPeriod(period) {
-            statsPeriod = period;
-            ['HOY', 'SEMANA', 'MES'].forEach(p => {
-                const el = document.getElementById(`statPeriod-${p}`);
-                if (p === period) el.className = 'stat-pill py-1.5 rounded-lg bg-white text-gray-900 shadow-2xs font-bold';
-                else el.className = 'stat-pill py-1.5 rounded-lg text-gray-600 font-bold';
+                container.appendChild(card);
             });
-            renderStats();
         }
 
-        function renderStats() {
-            const today = getTodayIsoString();
-            let pool = appointments;
+        function filtrarServicio(serv) {
+            filtroServicioActual = serv;
+            renderAgenda();
+        }
 
-            if (statsPeriod === 'HOY') {
-                pool = appointments.filter(a => a.date === today);
-            } else if (statsPeriod === 'SEMANA') {
-                const startWeek = getDayOffsetIsoString(-3);
-                const endWeek = getDayOffsetIsoString(4);
-                pool = appointments.filter(a => a.date >= startWeek && a.date <= endWeek);
+        function enviarWhatsApp(id) {
+            const cita = citasData.find(c => c.id === id);
+            if (!cita) return;
+            const mensaje = `Hola ${cita.nombrePadre}, le recordamos que su menor hijo(a) ${cita.nombreMenor} tiene su cita programada en el C.S. Chilca\n(Consultorio de CRED-Enfermería) el día ${cita.fecha} a las ${cita.hora}. Por favor asistir 20 minutos antes, con su DNI, Carnet de vacunación, Historia Clínica y Ficha de atención SIS si estuviera afiliado.`;
+            window.open(`https://api.whatsapp.com/send?phone=51${cita.celular1}&text=${encodeURIComponent(mensaje)}`, '_blank');
+        }
+
+        function cambiarEstadoCita(id, nuevoEstado) {
+            const cita = citasData.find(c => c.id === id);
+            if (cita) { cita.estado = nuevoEstado; guardarEnStorage(); renderAgenda(); }
+        }
+
+        function autocompletarDemo() {
+            document.getElementById('newHcl').value = 'HC-' + Math.floor(10000 + Math.random() * 90000);
+            document.getElementById('newDni').value = '8' + Math.floor(1000000 + Math.random() * 9000000);
+            document.getElementById('newNombre').value = 'Valeria Sofía Ramos Pérez';
+            document.getElementById('newNac').value = '2026-08-10';
+            document.getElementById('newPadre').value = 'Elena Pérez Gómez';
+            document.getElementById('newCel1').value = '987123456';
+        }
+
+        function calcularEdadExacta() {
+            const nacVal = document.getElementById('newNac').value;
+            if (!nacVal) return;
+            const nac = new Date(nacVal), hoy = new Date();
+            let meses = (hoy.getFullYear() - nac.getFullYear()) * 12 + (hoy.getMonth() - nac.getMonth());
+            document.getElementById('edadCalculadaText').innerText = `Edad aprox: ${meses} meses.`;
+        }
+
+        function guardarNuevaCita() {
+            const hcl = document.getElementById('newHcl').value.trim();
+            const dni = document.getElementById('newDni').value.trim();
+            const nombreMenor = document.getElementById('newNombre').value.trim();
+            const celular1 = document.getElementById('newCel1').value.trim();
+
+            if (!hcl || !dni || !nombreMenor || !celular1) {
+                alert('Complete los campos obligatorios: H.Cl, DNI, Nombre y Celular.');
+                return;
             }
 
-            const total = pool.length;
-            const attended = pool.filter(a => a.status === 'ATENDIDO').length;
-            const pending = pool.filter(a => a.status === 'PENDIENTE').length;
-            const noShow = pool.filter(a => a.status === 'NO_ASISTIO').length;
-
-            const attPct = total > 0 ? Math.round((attended / total) * 100) : 0;
-            const noShowPct = total > 0 ? ((noShow / total) * 100).toFixed(1) : 0;
-
-            document.getElementById('statTotal').textContent = total;
-            document.getElementById('statAttended').textContent = attended;
-            document.getElementById('statAttendedPct').textContent = `${attPct}% cumplimiento`;
-            document.getElementById('statPending').textContent = pending;
-            document.getElementById('statNoShow').textContent = noShow;
-            document.getElementById('statNoShowPct').textContent = `${noShowPct}% inasistencia`;
-
-            // Breakdown
-            const credOnly = pool.filter(a => a.service === 'CRED').length;
-            const sulfatoOnly = pool.filter(a => a.service === 'SULFATO').length;
-            const both = pool.filter(a => a.service === 'CRED_SULFATO').length;
-            const premTotal = pool.filter(a => a.isPrematuro).length;
-
-            document.getElementById('countCredOnly').textContent = credOnly;
-            document.getElementById('countSulfatoOnly').textContent = sulfatoOnly;
-            document.getElementById('countCredAndSulfato').textContent = both;
-            document.getElementById('countPrematuroTotal').textContent = premTotal;
-
-            document.getElementById('barCredOnly').style.width = total > 0 ? `${Math.round((credOnly / total) * 100)}%` : '0%';
-            document.getElementById('barSulfatoOnly').style.width = total > 0 ? `${Math.round((sulfatoOnly / total) * 100)}%` : '0%';
-            document.getElementById('barCredAndSulfato').style.width = total > 0 ? `${Math.round((both / total) * 100)}%` : '0%';
-        }
-
-        function downloadCsvReport() {
-            const headers = ['ID_Cita', 'Fecha', 'Turno', 'Hora', 'Bloques', 'Consultorio', 'HCl', 'DNI', 'Nombre_Menor', 'Fecha_Nac', 'Servicio', 'Prematuro', 'Padre_Madre', 'Celular1', 'Celular2', 'Estado', 'Agendado_Por', 'Detalle'];
-            const rows = appointments.map(a => [
-                a.id,
-                a.date,
-                a.shift,
-                a.time,
-                a.blocks,
-                a.consultorio,
-                a.hcl,
-                a.dni,
-                `"${a.name}"`,
-                a.dob,
-                a.service,
-                a.isPrematuro ? 'SI' : 'NO',
-                `"${a.parentName}"`,
-                a.phone1,
-                a.phone2 || '',
-                a.status,
-                `"${a.bookedBy}"`,
-                `"${a.detail || ''}"`
-            ]);
-
-            const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement('a');
-            link.setAttribute('href', encodedUri);
-            link.setAttribute('download', `Citas_CRED_Chilca_${getTodayIsoString()}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            showToast('Excel Descargado', 'Reporte completo generado en formato CSV', 'green');
-        }
-
-        // --- MODAL IMPRESIÓN PARA ARCHIVO H.CL. ---
-        function openPrintModal() {
-            document.getElementById('printHeaderDate').textContent = `Fecha de Citas: ${formatDateFriendly(selectedDate)}`;
-            const list = appointments
-                .filter(a => a.date === selectedDate && a.status !== 'NO_ASISTIO')
-                .sort((a, b) => a.consultorio.localeCompare(b.consultorio) || a.time.localeCompare(b.time));
-
-            document.getElementById('printTotalBadge').textContent = `Total: ${list.length} H.Cl.`;
-            const tbody = document.getElementById('printTableBody');
-
-            if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-400">No hay citas para esta fecha</td></tr>`;
-            } else {
-                tbody.innerHTML = list.map(a => `
-                    <tr>
-                        <td class="py-1.5 px-1 font-bold text-gray-900">${a.time} (Cons ${a.consultorio})</td>
-                        <td class="py-1.5 px-1 font-extrabold text-ios-blue">${a.hcl}</td>
-                        <td class="py-1.5 px-1">
-                            <div class="font-bold text-gray-900">${a.name}</div>
-                            <div class="text-[9px] text-gray-500">DNI: ${a.dni}</div>
-                        </td>
-                        <td class="py-1.5 px-1 font-semibold">${a.service}${a.isPrematuro ? ' (Prem.)' : ''}</td>
-                        <td class="py-1.5 px-1 text-center"><div class="w-3.5 h-3.5 border border-gray-600 rounded-xs mx-auto"></div></td>
-                    </tr>
-                `).join('');
-            }
-            document.getElementById('modalPrintHcl').classList.remove('hidden');
-        }
-
-        function closePrintModal() {
-            document.getElementById('modalPrintHcl').classList.add('hidden');
-        }
-
-        // --- LOGIN & STAFF SELECTION ---
-        function renderStaffSelects() {
-            const select = document.getElementById('selectBookedBy');
-            select.innerHTML = staffList.filter(s => s.active).map(s => `
-                <option value="${s.name}" ${s.id === currentUserId ? 'selected' : ''}>${s.name}</option>
-            `).join('');
-
-            const currentUser = staffList.find(s => s.id === currentUserId) || staffList[0];
-            document.getElementById('currentUserPill').textContent = currentUser.name.split(' ')[0] + ' ' + (currentUser.name.split(' ')[1] || '');
-
-            // Quick list in login modal
-            const quickList = document.getElementById('staffQuickList');
-            quickList.innerHTML = staffList.filter(s => s.active).map(s => `
-                <button type="button" onclick="selectStaffFromModal('${s.id}')"
-                    class="w-full p-2.5 rounded-2xl bg-white border border-gray-200/80 flex items-center justify-between text-left ios-tap">
-                    <div class="truncate">
-                        <div class="text-xs font-bold text-gray-900 truncate">${s.name}</div>
-                        <div class="text-[10px] text-gray-500">${s.role} • ${s.code}</div>
-                    </div>
-                    <span class="text-[10px] font-mono font-bold text-ios-blue bg-blue-50 px-2 py-0.5 rounded-lg flex-shrink-0">PIN: ${s.pin}</span>
-                </button>
-            `).join('');
-        }
-
-        function openLoginModal() {
-            document.getElementById('inputLoginPin').value = '';
-            document.getElementById('modalLogin').classList.remove('hidden');
-        }
-
-        function closeLoginModal() {
-            document.getElementById('modalLogin').classList.add('hidden');
-        }
-
-        function selectStaffFromModal(userId) {
-            currentUserId = userId;
-            renderStaffSelects();
-            closeLoginModal();
-            const user = staffList.find(s => s.id === userId);
-            showToast('Usuario Activo', `${user.name} (${user.role})`, 'blue');
-        }
-
-        function verifyPinDirect() {
-            const pin = document.getElementById('inputLoginPin').value.trim();
-            const found = staffList.find(s => String(s.pin) === pin && s.active);
-            if (found) {
-                selectStaffFromModal(found.id);
-            } else {
-                showToast('PIN Incorrecto', 'Revisa tu PIN de 4 dígitos', 'red');
-            }
-        }
-
-        // --- DISCRETE ADMIN SETTINGS (PIN 9999) ---
-        function handleAdminSettingsClick() {
-            const currentUser = staffList.find(s => s.id === currentUserId);
-            // If already Admin or asks for PIN
-            if (currentUser && currentUser.pin === '9999') {
-                openAdminModal();
-            } else {
-                const pin = prompt('Ingresa el PIN de Administrador / Jefatura:');
-                if (pin === '9999') {
-                    openAdminModal();
-                } else if (pin !== null) {
-                    showToast('Acceso Denegado', 'PIN de Administrador inválido', 'red');
-                }
-            }
-        }
-
-        function openAdminModal() {
-            document.getElementById('adminGScriptUrl').value = googleScriptUrl;
-            document.getElementById('adminFirebaseProjectId').value = firebaseProjectId;
-            document.getElementById('gdriveStatusBadge').textContent = googleScriptUrl ? 'Vinculada' : 'No vinculada';
-            document.getElementById('gdriveStatusBadge').className = googleScriptUrl ? 'text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800' : 'text-[9px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600';
-            document.getElementById('modalAdmin').classList.remove('hidden');
-        }
-
-        function closeAdminModal() {
-            document.getElementById('modalAdmin').classList.add('hidden');
-        }
-
-        function saveAdminGScriptUrl() {
-            const url = document.getElementById('adminGScriptUrl').value.trim();
-            googleScriptUrl = url;
-            localStorage.setItem('cs_chilca_gscript_url', url);
-            showToast('Google Drive Guardado', 'Sincronizando con tu hoja de cálculo...', 'green');
-            closeAdminModal();
-            syncWithCloudNow();
-        }
-
-        function saveAdminFirebaseProject() {
-            const val = document.getElementById('adminFirebaseProjectId').value.trim();
-            firebaseProjectId = val;
-            localStorage.setItem('cs_chilca_firebase_id', val);
-            showToast('Firebase Guardado', `Proyecto: ${val}`, 'green');
-        }
-
-        function resetDemoData() {
-            if (confirm('¿Restablecer los datos a la demostración inicial?')) {
-                appointments = DEFAULT_APPOINTMENTS;
-                staffList = DEFAULT_STAFF;
-                consultorioBEnabledMap = {};
-                saveLocalState();
-                renderAppointments();
-                renderAlerts();
-                renderStats();
-                closeAdminModal();
-                showToast('Datos Restablecidos', 'Se restauró el cuaderno de citas inicial', 'blue');
-            }
-        }
-
-        // --- SCREEN NAVIGATION ---
-        function switchScreen(screen) {
-            ['agenda', 'new', 'alerts', 'stats'].forEach(s => {
-                document.getElementById(`screen-${s}`).classList.add('hidden');
-                const navBtn = document.getElementById(`tabNav-${s}`);
-                if (s === screen) {
-                    navBtn.className = 'flex flex-col items-center gap-0.5 text-ios-blue ios-tap';
-                } else {
-                    navBtn.className = 'flex flex-col items-center gap-0.5 text-ios-gray1 ios-tap';
-                }
+            citasData.unshift({
+                id: 'CIT-' + Date.now().toString().slice(-5),
+                fecha: document.getElementById('newFechaCita').value || currentFechaSeleccionada,
+                turno: document.getElementById('newTurnoConsulta').value.split('|')[0],
+                hora: '08:30',
+                consultorio: document.getElementById('newTurnoConsulta').value.split('|')[1],
+                hcl: hcl, dni: dni, nombreMenor: nombreMenor,
+                fechaNac: document.getElementById('newNac').value || '2026-01-01',
+                servicio: document.getElementById('newServicio').value,
+                prematuro: document.getElementById('newPrematuro').checked ? 'SI' : 'NO',
+                nombrePadre: document.getElementById('newPadre').value.trim() || 'Apoderado',
+                celular1: celular1, celular2: '', estado: 'PENDIENTE'
             });
 
-            document.getElementById(`screen-${screen}`).classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            if (screen === 'new') onFormDateOrConsChange();
-            if (screen === 'alerts') renderAlerts();
-            if (screen === 'stats') renderStats();
+            guardarEnStorage();
+            alert('¡Cita guardada con éxito!');
+            switchView('agenda');
         }
 
-        // --- CLOUD SYNC ENGINE (GOOGLE APPS SCRIPT) ---
-        async function syncWithCloudNow(isSilent = false) {
-            if (!googleScriptUrl) {
-                if (!isSilent) showToast('Sin URL de Google Drive', 'Configúrala en el ícono de Ajustes ⚙️ (PIN 9999)', 'orange');
+        function renderAlertas() {
+            const container = document.getElementById('alertasContainer');
+            container.innerHTML = '';
+            const pendientes = citasData.filter(c => c.estado !== 'ATENDIDO');
+            if (pendientes.length === 0) {
+                container.innerHTML = `<div class="card" style="text-align:center; color:var(--ios-gray);">No hay alertas pendientes.</div>`;
                 return;
             }
-
-            const pill = document.getElementById('syncPill');
-            const dot = document.getElementById('syncDot');
-            const text = document.getElementById('syncText');
-
-            dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping';
-            text.textContent = 'Sincronizando...';
-
-            try {
-                const response = await fetch(googleScriptUrl, { method: 'GET' });
-                const result = await response.json();
-
-                if (result.status === 'ok') {
-                    // Update appointments from Google Sheet if any
-                    if (Array.isArray(result.citas) && result.citas.length > 0) {
-                        const parsedCitas = result.citas.map(c => ({
-                            id: Number(c.ID_Cita) || Date.now(),
-                            date: String(c.Fecha_Cita || '').substring(0, 10),
-                            shift: String(c.Turno || '').toLowerCase().includes('tarde') ? 'TARDE' : 'MANANA',
-                            time: String(c.Hora_Inicio || '').substring(0, 5),
-                            blocks: Number(c.Bloques_20min) || 1,
-                            consultorio: String(c.Consultorio || 'A').includes('B') ? 'B' : 'A',
-                            hcl: String(c.Nro_HCl || ''),
-                            dni: String(c.DNI_Menor || ''),
-                            name: c.Nombre_Menor || '',
-                            dob: String(c.Fecha_Nacimiento || '').substring(0, 10),
-                            parentName: c.Nombre_Padre_Madre || '',
-                            phone1: String(c.Celular_Principal || ''),
-                            phone2: String(c.Celular_Secundario || ''),
-                            service: c.Servicio || 'CRED',
-                            isPrematuro: String(c.CRED_Prematuro || '').toUpperCase() === 'SI',
-                            detail: c.Detalle_Nota || '',
-                            bookedBy: c.Registrado_Por || '',
-                            status: c.Estado_Cita || 'PENDIENTE'
-                        }));
-
-                        appointments = parsedCitas;
-                        saveLocalState();
-                    }
-
-                    // Update staff from Google Sheet if any
-                    if (Array.isArray(result.personal) && result.personal.length > 0) {
-                        staffList = result.personal.map(p => ({
-                            id: p.ID_Usuario || 'U',
-                            name: p.Nombre_Completo || '',
-                            role: p.Rol_Sistema || 'Enfermera',
-                            pin: String(p.PIN_Acceso || '1001'),
-                            code: p.DNI_Personal || '',
-                            active: String(p.Estado || 'ACTIVO').toUpperCase() === 'ACTIVO'
-                        }));
-                        saveLocalState();
-                        renderStaffSelects();
-                    }
-
-                    dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-600';
-                    text.textContent = 'G.Drive En Vivo';
-                    renderAppointments();
-                    renderAlerts();
-                    renderStats();
-                    if (!isSilent) showToast('Sincronización Exitosa', 'Datos descargados desde Google Drive', 'green');
-                }
-            } catch (err) {
-                dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-500';
-                text.textContent = 'Modo Local';
-                if (!isSilent) showToast('Guardado Local', 'Sin conexión directa a G.Drive, usando memoria local', 'orange');
-            }
+            pendientes.forEach(cita => {
+                let card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div style="font-size:13px; font-weight:600; color:var(--ios-orange); margin-bottom:4px;">⚠️ Pendiente</div>
+                    <div style="font-size:15px; font-weight:700;">${cita.nombreMenor} (H.Cl: ${cita.hcl})</div>
+                    <div style="font-size:13px; color:var(--ios-secondary); margin-bottom:8px;">Fecha: ${cita.fecha} | Tel: ${cita.celular1}</div>
+                `;
+                container.appendChild(card);
+            });
         }
 
-        function pushNewAppointmentToCloud(app) {
-            if (!googleScriptUrl) return;
-            fetch(googleScriptUrl, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'CREAR_CITA',
-                    data: app
-                })
-            }).catch(() => {});
+        function actualizarEstadisticas() {
+            document.getElementById('statTotal').innerText = citasData.length;
+            document.getElementById('statAtendidos').innerText = citasData.filter(c => c.estado === 'ATENDIDO').length;
+            document.getElementById('statPendientes').innerText = citasData.filter(c => c.estado === 'PENDIENTE').length;
+            document.getElementById('statInasistentes').innerText = citasData.filter(c => c.estado === 'INASISTENTE').length;
         }
 
-        function pushAppointmentUpdateToCloud(id, newStatus) {
-            if (!googleScriptUrl) return;
-            fetch(googleScriptUrl, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'ACTUALIZAR_ESTADO',
-                    id: id,
-                    estado: newStatus
-                })
-            }).catch(() => {});
+        function imprimirListaArchivo() { window.print(); }
+        function cambiarUsuario() {
+            let n = prompt('Nombre del personal:', usuarioActual.nombre);
+            if (n) { usuarioActual.nombre = n; document.getElementById('currentUserName').innerText = n; }
         }
 
-        // --- TOAST HELPER ---
-        let toastTimer = null;
-        function showToast(title, subtitle, color = 'green') {
-            const toast = document.getElementById('iosToast');
-            const icon = document.getElementById('toastIcon');
-            document.getElementById('toastTitle').textContent = title;
-            document.getElementById('toastSubtitle').textContent = subtitle;
-
-            const colors = {
-                green: 'bg-emerald-500/20 text-emerald-400',
-                blue: 'bg-ios-blue/20 text-ios-blue',
-                orange: 'bg-ios-orange/20 text-ios-orange',
-                red: 'bg-ios-red/20 text-ios-red'
-            };
-            icon.className = `w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${colors[color] || colors.green}`;
-
-            toast.classList.remove('hidden');
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 2800);
-        }
+        window.onload = () => {
+            document.getElementById('newFechaCita').value = currentFechaSeleccionada;
+            generarPildorasFechas();
+            renderAgenda();
+        };
     </script>
 </body>
 </html>

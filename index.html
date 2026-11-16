@@ -24,30 +24,24 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--ios-bg); color: var(--ios-text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* Top Status Bar Simulator */
         .top-status-bar { background: #000; color: white; display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; font-size: 12px; font-weight: 600; }
         .pill-status { background: #111; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; display: flex; align-items: center; gap: 6px; border: 0.5px solid #333; }
         .pill-status span.dot { width: 8px; height: 8px; background: #34C759; border-radius: 50%; display: inline-block; }
 
-        /* Main App Container */
         .app-container { flex: 1; display: flex; flex-direction: column; max-width: 480px; width: 100%; margin: 0 auto; background: var(--ios-card); position: relative; overflow: hidden; box-shadow: 0 0 30px rgba(0,0,0,0.15); }
         
-        /* Header Bar */
         .app-header { background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); border-bottom: 0.5px solid var(--ios-border); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
         .badge-instalar { background: var(--ios-blue); color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
         .user-badge-pill { font-size: 12px; background: rgba(0,122,255,0.1); color: var(--ios-blue); padding: 6px 12px; border-radius: 14px; font-weight: 600; display: flex; align-items: center; gap: 5px; cursor: pointer; border: 0.5px solid rgba(0,122,255,0.2); }
 
-        /* Content Views */
         .view-content { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 110px; display: none; }
         .view-content.active { display: block; }
 
-        /* iOS Bottom Tab Bar */
         .tab-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 83px; background: rgba(255,255,255,0.92); backdrop-filter: blur(25px); border-top: 0.5px solid var(--ios-border); display: flex; justify-content: space-around; padding-top: 8px; z-index: 100; }
         .tab-item { display: flex; flex-direction: column; align-items: center; color: var(--ios-gray); text-decoration: none; font-size: 10px; font-weight: 500; cursor: pointer; flex: 1; }
         .tab-item.active { color: var(--ios-blue); font-weight: 600; }
         .tab-item svg { width: 24px; height: 24px; margin-bottom: 3px; }
 
-        /* Cards & UI elements */
         .card { background: #FFFFFF; border: 0.5px solid var(--ios-border); border-radius: 14px; padding: 16px; margin-bottom: 14px; box-shadow: var(--ios-shadow); position: relative; }
         .card-left-green { border-left: 5px solid var(--ios-green); }
         .card-left-blue { border-left: 5px solid var(--ios-blue); }
@@ -65,7 +59,6 @@
         .form-input, .form-select { width: 100%; padding: 12px 14px; border: 0.5px solid var(--ios-border); border-radius: 10px; font-size: 15px; background: #FAFAFC; color: var(--ios-text); outline: none; }
         .form-input:focus, .form-select:focus { border-color: var(--ios-blue); background: #FFFFFF; box-shadow: 0 0 0 3px rgba(0,122,255,0.15); }
 
-        /* Date pills */
         .date-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 16px; scrollbar-width: none; }
         .date-pills::-webkit-scrollbar { display: none; }
         .date-pill { min-width: 58px; padding: 10px 4px; border-radius: 12px; background: var(--ios-light-gray); text-align: center; cursor: pointer; font-size: 11px; font-weight: 600; color: var(--ios-secondary); border: 1.5px solid transparent; }
@@ -86,11 +79,11 @@
     </div>
 
     <div class="app-container">
-        <!-- Header -->
+        <!-- Header with CITEN and Subtitle -->
         <header class="app-header">
             <button class="badge-instalar" onclick="alert('Aplicativo listo para instalar en pantalla de inicio')">⬇️ Instalar</button>
             <div style="display: flex; flex-direction: column; text-align: center;">
-                <h1 style="font-size: 16px; font-weight: 800; letter-spacing: -0.4px;">CITEN</h1>
+                <h1 style="font-size: 18px; font-weight: 800; letter-spacing: -0.4px;">CITEN</h1>
                 <span style="font-size: 10px; font-weight: 600; color: var(--ios-blue);">Citas de CRED - Enfermería</span>
             </div>
             <div class="user-badge-pill" onclick="cambiarUsuario()">
@@ -101,7 +94,7 @@
         <!-- VIEW 1: AGENDA -->
         <div id="view-agenda" class="view-content active">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="font-size: 12px; color: var(--ios-gray); font-weight: 600;" id="syncStatusLabel">🟢 G.Drive Sync • 14 KB</span>
+                <span style="font-size: 12px; color: var(--ios-gray); font-weight: 600;">🟢 G.Drive Sync • 14 KB</span>
                 <button class="btn" style="width: auto; font-size: 12px; padding: 6px 12px;" onclick="imprimirListaArchivo()">🖨️ Imprimir Lista H.Cl.</button>
             </div>
 
@@ -119,7 +112,6 @@
                 <button class="btn btn-secondary" style="font-size: 12px; padding: 8px 12px; width: auto;" onclick="toggleConsultorioB()">⚙️ Cons. A+B</button>
             </div>
 
-            <!-- Progress Card -->
             <div class="card" style="padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;">
                 <div>
                     <span style="font-size: 11px; color: var(--ios-gray); font-weight: 600; text-transform: uppercase;">Avance del día</span>
@@ -395,59 +387,85 @@
             const cita = citasData.find(c => c.id === id);
             if (!cita) return;
             const mensaje = `Hola ${cita.nombrePadre}, le recordamos que su menor hijo(a) ${cita.nombreMenor} tiene su cita programada en el C.S. Chilca\n(Consultorio de CRED-Enfermería) el día ${cita.fecha} a las ${cita.hora}. Por favor asistir 20 minutos antes, con su DNI, Carnet de vacunación, Historia Clínica y Ficha de atención SIS si estuviera afiliado.`;
-            window.open(`https://api.whatsapp.com/send?phone=51${cita.celular1}&text=${encodeURIComponent(mensaje)}`, '_blank');
+            const url = `https://api.whatsapp.com/send?phone=51${cita.celular1}&text=${encodeURIComponent(mensaje)}`;
+            window.open(url, '_blank');
         }
 
         function cambiarEstadoCita(id, nuevoEstado) {
             const cita = citasData.find(c => c.id === id);
-            if (cita) { cita.estado = nuevoEstado; guardarEnStorage(); renderAgenda(); }
+            if (cita) {
+                cita.estado = nuevoEstado;
+                guardarEnStorage();
+                renderAgenda();
+            }
         }
 
         function autocompletarDemo() {
             document.getElementById('newHcl').value = 'HC-' + Math.floor(10000 + Math.random() * 90000);
             document.getElementById('newDni').value = '8' + Math.floor(1000000 + Math.random() * 9000000);
-            document.getElementById('newNombre').value = 'Zoe Kataleya Vargas Nina';
-            document.getElementById('newNac').value = '2026-05-15';
-            document.getElementById('newPadre').value = 'Mónica Nina Quispe';
+            document.getElementById('newNombre').value = 'Valeria Sofía Ramos Pérez';
+            document.getElementById('newNac').value = '2026-08-10';
+            document.getElementById('newPadre').value = 'Elena Pérez Gómez';
             document.getElementById('newCel1').value = '987123456';
+            document.getElementById('newCel2').value = '912345678';
+            calcularEdadExacta();
         }
 
         function calcularEdadExacta() {
             const nacVal = document.getElementById('newNac').value;
             if (!nacVal) return;
-            const nac = new Date(nacVal), hoy = new Date();
+            const nac = new Date(nacVal);
+            const hoy = new Date();
             let meses = (hoy.getFullYear() - nac.getFullYear()) * 12 + (hoy.getMonth() - nac.getMonth());
-            document.getElementById('edadCalculadaText').innerText = `Edad calculada: aprox. ${meses} meses.`;
+            let dias = hoy.getDate() - nac.getDate();
+            if (dias < 0) { meses--; }
+            document.getElementById('edadCalculadaText').innerText = `Edad cronológica calculada: aprox. ${meses} meses.`;
         }
 
         function guardarNuevaCita() {
             const hcl = document.getElementById('newHcl').value.trim();
             const dni = document.getElementById('newDni').value.trim();
             const nombreMenor = document.getElementById('newNombre').value.trim();
+            const fechaNac = document.getElementById('newNac').value;
+            const nombrePadre = document.getElementById('newPadre').value.trim();
             const celular1 = document.getElementById('newCel1').value.trim();
+            const celular2 = document.getElementById('newCel2').value.trim();
+            const servicio = document.getElementById('newServicio').value;
+            const prematuro = document.getElementById('newPrematuro').checked ? 'SI' : 'NO';
+            const fecha = document.getElementById('newFechaCita').value || currentFechaSeleccionada;
+            const consultorio = document.getElementById('newConsultorio').value;
+            const bloques = parseInt(document.getElementById('newBloques').value) || 1;
 
             if (!hcl || !dni || !nombreMenor || !celular1) {
-                alert('Complete los campos obligatorios: H.Cl, DNI, Nombre y Celular.');
+                alert('Por favor complete los campos obligatorios: N° H.Cl, DNI, Nombre del Menor y Celular.');
                 return;
             }
 
-            citasData.unshift({
+            const nuevaCita = {
                 id: 'CIT-' + Date.now().toString().slice(-5),
-                fecha: document.getElementById('newFechaCita').value || currentFechaSeleccionada,
+                fecha: fecha,
                 turno: 'Mañana',
-                hora: '09:30',
-                bloques: parseInt(document.getElementById('newBloques').value) || 2,
-                consultorio: document.getElementById('newConsultorio').value,
-                hcl: hcl, dni: dni, nombreMenor: nombreMenor,
-                fechaNac: document.getElementById('newNac').value || '2026-01-01',
-                servicio: document.getElementById('newServicio').value,
-                prematuro: document.getElementById('newPrematuro').checked ? 'SI' : 'NO',
-                nombrePadre: document.getElementById('newPadre').value.trim() || 'Apoderado',
-                celular1: celular1, celular2: '', estado: 'PENDIENTE', registradoPor: usuarioActual.nombre
-            });
+                hora: '08:30',
+                bloques: bloques,
+                consultorio: consultorio,
+                hcl: hcl,
+                dni: dni,
+                nombreMenor: nombreMenor,
+                fechaNac: fechaNac || '2026-01-01',
+                servicio: servicio,
+                prematuro: prematuro,
+                nombrePadre: nombrePadre || 'No registrado',
+                celular1: celular1,
+                celular2: celular2,
+                estado: 'PENDIENTE',
+                registradoPor: usuarioActual.nombre
+            };
 
+            citasData.unshift(nuevaCita);
             guardarEnStorage();
-            alert('¡Cita guardada correctamente y sincronizada con G.Drive!');
+            alert('¡Cita guardada correctamente y sincronizada en el sistema!');
+            currentFechaSeleccionada = fecha;
+            generarPildorasFechas();
             switchView('agenda');
         }
 
@@ -467,22 +485,6 @@
                         <button class="btn btn-green" style="font-size:12px; padding:10px;" onclick="alert('Abriendo WhatsApp...')">💬 WhatsApp</button>
                     </div>
                 </div>
-                <div class="card card-left-orange">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
-                        <span class="badge" style="background:#FEF3C7; color:#92400E; font-weight:700;">Vence mañana</span>
-                        <div>
-                            <span class="badge badge-hcl">H.Cl. 45190</span>
-                            <span class="badge badge-prematuro">CRED-Prematuro</span>
-                        </div>
-                    </div>
-                    <div style="font-size:16px; font-weight:800; margin-bottom:2px;">Zoe Kataleya Vargas Nina</div>
-                    <div style="font-size:13px; color:var(--ios-secondary); margin-bottom:8px; font-weight:500;">DNI 81884321 • 5 meses, 28 días • Apoderado: Mónica Nina</div>
-                    <div style="background: #F4F4F6; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 500; margin-bottom: 12px;">Control CRED-Prematuro 6m próximo a cerrar ventana</div>
-                    <div style="display:flex; gap:8px;">
-                        <button class="btn btn-secondary" style="font-size:12px; padding:10px;" onclick="alert('Llamando...')">📞 Llamar</button>
-                        <button class="btn btn-green" style="font-size:12px; padding:10px;" onclick="alert('Abriendo WhatsApp...')">💬 WhatsApp</button>
-                    </div>
-                </div>
             `;
         }
 
@@ -490,10 +492,16 @@
             document.getElementById('statTotal').innerText = citasData.length + 400;
         }
 
-        function imprimirListaArchivo() { window.print(); }
+        function imprimirListaArchivo() {
+            window.print();
+        }
+
         function cambiarUsuario() {
-            let n = prompt('Nombre del personal:', usuarioActual.nombre);
-            if (n) { usuarioActual.nombre = n; document.getElementById('currentUserName').innerText = n; }
+            const nuevo = prompt('Ingrese nombre del personal autorizado:', usuarioActual.nombre);
+            if (nuevo) {
+                usuarioActual.nombre = nuevo;
+                document.getElementById('currentUserName').innerText = nuevo;
+            }
         }
 
         window.onload = () => {

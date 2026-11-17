@@ -87,17 +87,15 @@
                 
                 <!-- ================= SCREEN 1: AGENDA ================= -->
                 <section id="screen-agenda" class="p-4 space-y-3">
-                    <!-- Top Header Row matching image_c595d8.png -->
+                    <!-- Top Header Row -->
                     <div class="flex items-center justify-between gap-2">
-                        <button onclick="openInstallModal()" class="bg-ios-blue text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow-xs ios-tap">
-                            <i class="ph-bold ph-download-simple"></i> Instalar
-                        </button>
-                        <div class="text-center leading-tight">
+                        <div class="text-left leading-tight flex-shrink-0">
                             <h1 class="text-xl font-extrabold text-gray-900 tracking-tight">CITEN</h1>
-                            <span class="text-[10px] font-bold text-ios-blue">Citas de CRED - Enfermería</span>
+                            <span class="text-[10px] font-bold text-ios-blue block">Citas de CRED - Enfermería</span>
                         </div>
-                        <button onclick="openLoginModal()" class="bg-blue-50 text-ios-blue border border-blue-200 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 ios-tap">
-                            👤 <span id="currentRoleLabel">Iniciar Sesión</span>
+                        <button onclick="openLoginModal()" class="bg-blue-50 text-ios-blue border border-blue-200 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 ios-tap max-w-[215px]">
+                            <i class="ph-fill ph-user-circle text-base flex-shrink-0"></i>
+                            <span id="currentRoleLabel" class="truncate">Iniciar Sesión</span>
                         </button>
                     </div>
 
@@ -336,6 +334,22 @@
                             <span class="text-ios-red">🔴 Inasist.: <strong id="statInasistentes">0</strong></span>
                         </div>
                     </div>
+
+                    <!-- Acceso directo en pantalla del celular -->
+                    <div class="bg-white rounded-3xl p-4 shadow-ios-card flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-10 h-10 rounded-2xl bg-ios-blue/10 text-ios-blue flex items-center justify-center flex-shrink-0">
+                                <i class="ph-fill ph-device-mobile text-xl"></i>
+                            </div>
+                            <div class="leading-tight">
+                                <div class="text-xs font-extrabold text-gray-900">App en tu Celular</div>
+                                <div class="text-[10px] text-gray-500 mt-0.5">Abrir rápido desde el inicio</div>
+                            </div>
+                        </div>
+                        <button onclick="triggerShortcutInstall()" class="bg-ios-blue text-white px-3.5 py-2 rounded-2xl text-[11px] font-extrabold leading-tight text-center shadow-sm ios-tap flex-shrink-0">
+                            Colocar acceso<br>directo en pantalla
+                        </button>
+                    </div>
                 </section>
 
             </main>
@@ -503,12 +517,30 @@
                 </div>
             </div>
 
-            <!-- Install Modal -->
-            <div id="installModal" onclick="closeInstallModal()" class="hidden absolute inset-0 z-50 bg-black/50 flex items-end">
-                <div onclick="event.stopPropagation()" class="w-full bg-white rounded-t-[32px] p-5 space-y-3 text-xs">
-                    <h2 class="text-sm font-extrabold">¿A qué se refiere el botón 'Instalar'?</h2>
-                    <p class="leading-relaxed text-gray-700">Sirve para convertir la web en una <strong>PWA (App instalable)</strong> directamente en los celulares del personal del C.S. Chilca sin pasar por tiendas oficiales. Queda con su propio ícono en la pantalla de inicio para abrirse a pantalla completa rápidamente con datos móviles.</p>
-                    <button onclick="closeInstallModal()" class="w-full py-2.5 rounded-xl bg-ios-blue text-white font-bold">Entendido</button>
+            <!-- Install / Shortcut Modal -->
+            <div id="installModal" onclick="closeInstallModal()" class="hidden absolute inset-0 z-50 bg-black/50 backdrop-blur-[2px] flex items-end">
+                <div onclick="event.stopPropagation()" class="w-full bg-white rounded-t-[32px] p-5 pb-8 space-y-3.5 text-xs animate-slide-up shadow-2xl">
+                    <div class="w-10 h-1.5 bg-gray-300 rounded-full mx-auto"></div>
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-xl bg-ios-blue/10 text-ios-blue flex items-center justify-center flex-shrink-0">
+                            <i class="ph-fill ph-plus-square text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-extrabold text-gray-900">Colocar acceso directo en pantalla</h2>
+                            <p class="text-[11px] text-gray-500">Guarda CITEN como un ícono en tu celular</p>
+                        </div>
+                    </div>
+                    <div class="bg-ios-bg rounded-2xl p-3 space-y-2.5 text-[11px] text-gray-700 leading-relaxed">
+                        <div>
+                            <strong class="text-gray-900 block">📱 En Android (Google Chrome):</strong>
+                            Toca los <strong>3 puntos (⋮)</strong> arriba a la derecha del navegador y selecciona <strong>"Agregar a la pantalla principal"</strong> o <strong>"Instalar aplicación"</strong>.
+                        </div>
+                        <div class="pt-2 border-t border-gray-200/80">
+                            <strong class="text-gray-900 block">🍏 En iPhone (Safari):</strong>
+                            Toca el ícono de <strong>Compartir (<i class="ph-bold ph-export"></i>)</strong> abajo en el centro y elige <strong>"Agregar a inicio"</strong>.
+                        </div>
+                    </div>
+                    <button onclick="closeInstallModal()" class="w-full py-3 rounded-2xl bg-ios-blue text-white font-bold text-xs ios-tap">Entendido</button>
                 </div>
             </div>
 
@@ -961,10 +993,22 @@
             }
         }
 
+        function formatUserDisplayName(fullName) {
+            const parts = fullName.trim().split(/\s+/);
+            if (parts.length <= 2) return fullName;
+            // If starts with title like Lic., Téc., Srta., Dr., Dra.
+            if (/^(Lic|Téc|Tec|Srta|Dr|Dra|Enf|Adm)\.?$/i.test(parts[0])) {
+                // e.g. ["Lic.", "Carmen", "Rosa", "Mendoza"] -> "Lic. Carmen Mendoza" (or if 3 words: "Lic. Carmen Mendoza")
+                if (parts.length >= 4) return `${parts[0]} ${parts[1]} ${parts[3]}`;
+                return `${parts[0]} ${parts[1]} ${parts[2]}`;
+            }
+            return `${parts[0]} ${parts[1]}`;
+        }
+
         function applyLoggedUserUI() {
             if (!window.loggedInUser) return;
-            const shortName = window.loggedInUser.name.split(' ').slice(0, 2).join(' ');
-            document.getElementById('currentRoleLabel').textContent = shortName;
+            const displayName = formatUserDisplayName(window.loggedInUser.name);
+            document.getElementById('currentRoleLabel').textContent = displayName;
             document.getElementById('modalActiveUserName').textContent = window.loggedInUser.name;
             document.getElementById('modalActiveUserRole').textContent = `${window.loggedInUser.role} • Autorizado`;
 
@@ -1027,6 +1071,25 @@
             document.getElementById('loginModal').classList.remove('hidden');
         }
         function closeLoginModal() { document.getElementById('loginModal').classList.add('hidden'); }
+
+        let deferredInstallPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+        });
+
+        async function triggerShortcutInstall() {
+            if (deferredInstallPrompt) {
+                deferredInstallPrompt.prompt();
+                const { outcome } = await deferredInstallPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    deferredInstallPrompt = null;
+                }
+            } else {
+                openInstallModal();
+            }
+        }
+
         function openInstallModal() { document.getElementById('installModal').classList.remove('hidden'); }
         function closeInstallModal() { document.getElementById('installModal').classList.add('hidden'); }
         

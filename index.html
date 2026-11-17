@@ -329,11 +329,11 @@
                     </div>
                     <div class="bg-white rounded-3xl p-4 shadow-ios-card text-center space-y-2">
                         <span class="text-xs font-bold text-gray-400 uppercase">Progreso General del Mes</span>
-                        <div class="text-4xl font-extrabold text-ios-blue" id="statPorcentaje">84%</div>
+                        <div class="text-4xl font-extrabold text-ios-blue" id="statPorcentaje">0%</div>
                         <div class="flex justify-around text-xs font-bold pt-2">
-                            <span class="text-ios-green">🟢 Atendidos: <strong id="statAtendidos">342</strong></span>
-                            <span class="text-ios-blue">🔵 Pendientes: <strong id="statPendientes">44</strong></span>
-                            <span class="text-ios-red">🔴 Inasist.: <strong id="statInasistentes">22</strong></span>
+                            <span class="text-ios-green">🟢 Atendidos: <strong id="statAtendidos">0</strong></span>
+                            <span class="text-ios-blue">🔵 Pendientes: <strong id="statPendientes">0</strong></span>
+                            <span class="text-ios-red">🔴 Inasist.: <strong id="statInasistentes">0</strong></span>
                         </div>
                     </div>
                 </section>
@@ -351,7 +351,7 @@
                     <span class="text-[10px] font-semibold">Nueva Cita</span>
                 </button>
                 <button onclick="switchScreen('alerts')" class="nav-tab relative flex flex-col items-center gap-1 text-gray-400 ios-tap" data-screen="alerts">
-                    <span id="navAlertBadge" class="absolute -top-0.5 right-1 w-4 h-4 rounded-full bg-ios-red text-white text-[9px] font-bold flex items-center justify-center">5</span>
+                    <span id="navAlertBadge" class="hidden absolute -top-1 right-2 w-4 h-4 rounded-full bg-ios-red text-white text-[9px] font-bold flex items-center justify-center">0</span>
                     <i class="ph-fill ph-bell-ringing text-2xl"></i>
                     <span class="text-[10px] font-semibold">Alertas</span>
                 </button>
@@ -727,6 +727,7 @@
 
             document.getElementById('dayProgressPct').textContent = `${pct}%`;
             document.getElementById('dayProgressBar').style.width = `${pct}%`;
+            if (typeof renderStats === 'function') renderStats();
 
             if (dayApps.length === 0) {
                 list.innerHTML = `<div class="bg-white rounded-2xl p-6 text-center text-xs text-gray-500">No hay citas para esta fecha y filtro.</div>`;
@@ -1101,7 +1102,35 @@
             renderAlerts();
         }
 
+        function renderStats() {
+            const total = window.appointments.length;
+            const atendidos = window.appointments.filter(a => a.status === 'ATENDIDO').length;
+            const inasistentes = window.appointments.filter(a => a.status === 'NO_ASISTIO' || a.status === 'INASISTENTE').length;
+            const pendientes = window.appointments.filter(a => a.status === 'PENDIENTE').length;
+            const pct = total > 0 ? Math.round((atendidos / total) * 100) : 0;
+
+            const elPct = document.getElementById('statPorcentaje');
+            const elAt = document.getElementById('statAtendidos');
+            const elPe = document.getElementById('statPendientes');
+            const elIn = document.getElementById('statInasistentes');
+            if (elPct) elPct.textContent = `${pct}%`;
+            if (elAt) elAt.textContent = atendidos;
+            if (elPe) elPe.textContent = pendientes;
+            if (elIn) elIn.textContent = inasistentes;
+        }
+
         function renderAlerts() {
+            const totalAlerts = alertsData.AMBER.length + alertsData.RED.length;
+            const badge = document.getElementById('navAlertBadge');
+            if (badge) {
+                badge.textContent = totalAlerts;
+                badge.classList.toggle('hidden', totalAlerts === 0);
+            }
+            const tabAmber = document.getElementById('tabAmber');
+            const tabRed = document.getElementById('tabRed');
+            if (tabAmber) tabAmber.textContent = `Próx. a vencer (${alertsData.AMBER.length})`;
+            if (tabRed) tabRed.textContent = `Inasistentes (${alertsData.RED.length})`;
+
             const container = document.getElementById('alertsContainer');
             const items = alertsData[currentAlertTab];
             container.innerHTML = items.map(a => `

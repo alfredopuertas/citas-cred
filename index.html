@@ -97,7 +97,7 @@
                             <span class="text-[10px] font-bold text-ios-blue">Citas de CRED - Enfermería</span>
                         </div>
                         <button onclick="openLoginModal()" class="bg-blue-50 text-ios-blue border border-blue-200 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 ios-tap">
-                            👤 <span id="currentRoleLabel">Lic. Carmen (1001)</span>
+                            👤 <span id="currentRoleLabel">Iniciar Sesión</span>
                         </button>
                     </div>
 
@@ -428,15 +428,78 @@
                 </div>
             </div>
 
-            <!-- Login Modal (Admin G.Drive Control) -->
-            <div id="loginModal" onclick="closeLoginModal()" class="hidden absolute inset-0 z-50 bg-black/50 flex items-end">
-                <div onclick="event.stopPropagation()" class="w-full bg-white rounded-t-[32px] p-5 space-y-3">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-base font-extrabold">Personal Autorizado (Google Drive)</h2>
-                        <button onclick="closeLoginModal()" class="text-gray-500 font-bold">✕</button>
+            <!-- SECURITY PIN LOCK OVERLAY -->
+            <div id="authLockOverlay" class="absolute inset-0 z-50 bg-ios-bg/95 backdrop-blur-xl flex flex-col justify-between p-6 pt-12 pb-8">
+                <div class="text-center space-y-2">
+                    <div class="w-14 h-14 rounded-2xl bg-ios-blue text-white flex items-center justify-center mx-auto shadow-md">
+                        <i class="ph-fill ph-lock-key text-3xl"></i>
                     </div>
-                    <p class="text-xs text-gray-500">El administrador controla los accesos en la Hoja 1 de Google Drive.</p>
-                    <div class="space-y-1.5" id="staffLoginList"></div>
+                    <h2 class="text-xl font-extrabold text-gray-900 tracking-tight">CITEN • C.S. Chilca</h2>
+                    <p class="text-xs text-gray-500 font-medium">Acceso exclusivo para personal autorizado</p>
+                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-gray-200 text-[10px] font-semibold text-gray-600 shadow-2xs" id="lockSyncStatus">
+                        <span class="w-1.5 h-1.5 rounded-full bg-ios-green animate-pulse"></span>
+                        <span>Control de Acceso Activo</span>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="bg-white rounded-2xl p-3.5 shadow-ios-card space-y-2">
+                        <label class="block text-[10px] font-extrabold uppercase text-gray-400 text-center">Ingrese su PIN de 4 dígitos</label>
+                        <div class="flex justify-center gap-3 py-1" id="pinDotsContainer">
+                            <span class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-ios-blue bg-transparent transition-all"></span>
+                            <span class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-ios-blue bg-transparent transition-all"></span>
+                            <span class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-ios-blue bg-transparent transition-all"></span>
+                            <span class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-ios-blue bg-transparent transition-all"></span>
+                        </div>
+                        <p id="pinErrorMsg" class="hidden text-center text-[11px] font-bold text-ios-red">PIN incorrecto o usuario suspendido</p>
+                    </div>
+
+                    <!-- iOS Numeric Keypad -->
+                    <div class="grid grid-cols-3 gap-2.5 max-w-[270px] mx-auto">
+                        <button type="button" onclick="pressPinKey('1')" class="h-14 rounded-2xl bg-white text-gray-900 font-bold text-xl shadow-2xs ios-tap">1</button>
+                        <button type="button" onclick="pressPinKey('2')" class="h-14 rounded-2xl bg-white text-gray-900 font-bold text-xl shadow-2xs ios-tap">2</button>
+                        <button type="button" onclick="pressPinKey('3')" class="h-14 rounded-2xl bg-white text-gray-900 font-bold text-xl shadow-2xs ios-tap">3</button>
+                        <button type="button" onclick="pressPinKey('4')" class="h-14 rounded-2xl bg-white text-gray-900 font-bold text-xl shadow-2xs ios-tap">4</button>
+                        <button type="button" onclick="pressPinKey('5')" class="h-14 rounded-2xl bg-white text-gray-900 font-bold text-xl shadow-2xs ios-tap">5</button>
+                        <button type="button" onclick="pressPinKey('6')" class="h-14 rounded-2xl bg-white text-gray-900 font-bold text-xl shadow-2xs ios-tap">6</button>
+                        <button type="button" onclick="pressPinKey('7')" class="h-14 rounded-2xl bg-white text-gray-900 font-bold text-xl shadow-2xs ios-tap">7</button>
+                        <button type="button" onclick="pressPinKey('8')" class="h-14 rounded-2xl bg-white text-gray-900 font-bold text-xl shadow-2xs ios-tap">8</button>
+                        <button type="button" onclick="pressPinKey('9')" class="h-14 rounded-2xl bg-white text-gray-900 font-bold text-xl shadow-2xs ios-tap">9</button>
+                        <button type="button" onclick="clearPinInput()" class="h-14 rounded-2xl bg-gray-200/80 text-gray-700 font-bold text-xs ios-tap">Limpiar</button>
+                        <button type="button" onclick="pressPinKey('0')" class="h-14 rounded-2xl bg-white text-gray-900 font-bold text-xl shadow-2xs ios-tap">0</button>
+                        <button type="button" onclick="backspacePinKey()" class="h-14 rounded-2xl bg-gray-200/80 text-gray-700 font-bold text-lg flex items-center justify-center ios-tap"><i class="ph-bold ph-backspace"></i></button>
+                    </div>
+                </div>
+
+                <p class="text-center text-[10px] text-gray-400 leading-relaxed">
+                    Si no tiene PIN o fue suspendido, solicite autorización a la Jefatura de Enfermería (Google Drive).
+                </p>
+            </div>
+
+            <!-- Login Modal (Active Session & Authorized Staff) -->
+            <div id="loginModal" onclick="closeLoginModal()" class="hidden absolute inset-0 z-50 bg-black/50 backdrop-blur-[2px] flex items-end">
+                <div onclick="event.stopPropagation()" class="w-full bg-white rounded-t-[32px] p-5 pb-8 space-y-3.5 animate-slide-up shadow-2xl max-h-[82%] overflow-y-auto no-scrollbar">
+                    <div class="w-10 h-1.5 bg-gray-300 rounded-full mx-auto"></div>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase text-ios-blue">Sesión Activa • C.S. Chilca</span>
+                            <h2 class="text-base font-extrabold text-gray-900" id="modalActiveUserName">--</h2>
+                            <p class="text-xs text-gray-500" id="modalActiveUserRole">--</p>
+                        </div>
+                        <button onclick="closeLoginModal()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 font-bold flex items-center justify-center">✕</button>
+                    </div>
+
+                    <button onclick="logoutUser()" class="w-full py-3 rounded-2xl bg-ios-red/10 text-ios-red font-extrabold text-xs flex items-center justify-center gap-1.5 ios-tap">
+                        <i class="ph-bold ph-sign-out text-base"></i> Cerrar Sesión / Cambiar Profesional
+                    </button>
+
+                    <div class="pt-2 border-t border-gray-100 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-extrabold uppercase text-gray-400">Personal Habilitado (Drive)</span>
+                            <span class="text-[10px] font-bold text-ios-green" id="activeStaffCountBadge">0 activos</span>
+                        </div>
+                        <div class="space-y-1.5 max-h-48 overflow-y-auto no-scrollbar" id="staffLoginList"></div>
+                    </div>
                 </div>
             </div>
 
@@ -500,6 +563,7 @@
                     window.authorizedUsers = data.authorizedUsers;
                     if (window.populateStaffSelects) window.populateStaffSelects();
                     if (window.renderGoogleDriveStaffTable) window.renderGoogleDriveStaffTable();
+                    if (window.validateActiveSession) window.validateActiveSession();
                 }
                 
                 if (needsRender) {
@@ -570,6 +634,7 @@
             renderTimeSlots();
             renderAlerts();
             renderGoogleDriveStaffTable();
+            window.validateActiveSession();
         };
 
         function switchMainWorkspace(mode) {
@@ -835,10 +900,132 @@
 
         function populateStaffSelects() {
             const active = window.authorizedUsers.filter(u => u.active);
-            document.getElementById('inputBookedByStaff').innerHTML = active.map(u => `<option value="${u.name}">${u.name}</option>`).join('');
+            const sel = document.getElementById('inputBookedByStaff');
+            sel.innerHTML = active.map(u => `<option value="${u.name}">${u.name}</option>`).join('');
+            if (window.loggedInUser) sel.value = window.loggedInUser.name;
         }
 
-        function openLoginModal() { document.getElementById('loginModal').classList.remove('hidden'); }
+
+        let enteredPin = "";
+        window.loggedInUser = null;
+
+        function updatePinDots() {
+            const dots = document.querySelectorAll('.pin-dot');
+            dots.forEach((dot, idx) => {
+                if (idx < enteredPin.length) {
+                    dot.classList.add('bg-ios-blue', 'scale-110');
+                    dot.classList.remove('bg-transparent');
+                } else {
+                    dot.classList.remove('bg-ios-blue', 'scale-110');
+                    dot.classList.add('bg-transparent');
+                }
+            });
+        }
+
+        function pressPinKey(digit) {
+            if (enteredPin.length >= 4) return;
+            document.getElementById('pinErrorMsg').classList.add('hidden');
+            enteredPin += digit;
+            updatePinDots();
+            if (enteredPin.length === 4) {
+                setTimeout(verifyEnteredPin, 120);
+            }
+        }
+
+        function backspacePinKey() {
+            enteredPin = enteredPin.slice(0, -1);
+            document.getElementById('pinErrorMsg').classList.add('hidden');
+            updatePinDots();
+        }
+
+        function clearPinInput() {
+            enteredPin = "";
+            document.getElementById('pinErrorMsg').classList.add('hidden');
+            updatePinDots();
+        }
+
+        function verifyEnteredPin() {
+            const matched = window.authorizedUsers.find(u => u.active === true && String(u.pin).trim() === enteredPin);
+            if (matched) {
+                window.loggedInUser = matched;
+                localStorage.setItem('citen_logged_user_id', matched.id);
+                localStorage.setItem('citen_logged_user_pin', String(matched.pin).trim());
+                enteredPin = "";
+                updatePinDots();
+                applyLoggedUserUI();
+                document.getElementById('authLockOverlay').classList.add('hidden');
+            } else {
+                document.getElementById('pinErrorMsg').classList.remove('hidden');
+                enteredPin = "";
+                updatePinDots();
+            }
+        }
+
+        function applyLoggedUserUI() {
+            if (!window.loggedInUser) return;
+            const shortName = window.loggedInUser.name.split(' ').slice(0, 2).join(' ');
+            document.getElementById('currentRoleLabel').textContent = shortName;
+            document.getElementById('modalActiveUserName').textContent = window.loggedInUser.name;
+            document.getElementById('modalActiveUserRole').textContent = `${window.loggedInUser.role} • Autorizado`;
+
+            const staffSelect = document.getElementById('inputBookedByStaff');
+            if (staffSelect) {
+                staffSelect.value = window.loggedInUser.name;
+            }
+        }
+
+        window.validateActiveSession = function() {
+            const savedId = localStorage.getItem('citen_logged_user_id');
+            const savedPin = localStorage.getItem('citen_logged_user_pin');
+            const overlay = document.getElementById('authLockOverlay');
+
+            if (!savedId || !savedPin) {
+                window.loggedInUser = null;
+                if (overlay) overlay.classList.remove('hidden');
+                return;
+            }
+
+            const validUser = window.authorizedUsers.find(
+                u => u.active === true && (u.id === savedId || String(u.pin).trim() === savedPin)
+            );
+
+            if (validUser) {
+                window.loggedInUser = validUser;
+                applyLoggedUserUI();
+                if (overlay) overlay.classList.add('hidden');
+            } else {
+                // Suspended or removed in Google Drive! Lock immediately
+                window.loggedInUser = null;
+                localStorage.removeItem('citen_logged_user_id');
+                localStorage.removeItem('citen_logged_user_pin');
+                if (overlay) overlay.classList.remove('hidden');
+            }
+        };
+
+        function logoutUser() {
+            window.loggedInUser = null;
+            localStorage.removeItem('citen_logged_user_id');
+            localStorage.removeItem('citen_logged_user_pin');
+            closeLoginModal();
+            clearPinInput();
+            document.getElementById('currentRoleLabel').textContent = 'Iniciar Sesión';
+            document.getElementById('authLockOverlay').classList.remove('hidden');
+        }
+
+        function openLoginModal() {
+            const active = window.authorizedUsers.filter(u => u.active);
+            document.getElementById('activeStaffCountBadge').textContent = `${active.length} activos`;
+            document.getElementById('staffLoginList').innerHTML = active.map(u => `
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-ios-bg text-xs">
+                    <div>
+                        <div class="font-bold text-gray-900">${u.name}</div>
+                        <div class="text-[10px] text-gray-500">${u.role}</div>
+                    </div>
+                    <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">Activo</span>
+                </div>
+            `).join('');
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
         function closeLoginModal() { document.getElementById('loginModal').classList.add('hidden'); }
         function openInstallModal() { document.getElementById('installModal').classList.remove('hidden'); }
         function closeInstallModal() { document.getElementById('installModal').classList.add('hidden'); }

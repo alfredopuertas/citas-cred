@@ -250,11 +250,30 @@
                                     </span>
                                 </label>
                             </div>
-                            <select id="newServicio" class="w-full text-xs font-bold bg-ios-bg p-2.5 rounded-xl focus:outline-none" onchange="onServiceChanged()">
-                                <option value="CRED">CRED</option>
-                                <option value="SULFATO">Sulfato Ferroso</option>
-                                <option value="CRED_SULFATO">CRED + Sulfato Ferroso</option>
-                            </select>
+                            <div class="flex items-center gap-2">
+                                <select id="newServicio" class="w-2/3 text-xs font-bold bg-ios-bg p-2.5 rounded-xl focus:outline-none" onchange="onServiceChanged()">
+                                    <option value="CRED">CRED</option>
+                                    <option value="SULFATO">Sulfato Ferroso</option>
+                                    <option value="CRED_SULFATO">CRED + Sulfato Ferroso</option>
+                                </select>
+                                <div class="w-1/3 flex items-center bg-ios-bg rounded-xl px-2">
+                                    <span class="text-[9px] font-bold text-gray-500 whitespace-nowrap">Nº CRED:</span>
+                                    <select id="inputCredNumber" class="w-full text-xs font-bold bg-transparent p-2.5 focus:outline-none">
+                                        <option value="-">-</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                        <option value="10">10</option>
+                                        <option value="11">11</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- 4. Horarios y Bloques (Clean slot buttons without trailing end time text) -->
@@ -448,6 +467,66 @@
         </div>
     </div>
 
+    
+    <!-- FIREBASE INTEGRATION -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDwZr2fYn5kSF9uZpzDUMY0lB5TN0eiiK8",
+            authDomain: "ap-citas.firebaseapp.com",
+            projectId: "ap-citas",
+            storageBucket: "ap-citas.firebasestorage.app",
+            messagingSenderId: "884307856887",
+            appId: "1:884307856887:web:7c16a3edf4156c801df2f2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const docRef = doc(db, "citen_chilca", "database");
+
+        // Listen for real-time updates
+        onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                let needsRender = false;
+                
+                if (data.appointments) {
+                    window.appointments = data.appointments;
+                    needsRender = true;
+                }
+                if (data.authorizedUsers) {
+                    window.authorizedUsers = data.authorizedUsers;
+                    if (window.populateStaffSelects) window.populateStaffSelects();
+                    if (window.renderGoogleDriveStaffTable) window.renderGoogleDriveStaffTable();
+                }
+                
+                if (needsRender) {
+                    if (window.renderAppointments) window.renderAppointments();
+                    if (window.renderAlerts) window.renderAlerts();
+                    document.getElementById('syncText').innerHTML = "🟢 Sincronizado en Vivo";
+                }
+            }
+        });
+
+        // Global function to push updates
+        window.saveToFirebase = async function() {
+            document.getElementById('syncText').innerHTML = "🟡 Guardando...";
+            try {
+                await setDoc(docRef, {
+                    appointments: window.appointments,
+                    authorizedUsers: window.authorizedUsers,
+                    lastUpdate: new Date().toISOString()
+                }, { merge: true });
+                document.getElementById('syncText').innerHTML = "🟢 Sincronizado en Vivo";
+            } catch (e) {
+                console.error("Error saving to Firebase: ", e);
+                document.getElementById('syncText').innerHTML = "🔴 Error Sync (Offline)";
+            }
+        };
+    </script>
+
     <script>
         let currentFechaSeleccionada = new Date().toISOString().split('T')[0];
         let consultorioBEnabledByDay = { };
@@ -459,7 +538,7 @@
         let currentAlertTab = 'AMBER';
         let currentUserIndex = 0;
 
-        let authorizedUsers = [
+        window.authorizedUsers = [
             { id: 'U1', name: 'Lic. Carmen Rosa Mendoza', role: 'Enfermera', pin: '1001', active: true },
             { id: 'U2', name: 'Lic. Patricia Salazar Vega', role: 'Enfermera', pin: '1002', active: true },
             { id: 'U3', name: 'Lic. Milagros Quispe Huamán', role: 'Enfermera', pin: '1003', active: true },
@@ -471,7 +550,7 @@
             { id: 'U9', name: 'Srta. Lucía Gómez', role: 'Secretaria', pin: '3001', active: true }
         ];
 
-        let appointments = [];
+        window.appointments = [];
 
         let alertsData = {
             AMBER: [],
@@ -611,7 +690,7 @@
 
         function renderAppointments() {
             const list = document.getElementById('appointmentsList');
-            const dayApps = appointments
+            const dayApps = window.appointments
                 .filter(a => a.exactDate === currentFechaSeleccionada)
                 .filter(a => currentConsultorioFilter === 'ALL' || a.consultorio === currentConsultorioFilter)
                 .filter(a => currentShiftFilter === 'ALL' || a.shift === currentShiftFilter)
@@ -679,7 +758,7 @@
                             <span class="font-bold text-[10px] px-2 py-0.5 rounded-full ${app.status==='ATENDIDO'?'bg-emerald-100 text-emerald-800':'bg-amber-100 text-amber-800'}">${app.status}</span>
                         </div>
                         <div class="text-sm font-bold text-gray-900">${app.name}</div>
-                        <div class="text-[11px] text-gray-500">H.Cl: <strong>${app.hcl}</strong> • DNI: ${app.dni}</div>
+                        <div class="text-[11px] text-gray-500">H.Cl: <strong>${app.hcl}</strong> • DNI: ${app.dni} • No. de CRED: <strong class="text-ios-blue">${app.credNumber && app.credNumber !== '-' ? app.credNumber : '-'}</strong></div>
                         <div class="text-[10px] text-ios-blue font-semibold">Agendado por: ${app.bookedBy}</div>
                     </div>
                 `;
@@ -689,7 +768,7 @@
         }
 
         function openActionSheet(id) {
-            const app = appointments.find(a => a.id === id);
+            const app = window.appointments.find(a => a.id === id);
             if (!app) return;
             activeAppointmentId = id;
             document.getElementById('sheetConsBadge').textContent = `CONS. ${app.consultorio}`;
@@ -702,7 +781,7 @@
                     dobFormatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
                 }
             }
-            document.getElementById('sheetChildMeta').textContent = `H.Cl: ${app.hcl} • DNI: ${app.dni} • F.Nac: ${dobFormatted} (${app.ageText})`;
+            document.getElementById('sheetChildMeta').innerHTML = `H.Cl: <strong>${app.hcl}</strong> • DNI: ${app.dni} • No. de CRED: <strong>${app.credNumber && app.credNumber !== '-' ? app.credNumber : '-'}</strong><br>F.Nac: ${dobFormatted} (${app.ageText})`;
 
             document.getElementById('sheetTimeBadge').textContent = `${app.time} (${app.blocks * 20}m)`;
             document.getElementById('sheetBookedByMeta').textContent = `Agendado por: ${app.bookedBy}`;
@@ -716,22 +795,23 @@
 
         function closeActionSheet() { document.getElementById('actionSheetBackdrop').classList.add('hidden'); }
         function triggerWhatsAppSend() {
-            const app = appointments.find(a => a.id === activeAppointmentId);
+            const app = window.appointments.find(a => a.id === activeAppointmentId);
             if (!app) return;
             const text = document.getElementById('whatsappPreviewText').textContent.replace(/^"|"$/g, '');
             window.open(`https://wa.me/51${app.phone1}?text=${encodeURIComponent(text)}`, '_blank');
         }
 
         function markAsAttended() {
-            const app = appointments.find(a => a.id === activeAppointmentId);
+            const app = window.appointments.find(a => a.id === activeAppointmentId);
             if (!app) return;
             app.status = 'ATENDIDO';
             renderAppointments();
+            if(window.saveToFirebase) window.saveToFirebase();
             closeActionSheet();
         }
 
         function openEditAppointment() {
-            const app = appointments.find(a => a.id === activeAppointmentId);
+            const app = window.appointments.find(a => a.id === activeAppointmentId);
             if (!app) return;
             editingAppointmentId = activeAppointmentId;
             closeActionSheet();
@@ -745,14 +825,15 @@
 
         function deleteActiveAppointment() {
             if (confirm('¿Desea borrar esta cita?')) {
-                appointments = appointments.filter(a => a.id !== activeAppointmentId);
+                window.appointments = window.appointments.filter(a => a.id !== activeAppointmentId);
                 closeActionSheet();
                 renderAppointments();
+                if(window.saveToFirebase) window.saveToFirebase();
             }
         }
 
         function populateStaffSelects() {
-            const active = authorizedUsers.filter(u => u.active);
+            const active = window.authorizedUsers.filter(u => u.active);
             document.getElementById('inputBookedByStaff').innerHTML = active.map(u => `<option value="${u.name}">${u.name}</option>`).join('');
         }
 
@@ -771,7 +852,7 @@
             const dateVal = document.getElementById('printDateSelector').value || currentFechaSeleccionada;
             document.getElementById('printDateSubtitle').textContent = `Fecha de Citas: ${dateVal}`;
             
-            const dayApps = appointments
+            const dayApps = window.appointments
                 .filter(a => a.exactDate === dateVal && a.status !== 'NO_ASISTIO')
                 .sort((a, b) => {
                     const timeA = parseInt(a.time.replace(':', ''));
@@ -797,7 +878,7 @@
         function closePrintHclModal() { document.getElementById('printHclModal').classList.add('hidden'); }
 
         function renderGoogleDriveStaffTable() {
-            document.getElementById('gsheetStaffBody').innerHTML = authorizedUsers.map((u, idx) => `
+            document.getElementById('gsheetStaffBody').innerHTML = window.authorizedUsers.map((u, idx) => `
                 <tr class="border-b"><td class="p-2">${idx+1}</td><td class="p-2 font-bold">${u.name}</td><td class="p-2">${u.role}</td><td class="p-2 font-mono">${u.pin}</td><td class="p-2 text-emerald-700 font-bold">✓ ACTIVO</td></tr>
             `).join('');
         }
@@ -825,7 +906,7 @@
             const targetCons = consRadio ? consRadio.value : 'A';
             
             const bookedTimes = new Set();
-            appointments.filter(a => a.exactDate === targetDate && a.shift === formShift && a.status !== 'NO_ASISTIO' && a.consultorio === targetCons && a.id !== editingAppointmentId).forEach(a => {
+            window.appointments.filter(a => a.exactDate === targetDate && a.shift === formShift && a.status !== 'NO_ASISTIO' && a.consultorio === targetCons && a.id !== editingAppointmentId).forEach(a => {
                 bookedTimes.add(a.time);
                 if (a.blocks === 2) {
                     const idx = slotList.indexOf(a.time);
@@ -916,10 +997,10 @@
             const consultorio = consRadio ? consRadio.value : 'A';
 
             if (editingAppointmentId) {
-                appointments = appointments.filter(a => a.id !== editingAppointmentId);
+                window.appointments = window.appointments.filter(a => a.id !== editingAppointmentId);
                 editingAppointmentId = null;
             }
-            appointments.push({
+            window.appointments.push({
                 id: Date.now(),
                 exactDate: exactDate,
                 consultorio: consultorio,
@@ -934,6 +1015,7 @@
                 parentName: document.getElementById('inputParentName').value,
                 phone1: document.getElementById('inputPhone1').value,
                 service: document.getElementById('newServicio').value,
+                credNumber: document.getElementById('inputCredNumber').value,
                 bookedBy: document.getElementById('inputBookedByStaff').value || 'Lic. Carmen Rosa Mendoza',
                 status: 'PENDIENTE'
             });
@@ -941,6 +1023,7 @@
             renderWeekStrip();
             renderAppointments();
             switchScreen('agenda');
+            if(window.saveToFirebase) window.saveToFirebase();
             alert('¡Cita guardada correctamente y sincronizada!');
         }
 
@@ -997,6 +1080,7 @@
             document.getElementById('inputName').value = p.name || '';
             document.getElementById('inputParentName').value = p.parentName || '';
             document.getElementById('inputPhone1').value = p.phone1 || '';
+            document.getElementById('inputCredNumber').value = p.credNumber || '-';
             if(p.exactDate) {
                 document.getElementById('inputExactDate').value = p.exactDate;
                 currentFechaSeleccionada = p.exactDate;

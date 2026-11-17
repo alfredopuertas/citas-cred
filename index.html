@@ -149,7 +149,7 @@
                                 <i class="ph-fill ph-calendar-check text-lg"></i>
                             </div>
                             <div>
-                                <div class="text-[11px] text-gray-400 font-bold uppercase">Avance del día <span class="text-ios-blue font-semibold lowercase" id="activeConsBadge">Solo Cons. A</span></div>
+                                <div class="text-[11px] text-gray-400 font-bold uppercase">Avance del día <span class="text-ios-blue font-bold uppercase ml-1 px-1.5 py-0.5 rounded bg-ios-blue/10" id="activeConsBadge">SOLO CONS. A</span></div>
                                 <div class="text-xs font-extrabold text-gray-900" id="dayProgressText">2 de 5 atendidos</div>
                             </div>
                         </div>
@@ -388,15 +388,24 @@
             <!-- Print H.Cl. Modal -->
             <div id="printHclModal" onclick="closePrintHclModal()" class="hidden absolute inset-0 z-50 bg-black/50 backdrop-blur-[2px] flex items-end">
                 <div onclick="event.stopPropagation()" class="w-full h-[90%] bg-white rounded-t-[32px] p-5 flex flex-col animate-slide-up shadow-2xl">
-                    <h2 class="text-base font-extrabold mb-2">Lista para Archivo de Historias Clínicas</h2>
-                    <div id="printableHclSheet" class="flex-1 overflow-y-auto border border-gray-200 rounded-2xl p-3 bg-gray-50 space-y-2">
-                        <h3 class="text-xs font-bold text-gray-900">ESTABLECIMIENTO: C.S. CHILCA</h3>
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-base font-extrabold leading-tight">Lista para Archivo de<br>Historias Clínicas</h2>
+                        <input type="date" id="printDateSelector" onchange="renderPrintList()" class="p-1.5 rounded-xl bg-gray-100 border border-gray-200 text-[11px] font-bold text-ios-blue focus:outline-none">
+                    </div>
+                    <div id="printableHclSheet" class="flex-1 overflow-y-auto border border-gray-200 rounded-2xl p-3 bg-gray-50 space-y-3">
+                        <div class="border-b-2 border-gray-900 pb-2">
+                            <h3 class="text-xs font-bold text-gray-900">ESTABLECIMIENTO: C.S. CHILCA</h3>
+                            <p class="text-[10px] text-gray-600 font-semibold mt-0.5" id="printDateSubtitle"></p>
+                        </div>
                         <table class="w-full text-left text-xs">
-                            <thead><tr class="border-b"><th class="py-1">Hora</th><th class="py-1">H.Cl.</th><th class="py-1">Paciente</th><th class="py-1">Agendado por</th></tr></thead>
+                            <thead><tr class="border-b text-gray-500 text-[10px] uppercase"><th class="py-1">Hora</th><th class="py-1">H.Cl.</th><th class="py-1">Paciente</th><th class="py-1">Agendado por</th></tr></thead>
                             <tbody id="printHclTableBody"></tbody>
                         </table>
                     </div>
-                    <button onclick="window.print()" class="mt-3 py-3 rounded-2xl bg-ios-blue text-white font-bold text-xs">🖨️ Imprimir Lista</button>
+                    <div class="grid grid-cols-2 gap-2 mt-3">
+                        <button onclick="closePrintHclModal()" class="w-full py-3 rounded-2xl bg-gray-200 text-gray-700 font-bold text-xs ios-tap">Cancelar</button>
+                        <button onclick="window.print()" class="w-full py-3 rounded-2xl bg-ios-blue text-white font-bold text-xs shadow-md ios-tap flex items-center justify-center gap-1.5"><i class="ph-bold ph-printer"></i> Imprimir</button>
+                    </div>
                 </div>
             </div>
 
@@ -462,18 +471,11 @@
             { id: 'U9', name: 'Srta. Lucía Gómez', role: 'Secretaria', pin: '3001', active: true }
         ];
 
-        let appointments = [
-            { id: 101, exactDate: currentFechaSeleccionada, consultorio: 'A', shift: 'MANANA', time: '08:30', blocks: 2, hcl: '44910', dni: '81902344', name: 'Camila Valentina Flores Mamani', dob: '2026-09-10', ageText: '2 meses, 5 días', parentName: 'Elena Mamani Cruz', phone1: '945128904', phone2: '976543210', service: 'CRED', isPrematuro: true, bookedBy: 'Srta. Lucía Gómez', status: 'ATENDIDO' },
-            { id: 102, exactDate: currentFechaSeleccionada, consultorio: 'A', shift: 'MANANA', time: '09:10', blocks: 1, hcl: '45892', dni: '81459230', name: 'Mateo Sebastián Quispe Huamán', dob: '2026-07-13', ageText: '4 meses, 2 días', parentName: 'Rosa Huamán Quispe', phone1: '987451203', phone2: '945112233', service: 'CRED_SULFATO', isPrematuro: false, bookedBy: 'Téc. Marisol Ramos Luján', status: 'PENDIENTE' }
-        ];
+        let appointments = [];
 
         let alertsData = {
-            AMBER: [
-                { id: 'A1', hcl: '45612', name: 'Dylan Josué Huarcaya Ramos', dni: '81501299', age: '3m 27d', parentName: 'Karina Ramos', phone1: '982341122', reason: 'Control 4m e inicio de Sulfato Ferroso vence en 2 días', urgency: 'Vence en 2 días' }
-            ],
-            RED: [
-                { id: 'R1', hcl: '45234', name: 'Brianna Sofía Luján Castro', dni: '81209843', age: '6m 5d', parentName: 'Milagros Castro', phone1: '966712345', reason: 'No asistió a su cita anterior', urgency: '4 días de atraso' }
-            ]
+            AMBER: [],
+            RED: []
         };
 
         const MORNING_SLOTS = ['08:30', '08:50', '09:10', '09:30', '09:50', '10:10', '10:30', '10:50', '11:10', '11:30', '11:50'];
@@ -562,12 +564,14 @@
                 btn.className = 'px-2.5 py-1.5 rounded-xl text-xs font-bold border bg-ios-green/15 text-ios-green border-ios-green/30 ios-tap';
                 btn.textContent = 'Cons. B Activo';
                 dot.className = 'w-1.5 h-1.5 rounded-full bg-ios-green';
-                badge.textContent = 'Cons. A + B Activos';
+                badge.textContent = 'CONS. A + B ACTIVOS';
+                badge.className = 'text-ios-green font-bold uppercase ml-1 px-1.5 py-0.5 rounded bg-ios-green/15 text-[9px]';
             } else {
                 btn.className = 'px-2.5 py-1.5 rounded-xl text-xs font-bold border bg-white text-gray-700 border-gray-200 ios-tap';
                 btn.textContent = '+ Activar Cons. B';
                 dot.className = 'w-1.5 h-1.5 rounded-full bg-gray-400';
-                badge.textContent = 'Solo Cons. A';
+                badge.textContent = 'SOLO CONS. A';
+                badge.className = 'text-ios-blue font-bold uppercase ml-1 px-1.5 py-0.5 rounded bg-ios-blue/10 text-[9px]';
             }
 
             document.querySelectorAll('.cons-filter-btn').forEach(b => {
@@ -622,6 +626,26 @@
             let totalCount = dayApps.length;
             let pct = totalCount > 0 ? Math.round((atendidosCount / totalCount) * 100) : 0;
             document.getElementById('dayProgressText').textContent = `${atendidosCount} de ${totalCount} atendidos`;
+            
+            // Update badge text dynamically based on the active filter
+            const badge = document.getElementById('activeConsBadge');
+            if (currentConsultorioFilter === 'ALL') {
+                const isBActive = !!consultorioBEnabledByDay[currentFechaSeleccionada];
+                if (isBActive) {
+                    badge.textContent = 'CONS. A + B';
+                    badge.className = 'text-ios-green font-bold uppercase ml-1 px-1.5 py-0.5 rounded bg-ios-green/15 text-[9px]';
+                } else {
+                    badge.textContent = 'SOLO CONS. A';
+                    badge.className = 'text-ios-blue font-bold uppercase ml-1 px-1.5 py-0.5 rounded bg-ios-blue/10 text-[9px]';
+                }
+            } else if (currentConsultorioFilter === 'A') {
+                badge.textContent = 'SOLO CONS. A';
+                badge.className = 'text-ios-blue font-bold uppercase ml-1 px-1.5 py-0.5 rounded bg-ios-blue/10 text-[9px]';
+            } else if (currentConsultorioFilter === 'B') {
+                badge.textContent = 'SOLO CONS. B';
+                badge.className = 'text-ios-teal font-bold uppercase ml-1 px-1.5 py-0.5 rounded bg-ios-teal/15 text-[9px] text-teal-700';
+            }
+
             document.getElementById('dayProgressPct').textContent = `${pct}%`;
             document.getElementById('dayProgressBar').style.width = `${pct}%`;
 
@@ -738,9 +762,38 @@
         function closeInstallModal() { document.getElementById('installModal').classList.add('hidden'); }
         
         function openPrintHclModal() {
-            document.getElementById('printHclTableBody').innerHTML = appointments.map(a => `<tr><td class="py-1">${a.time}</td><td class="py-1 font-bold text-ios-blue">${a.hcl}</td><td class="py-1">${a.name}</td><td class="py-1 text-gray-500">${a.bookedBy}</td></tr>`).join('');
+            document.getElementById('printDateSelector').value = currentFechaSeleccionada;
+            renderPrintList();
             document.getElementById('printHclModal').classList.remove('hidden');
         }
+
+        function renderPrintList() {
+            const dateVal = document.getElementById('printDateSelector').value || currentFechaSeleccionada;
+            document.getElementById('printDateSubtitle').textContent = `Fecha de Citas: ${dateVal}`;
+            
+            const dayApps = appointments
+                .filter(a => a.exactDate === dateVal && a.status !== 'NO_ASISTIO')
+                .sort((a, b) => {
+                    const timeA = parseInt(a.time.replace(':', ''));
+                    const timeB = parseInt(b.time.replace(':', ''));
+                    return timeA - timeB;
+                });
+                
+            const tbody = document.getElementById('printHclTableBody');
+            if(dayApps.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-gray-400 text-xs">No hay citas registradas.</td></tr>`;
+            } else {
+                tbody.innerHTML = dayApps.map(a => `
+                    <tr class="border-b border-gray-100">
+                        <td class="py-1.5 font-semibold text-[11px]">${a.time}</td>
+                        <td class="py-1.5 font-bold text-ios-blue text-[11px]">${a.hcl}</td>
+                        <td class="py-1.5 text-[11px] leading-tight font-medium">${a.name}</td>
+                        <td class="py-1.5 text-gray-500 text-[9px] leading-tight">${a.bookedBy}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
         function closePrintHclModal() { document.getElementById('printHclModal').classList.add('hidden'); }
 
         function renderGoogleDriveStaffTable() {

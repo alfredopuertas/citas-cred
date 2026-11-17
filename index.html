@@ -124,8 +124,8 @@
                     <!-- Consultorio Filters (Consultorio A highlighted by default) + Toggle B -->
                     <div class="flex items-center justify-between gap-2 pt-1">
                         <div class="flex-1 grid grid-cols-3 bg-gray-200/80 p-0.5 rounded-xl text-xs font-semibold">
-                            <button onclick="setConsultorioFilter('ALL')" class="cons-filter-btn py-1 rounded-[9px] text-gray-600" data-cons="ALL">Todos</button>
-                            <button onclick="setConsultorioFilter('A')" class="cons-filter-btn py-1 rounded-[9px] bg-white text-gray-900 shadow-xs" data-cons="A">Cons. A</button>
+                            <button onclick="setConsultorioFilter(\'ALL\')" class="cons-filter-btn py-1 rounded-[9px] text-gray-600" data-cons="ALL">Todos</button>
+                            <button onclick="setConsultorioFilter(\'A\')" class="cons-filter-btn py-1 rounded-[9px] bg-white text-gray-900 shadow-xs" data-cons="A">Cons. A</button>
                             <button onclick="setConsultorioFilter('B')" class="cons-filter-btn py-1 rounded-[9px] text-gray-600 flex items-center justify-center gap-1" data-cons="B">
                                 <span>Cons. B</span> <span class="w-1.5 h-1.5 rounded-full bg-gray-400" id="consBStatusDot"></span>
                             </button>
@@ -251,9 +251,9 @@
                                 </label>
                             </div>
                             <select id="newServicio" class="w-full text-xs font-bold bg-ios-bg p-2.5 rounded-xl focus:outline-none" onchange="onServiceChanged()">
-                                <option value="CRED">Solo CRED (20 min)</option>
-                                <option value="SULFATO">Sulfato Ferroso (20 min)</option>
-                                <option value="CRED_SULFATO">CRED + Sulfato Ferroso (40 min)</option>
+                                <option value="CRED">CRED</option>
+                                <option value="SULFATO">Sulfato Ferroso</option>
+                                <option value="CRED_SULFATO">CRED + Sulfato Ferroso</option>
                             </select>
                         </div>
 
@@ -442,7 +442,7 @@
     <script>
         let currentFechaSeleccionada = new Date().toISOString().split('T')[0];
         let consultorioBEnabledByDay = { };
-        let currentConsultorioFilter = 'ALL';
+        let currentConsultorioFilter = 'A';
         let currentShiftFilter = 'ALL';
         let formShift = 'MANANA';
         let activeAppointmentId = null;
@@ -634,21 +634,23 @@
             let currentShiftRendered = null;
 
             dayApps.forEach(app => {
-                // Separador visual tenue entre mañana y tarde
-                let shiftBg = app.shift === 'MANANA' ? 'bg-white' : 'bg-[#F8FAFC]'; // Tarde con color gris/azulado muy tenue
+                let shiftBg = app.shift === 'MANANA' ? 'bg-white' : 'bg-[#F8FAFC]'; 
                 let cardBorder = app.status === 'ATENDIDO' ? 'border-l-4 border-l-ios-green' : 'border-l-4 border-l-ios-blue';
                 
-                // Mostrar un pequeño encabezado sutil si cambiamos de turno
                 if (currentShiftRendered !== app.shift) {
-                    const shiftName = app.shift === 'MANANA' ? '☀️ Turno Mañana' : '🌙 Turno Tarde';
-                    html += `<div class="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider px-2 pt-2 pb-1">${shiftName}</div>`;
+                    const shiftName = app.shift === 'MANANA' ? '☀️ TURNO MAÑANA' : '🌙 TURNO TARDE';
+                    const shiftColor = app.shift === 'MANANA' ? 'text-ios-orange' : 'text-ios-indigo';
+                    html += `<div class="text-[10px] font-extrabold ${shiftColor} uppercase tracking-wider px-2 pt-2 pb-1">${shiftName}</div>`;
                     currentShiftRendered = app.shift;
                 }
+
+                // Llaves de color (mañana: verde, tarde: azul)
+                let keyIcon = app.shift === 'MANANA' ? '<i class="ph-fill ph-key text-ios-green mr-1"></i>' : '<i class="ph-fill ph-key text-ios-blue mr-1"></i>';
 
                 html += `
                     <div onclick="openActionSheet(${app.id})" class="${shiftBg} rounded-2xl p-3.5 shadow-ios-card ${cardBorder} ios-tap cursor-pointer space-y-1.5">
                         <div class="flex justify-between items-center text-xs">
-                            <span class="font-bold bg-black text-white px-1.5 py-0.5 rounded text-[10px]">Cons. ${app.consultorio}</span>
+                            <span class="font-bold bg-black text-white px-1.5 py-0.5 rounded text-[10px] flex items-center">${keyIcon} Cons. ${app.consultorio}</span>
                             <span class="font-extrabold text-ios-blue">${app.time} (${app.blocks * 20}m)</span>
                             <span class="font-bold text-[10px] px-2 py-0.5 rounded-full ${app.status==='ATENDIDO'?'bg-emerald-100 text-emerald-800':'bg-amber-100 text-amber-800'}">${app.status}</span>
                         </div>
@@ -668,7 +670,16 @@
             activeAppointmentId = id;
             document.getElementById('sheetConsBadge').textContent = `CONS. ${app.consultorio}`;
             document.getElementById('sheetChildName').textContent = app.name;
-            document.getElementById('sheetChildMeta').textContent = `H.Cl: ${app.hcl} • DNI: ${app.dni} • F.Nac: ${app.dob || '--'} (${app.ageText})`;
+            
+            let dobFormatted = '--';
+            if (app.dob) {
+                const parts = app.dob.split('-');
+                if (parts.length === 3) {
+                    dobFormatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                }
+            }
+            document.getElementById('sheetChildMeta').textContent = `H.Cl: ${app.hcl} • DNI: ${app.dni} • F.Nac: ${dobFormatted} (${app.ageText})`;
+
             document.getElementById('sheetTimeBadge').textContent = `${app.time} (${app.blocks * 20}m)`;
             document.getElementById('sheetBookedByMeta').textContent = `Agendado por: ${app.bookedBy}`;
 

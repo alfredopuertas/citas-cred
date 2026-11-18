@@ -239,6 +239,8 @@
                                     <option value="CRED">CRED</option>
                                     <option value="SULFATO">Sulfato Ferroso</option>
                                     <option value="CRED_SULFATO">CRED + Sulfato Ferroso</option>
+                                    <option value="DOSAJE_HB">Dosaje de Hb</option>
+                                    <option value="TA">TA</option>
                                 </select>
                                 <div class="w-1/3 flex items-center bg-ios-bg rounded-xl px-2">
                                     <span class="text-[9px] font-bold text-gray-500 whitespace-nowrap">Nº CRED:</span>
@@ -274,8 +276,8 @@
                                 </label>
                             </div>
                             <div class="grid grid-cols-2 bg-gray-200 p-0.5 rounded-xl text-xs font-semibold">
-                                <button type="button" onclick="setFormShift('MANANA')" id="formShiftManana" class="py-1.5 rounded-lg bg-white shadow-xs">Mañana</button>
-                                <button type="button" onclick="setFormShift('TARDE')" id="formShiftTarde" class="py-1.5 rounded-lg text-gray-600">Tarde</button>
+                                <button type="button" onclick="setFormShift('MANANA')" id="formShiftManana" class="py-1.5 rounded-lg bg-white shadow-xs">Mañana 8:30 hs</button>
+                                <button type="button" onclick="setFormShift('TARDE')" id="formShiftTarde" class="py-1.5 rounded-lg text-gray-600">Tarde: 14 hs</button>
                             </div>
                             <div class="grid grid-cols-3 gap-1.5 pt-1" id="timeSlotsGrid"></div>
                         </div>
@@ -607,6 +609,7 @@
                 if (needsRender) {
                     if (window.renderAppointments) window.renderAppointments();
                     if (window.renderAlerts) window.renderAlerts();
+                    if (window.renderTimeSlots) window.renderTimeSlots();
                     document.getElementById('syncText').innerHTML = "🟢 Sincronizado en Vivo";
                 }
             }
@@ -824,6 +827,33 @@
             });
         })();
 
+        function resetNewAppointmentForm() {
+            const form = document.getElementById('newAppointmentForm');
+            if (form) form.reset();
+            document.getElementById('inputExactDate').value = currentFechaSeleccionada;
+            document.getElementById('inputHcl').value = '';
+            document.getElementById('inputDni').value = '';
+            document.getElementById('inputName').value = '';
+            document.getElementById('inputDob').value = '';
+            document.getElementById('calculatedAgeText').textContent = '--';
+            document.getElementById('calculatedAgeBanner').classList.add('hidden');
+            document.getElementById('inputParentName').value = '';
+            document.getElementById('inputPhone1').value = '';
+            document.getElementById('inputPhone2').value = '';
+            document.getElementById('inputPrematuro').checked = false;
+            document.getElementById('newServicio').value = 'CRED';
+            document.getElementById('inputCredNumber').value = '-';
+            const radios = document.querySelectorAll('input[name="blockDuration"]');
+            if (radios[0]) radios[0].checked = true;
+            if (window.loggedInUser) {
+                const sel = document.getElementById('inputBookedByStaff');
+                if (sel) sel.value = window.loggedInUser.name;
+            }
+            setFormShift('MANANA');
+            renderFormConsultorioSelector();
+            renderTimeSlots();
+        }
+
         function switchScreen(screenName) {
             if (screenName !== 'new') editingAppointmentId = null;
             ['agenda', 'new', 'alerts', 'stats'].forEach(s => document.getElementById(`screen-${s}`).classList.add('hidden'));
@@ -832,7 +862,13 @@
                 if(t.dataset.screen === screenName) t.className = "nav-tab flex flex-col items-center gap-1 text-ios-blue ios-tap";
                 else t.className = "nav-tab flex flex-col items-center gap-1 text-gray-400 ios-tap";
             });
-            if(screenName === 'new') onFormScheduleChange();
+            if (screenName === 'new') {
+                if (!editingAppointmentId) {
+                    resetNewAppointmentForm();
+                } else {
+                    onFormScheduleChange();
+                }
+            }
         }
 
         function renderWeekStrip() {
@@ -930,6 +966,17 @@
             renderAppointments();
         }
 
+        function formatServiceLabel(srv) {
+            const map = {
+                'CRED': 'CRED',
+                'SULFATO': 'Sulfato Ferroso',
+                'CRED_SULFATO': 'CRED + Sulfato Ferroso',
+                'DOSAJE_HB': 'Dosaje de Hb',
+                'TA': 'TA'
+            };
+            return map[srv] || srv || 'CRED';
+        }
+
         function renderAppointments() {
             const list = document.getElementById('appointmentsList');
             const dayApps = window.appointments
@@ -1002,7 +1049,7 @@
                         </div>
                         <div class="text-sm font-bold text-gray-900">${app.name}</div>
                         <div class="text-[11px] text-gray-500">H.Cl: <strong>${app.hcl}</strong> • DNI: ${app.dni} • No. de CRED: <strong class="text-ios-blue">${app.credNumber && app.credNumber !== '-' ? app.credNumber : '-'}</strong></div>
-                        <div class="text-[10px] text-ios-blue font-semibold">Agendado por: ${app.bookedBy}</div>
+                        <div class="flex items-center justify-between text-[10px] pt-0.5"><span class="text-ios-blue font-semibold">Agendado por: ${app.bookedBy}</span><span class="px-2 py-0.5 rounded-md bg-gray-100 text-gray-700 font-bold">${formatServiceLabel(app.service)}${app.isPrematuro ? ' • Prematuro' : ''}</span></div>
                     </div>
                 `;
             });
@@ -1286,72 +1333,63 @@
             }
         }
 
+        function timeToMinutes(tStr) {
+            if (!tStr || !tStr.includes(':')) return -1;
+            const [h, m] = tStr.split(':').map(Number);
+            return h * 60 + m;
+        }
+
         function renderTimeSlots() {
             const durationBlocks = parseInt(document.querySelector('input[name="blockDuration"]:checked').value, 10);
+            const neededMinutes = durationBlocks * 20;
             const slotList = formShift === 'MANANA' ? MORNING_SLOTS : AFTERNOON_SLOTS;
             const grid = document.getElementById('timeSlotsGrid');
 
             const targetDate = document.getElementById('inputExactDate').value;
             const consRadio = document.querySelector('input[name="formConsultorio"]:checked');
             const targetCons = consRadio ? consRadio.value : 'A';
-            
-            const bookedTimes = new Set();
-            window.appointments.filter(a => a.exactDate === targetDate && a.shift === formShift && a.status !== 'NO_ASISTIO' && a.consultorio === targetCons && a.id !== editingAppointmentId).forEach(a => {
-                bookedTimes.add(a.time);
-                if (a.blocks === 2) {
-                    const idx = slotList.indexOf(a.time);
-                    if (idx !== -1 && idx + 1 < slotList.length) {
-                        bookedTimes.add(slotList[idx + 1]);
-                    }
-                }
-            });
 
-            grid.innerHTML = slotList.map((time, idx) => {
+            // Intervalos ocupados en minutos [inicio, fin) para calcular bloques libres de 20 min con precisión
+            const bookedIntervals = window.appointments
+                .filter(a => a.exactDate === targetDate && a.shift === formShift && a.status !== 'NO_ASISTIO' && a.status !== 'INASISTENTE' && a.consultorio === targetCons && a.id !== editingAppointmentId)
+                .map(a => {
+                    const start = timeToMinutes(a.time);
+                    const dur = (Number(a.blocks) || 1) * 20;
+                    return { start, end: start + dur };
+                })
+                .filter(iv => iv.start >= 0);
+
+            const availableButtons = slotList.map((time, idx) => {
+                // Si elige 2 bloques (40m), no puede empezar en el último bloque del turno
                 if (durationBlocks === 2 && idx + 1 >= slotList.length) return '';
-                
-                const isBooked = bookedTimes.has(time);
-                let isNextBooked = false;
-                if (durationBlocks === 2) {
-                    isNextBooked = bookedTimes.has(slotList[idx + 1]);
-                }
 
-                if (isBooked || (durationBlocks === 2 && isNextBooked)) return ''; 
-                
-                let label = time;
-                if (durationBlocks === 2) {
-                    const nextTime = slotList[idx + 1];
-                    const [h, m] = nextTime.split(':').map(Number);
-                    const totalM = h * 60 + m + 20;
-                    const endH = String(Math.floor(totalM / 60)).padStart(2, '0');
-                    const endM = String(totalM % 60).padStart(2, '0');
-                    label = `${time} - ${endH}:${endM}`;
-                }
+                const slotStart = timeToMinutes(time);
+                const slotEnd = slotStart + neededMinutes;
+
+                // Verificar si algún intervalo ocupado se cruza con este bloque
+                const overlaps = bookedIntervals.some(iv => slotStart < iv.end && slotEnd > iv.start);
+                if (overlaps) return '';
 
                 return `
                     <label class="cursor-pointer">
                         <input type="radio" name="timeSlot" value="${time}" class="peer sr-only">
-                        <div class="p-2 rounded-xl bg-ios-bg border-2 border-transparent peer-checked:border-ios-blue text-center text-xs font-bold truncate">
-                            ${label}
+                        <div class="p-2 rounded-xl bg-ios-bg border-2 border-transparent peer-checked:border-ios-blue text-center text-xs font-bold">
+                            ${time}
                         </div>
                     </label>
                 `;
-            }).join('');
+            }).filter(Boolean);
 
-            const firstAvailable = document.querySelector('input[name="timeSlot"]:not(:checked)');
-            const checkedSlot = document.querySelector('input[name="timeSlot"]:checked');
-            if(!checkedSlot && firstAvailable) {
-                 firstAvailable.checked = true;
+            if (availableButtons.length === 0) {
+                grid.innerHTML = `<div class="col-span-3 text-center text-[11px] font-semibold text-gray-500 py-3 bg-ios-bg rounded-xl">No hay bloques libres de 20 min en este turno.</div>`;
+            } else {
+                grid.innerHTML = availableButtons.join('');
+                const firstAvailable = grid.querySelector('input[name="timeSlot"]');
+                if (firstAvailable) firstAvailable.checked = true;
             }
         }
 
         function onServiceChanged() {
-            const srv = document.getElementById('newServicio').value;
-            const radios = document.querySelectorAll('input[name="blockDuration"]');
-            if (srv === 'CRED' || srv === 'CRED_SULFATO') {
-                radios[1].checked = true; // 2 Bloques (40m)
-            } else {
-                radios[0].checked = true; // 1 Bloque (20m)
-            }
             renderTimeSlots();
         }
 
@@ -1404,12 +1442,15 @@
                 ageText: document.getElementById('calculatedAgeText').textContent || '3 meses',
                 parentName: document.getElementById('inputParentName').value,
                 phone1: document.getElementById('inputPhone1').value,
+                phone2: document.getElementById('inputPhone2').value || '',
+                isPrematuro: document.getElementById('inputPrematuro').checked,
                 service: document.getElementById('newServicio').value,
                 credNumber: document.getElementById('inputCredNumber').value,
                 bookedBy: document.getElementById('inputBookedByStaff').value || 'Lic. Carmen Rosa Mendoza',
                 status: 'PENDIENTE'
             });
             currentFechaSeleccionada = exactDate;
+            resetNewAppointmentForm();
             renderWeekStrip();
             renderAppointments();
             switchScreen('agenda');
@@ -1468,12 +1509,31 @@
             document.getElementById('inputHcl').value = p.hcl || '';
             document.getElementById('inputDni').value = p.dni || '';
             document.getElementById('inputName').value = p.name || '';
+            document.getElementById('inputDob').value = p.dob || '';
+            if (p.dob) calculateExactAge();
+            else {
+                document.getElementById('calculatedAgeText').textContent = '--';
+                document.getElementById('calculatedAgeBanner').classList.add('hidden');
+            }
             document.getElementById('inputParentName').value = p.parentName || '';
             document.getElementById('inputPhone1').value = p.phone1 || '';
+            document.getElementById('inputPhone2').value = p.phone2 || '';
+            document.getElementById('inputPrematuro').checked = !!p.isPrematuro;
+            document.getElementById('newServicio').value = p.service || 'CRED';
             document.getElementById('inputCredNumber').value = p.credNumber || '-';
-            if(p.exactDate) {
+            if (p.exactDate) {
                 document.getElementById('inputExactDate').value = p.exactDate;
                 currentFechaSeleccionada = p.exactDate;
+            }
+            const radios = document.querySelectorAll('input[name="blockDuration"]');
+            if (p.blocks === 2 && radios[1]) radios[1].checked = true;
+            else if (radios[0]) radios[0].checked = true;
+            setFormShift(p.shift || 'MANANA');
+            renderFormConsultorioSelector();
+            renderTimeSlots();
+            if (p.time) {
+                const slotRadio = document.querySelector(`input[name="timeSlot"][value="${p.time}"]`);
+                if (slotRadio) slotRadio.checked = true;
             }
         }
 

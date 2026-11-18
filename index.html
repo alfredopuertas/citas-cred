@@ -1062,29 +1062,42 @@
             let currentShiftRendered = null;
 
             dayApps.forEach(app => {
-                let shiftBg = app.shift === 'MANANA' ? 'bg-white' : 'bg-[#F8FAFC]'; 
-                let cardBorder = app.status === 'ATENDIDO' ? 'border-l-4 border-l-ios-green' : 'border-l-4 border-l-ios-blue';
+                const shiftNorm = String(app.shift || 'MANANA').toUpperCase() === 'TARDE' ? 'TARDE' : 'MANANA';
+                const isManana = shiftNorm === 'MANANA';
+
+                // Fondo pastel tenue diferenciado: verde menta suave en la mañana, celeste pastel suave en la tarde
+                const shiftBg = isManana
+                    ? 'bg-[#EEFBF3] border border-emerald-200/80'
+                    : 'bg-[#EEF6FF] border border-blue-200/80';
+                const cardBorder = isManana
+                    ? 'border-l-4 border-l-ios-green'
+                    : 'border-l-4 border-l-ios-blue';
                 
-                if (currentShiftRendered !== app.shift) {
-                    const shiftName = app.shift === 'MANANA' ? '☀️ TURNO MAÑANA' : '🌙 TURNO TARDE';
-                    const shiftColor = app.shift === 'MANANA' ? 'text-ios-orange' : 'text-ios-indigo';
-                    html += `<div class="text-[10px] font-extrabold ${shiftColor} uppercase tracking-wider px-2 pt-2 pb-1">${shiftName}</div>`;
-                    currentShiftRendered = app.shift;
+                if (currentShiftRendered !== shiftNorm) {
+                    const shiftName = isManana ? '☀️ TURNO MAÑANA' : '🌙 TURNO TARDE';
+                    const shiftHeaderCls = isManana
+                        ? 'text-emerald-800 bg-emerald-100/80 border border-emerald-200/70'
+                        : 'text-blue-800 bg-blue-100/80 border border-blue-200/70';
+                    html += `<div class="pt-2 pb-1"><span class="inline-block text-[10px] font-extrabold ${shiftHeaderCls} uppercase tracking-wider px-2.5 py-0.5 rounded-lg">${shiftName}</span></div>`;
+                    currentShiftRendered = shiftNorm;
                 }
 
-                // Llaves de color (mañana: verde, tarde: azul)
-                let keyIcon = app.shift === 'MANANA' ? '<i class="ph-fill ph-key text-ios-green mr-1"></i>' : '<i class="ph-fill ph-key text-ios-blue mr-1"></i>';
+                // Llaves de color: verde en la mañana, azul/celeste en la tarde
+                const keyIcon = isManana
+                    ? '<i class="ph-fill ph-key text-emerald-400 mr-1"></i>'
+                    : '<i class="ph-fill ph-key text-sky-400 mr-1"></i>';
+                const timeColor = isManana ? 'text-emerald-700' : 'text-ios-blue';
 
                 html += `
                     <div onclick="openActionSheet(${app.id})" class="${shiftBg} rounded-2xl p-3.5 shadow-ios-card ${cardBorder} ios-tap cursor-pointer space-y-1.5">
                         <div class="flex justify-between items-center text-xs">
-                            <span class="font-bold bg-black text-white px-1.5 py-0.5 rounded text-[10px] flex items-center">${keyIcon} Cons. ${app.consultorio}</span>
-                            <span class="font-extrabold text-ios-blue">${app.time} (${app.blocks * 20}m)</span>
-                            <span class="font-bold text-[10px] px-2 py-0.5 rounded-full ${app.status==='ATENDIDO'?'bg-emerald-100 text-emerald-800':'bg-amber-100 text-amber-800'}">${app.status}</span>
+                            <span class="font-bold bg-gray-900 text-white px-2 py-0.5 rounded text-[10px] flex items-center">${keyIcon} Cons. ${app.consultorio}</span>
+                            <span class="font-extrabold ${timeColor}">${app.time} (${app.blocks * 20}m)</span>
+                            <span class="font-bold text-[10px] px-2 py-0.5 rounded-full ${app.status==='ATENDIDO'?'bg-emerald-200/80 text-emerald-900':'bg-amber-100 text-amber-800'}">${app.status}</span>
                         </div>
                         <div class="text-sm font-bold text-gray-900">${formatPatientDisplayName(app)}</div>
-                        <div class="text-[11px] text-gray-500">H.Cl: <strong>${app.hcl}</strong> • DNI: ${app.dni} • No. de CRED: <strong class="text-ios-blue">${app.credNumber && app.credNumber !== '-' ? app.credNumber : '-'}</strong></div>
-                        <div class="flex items-center justify-between text-[10px] pt-0.5"><span class="text-ios-blue font-semibold">Agendado por: ${app.bookedBy}</span><span class="px-2 py-0.5 rounded-md bg-gray-100 text-gray-700 font-bold">${formatServiceLabel(app.service)}${app.isPrematuro ? ' • Prematuro' : ''}</span></div>
+                        <div class="text-[11px] text-gray-600">H.Cl: <strong>${app.hcl}</strong> • DNI: ${app.dni} • No. de CRED: <strong class="${timeColor}">${app.credNumber && app.credNumber !== '-' ? app.credNumber : '-'}</strong></div>
+                        <div class="flex items-center justify-between text-[10px] pt-0.5"><span class="text-ios-blue font-semibold">Agendado por: ${app.bookedBy}</span><span class="px-2 py-0.5 rounded-md bg-white/80 border border-gray-200/70 text-gray-700 font-bold">${formatServiceLabel(app.service)}${app.isPrematuro ? ' • Prematuro' : ''}</span></div>
                     </div>
                 `;
             });

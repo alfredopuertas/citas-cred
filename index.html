@@ -637,6 +637,17 @@
             return `${y}-${m}-${d}`;
         }
 
+        function formatDateDDMMYY(isoStr) {
+            if (!isoStr) return '--';
+            const clean = String(isoStr).split('T')[0];
+            const parts = clean.split('-');
+            if (parts.length === 3) {
+                const yy = parts[0].slice(-2);
+                return `${parts[2]}/${parts[1]}/${yy}`;
+            }
+            return isoStr;
+        }
+
         let currentFechaSeleccionada = getLocalDateISO();
         let consultorioBEnabledByDay = { };
         let currentConsultorioFilter = 'A';
@@ -672,7 +683,7 @@
         window.onload = function() {
             document.getElementById('inputExactDate').value = currentFechaSeleccionada;
             document.getElementById('inlineDatePicker').value = currentFechaSeleccionada;
-            document.getElementById('selectedDateLabel').textContent = `Fecha: ${currentFechaSeleccionada}`;
+            document.getElementById('selectedDateLabel').textContent = `Fecha: ${formatDateDDMMYY(currentFechaSeleccionada)}`;
             populateStaffSelects();
             renderWeekStrip();
             renderAppointments();
@@ -737,8 +748,7 @@
             }
 
             container.innerHTML = matches.map(app => {
-                const dateParts = (app.exactDate || '').split('-');
-                const fechaFmt = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}` : app.exactDate;
+                const fechaFmt = formatDateDDMMYY(app.exactDate);
                 const badgeCls = app.status === 'ATENDIDO' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800';
                 return `
                     <div onclick="selectSearchedCita(${app.id}, '${app.exactDate}')" class="bg-white rounded-2xl p-3.5 shadow-ios-card border-l-4 ${app.status==='ATENDIDO'?'border-l-ios-green':'border-l-ios-blue'} ios-tap cursor-pointer space-y-1">
@@ -758,7 +768,7 @@
             if (exactDate) {
                 currentFechaSeleccionada = exactDate;
                 document.getElementById('inlineDatePicker').value = exactDate;
-                document.getElementById('selectedDateLabel').textContent = `Fecha: ${exactDate}`;
+                document.getElementById('selectedDateLabel').textContent = `Fecha: ${formatDateDDMMYY(exactDate)}`;
                 renderWeekStrip();
                 updateConsultorioBUI();
             }
@@ -847,7 +857,7 @@
         function selectDate(iso) {
             currentFechaSeleccionada = iso;
             document.getElementById('inlineDatePicker').value = iso;
-            document.getElementById('selectedDateLabel').textContent = `Fecha: ${iso}`;
+            document.getElementById('selectedDateLabel').textContent = `Fecha: ${formatDateDDMMYY(iso)}`;
             renderWeekStrip();
             renderAppointments();
             updateConsultorioBUI();
@@ -1007,20 +1017,14 @@
             document.getElementById('sheetConsBadge').textContent = `CONS. ${app.consultorio}`;
             document.getElementById('sheetChildName').textContent = app.name;
             
-            let dobFormatted = '--';
-            if (app.dob) {
-                const parts = app.dob.split('-');
-                if (parts.length === 3) {
-                    dobFormatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
-                }
-            }
+            let dobFormatted = formatDateDDMMYY(app.dob);
             document.getElementById('sheetChildMeta').innerHTML = `H.Cl: <strong>${app.hcl}</strong> • DNI: ${app.dni} • No. de CRED: <strong>${app.credNumber && app.credNumber !== '-' ? app.credNumber : '-'}</strong><br>F.Nac: ${dobFormatted} (${app.ageText})`;
 
             document.getElementById('sheetTimeBadge').textContent = `${app.time} (${app.blocks * 20}m)`;
             document.getElementById('sheetBookedByMeta').textContent = `Agendado por: ${app.bookedBy}`;
 
             const msg = `Hola ${app.parentName}, le recordamos que su menor hijo(a) ${app.name} tiene su cita programada en el C.S. Chilca
-(Consultorio de CRED-Enfermería) el día ${app.exactDate} a las ${app.time}. Por favor asistir 20 minutos antes, con su DNI, Carnet de vacunación, Historia Clínica y Ficha de atención SIS si estuviera afiliado.`;
+(Consultorio de CRED-Enfermería) el día ${formatDateDDMMYY(app.exactDate)} a las ${app.time}. Por favor asistir 20 minutos antes, con su DNI, Carnet de vacunación, Historia Clínica y Ficha de atención SIS si estuviera afiliado.`;
             document.getElementById('whatsappPreviewText').textContent = `"${msg}"`;
 
             document.getElementById('actionSheetBackdrop').classList.remove('hidden');
@@ -1236,7 +1240,7 @@
 
         function renderPrintList() {
             const dateVal = document.getElementById('printDateSelector').value || currentFechaSeleccionada;
-            document.getElementById('printDateSubtitle').textContent = `Fecha de Citas: ${dateVal}`;
+            document.getElementById('printDateSubtitle').textContent = `Fecha de Citas: ${formatDateDDMMYY(dateVal)}`;
             
             const dayApps = window.appointments
                 .filter(a => a.exactDate === dateVal && a.status !== 'NO_ASISTIO')

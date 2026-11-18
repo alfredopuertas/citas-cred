@@ -630,7 +630,14 @@
     </script>
 
     <script>
-        let currentFechaSeleccionada = new Date().toISOString().split('T')[0];
+        function getLocalDateISO(dateObj = new Date()) {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        let currentFechaSeleccionada = getLocalDateISO();
         let consultorioBEnabledByDay = { };
         let currentConsultorioFilter = 'A';
         let currentShiftFilter = 'ALL';
@@ -665,6 +672,7 @@
         window.onload = function() {
             document.getElementById('inputExactDate').value = currentFechaSeleccionada;
             document.getElementById('inlineDatePicker').value = currentFechaSeleccionada;
+            document.getElementById('selectedDateLabel').textContent = `Fecha: ${currentFechaSeleccionada}`;
             populateStaffSelects();
             renderWeekStrip();
             renderAppointments();
@@ -824,7 +832,7 @@
             for(let i = -3; i <= 14; i++) {
                 let d = new Date(currentFechaSeleccionada + 'T00:00:00');
                 d.setDate(d.getDate() + i);
-                let iso = d.toISOString().split('T')[0];
+                let iso = getLocalDateISO(d);
                 let isSelected = iso === currentFechaSeleccionada;
                 html += `
                     <button onclick="selectDate('${iso}')" class="flex-1 py-1.5 px-1 rounded-xl flex flex-col items-center flex-shrink-0 min-w-[50px] ${isSelected ? 'bg-ios-blue text-white shadow-md' : 'bg-white text-gray-700 shadow-2xs'}">
@@ -1420,7 +1428,7 @@
         
         function calculateExactAge() {
             const dobVal = document.getElementById('inputDob').value;
-            const refVal = document.getElementById('inputExactDate').value || new Date().toISOString().split('T')[0];
+            const refVal = document.getElementById('inputExactDate').value || getLocalDateISO();
             if (!dobVal) return;
 
             const dob = new Date(dobVal + 'T00:00:00');

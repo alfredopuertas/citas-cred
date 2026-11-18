@@ -191,9 +191,15 @@
                                     </div>
                                 </div>
                             </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-600">Apellidos y Nombres del Menor</label>
-                                <input type="text" id="inputName" placeholder="Nombre completo" required class="w-full text-xs font-bold bg-ios-bg p-2 rounded-xl focus:outline-none">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-600">Apellidos del Menor *</label>
+                                    <input type="text" id="inputLastName" placeholder="Ej. Quispe Huamán" required class="w-full text-xs font-bold bg-ios-bg p-2 rounded-xl focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-600">Nombres del Menor *</label>
+                                    <input type="text" id="inputFirstName" placeholder="Ej. Mateo Sebastián" required class="w-full text-xs font-bold bg-ios-bg p-2 rounded-xl focus:outline-none">
+                                </div>
                             </div>
                             <div class="flex items-center justify-between gap-2">
                                 <label class="text-[10px] font-bold text-gray-600">Fecha Nacimiento</label>
@@ -243,7 +249,7 @@
                                     <option value="TA">TA</option>
                                 </select>
                                 <div class="w-1/3 flex items-center bg-ios-bg rounded-xl px-2">
-                                    <span class="text-[9px] font-bold text-gray-500 whitespace-nowrap">Nº CRED:</span>
+                                    <span class="text-[10px] font-bold text-gray-500 whitespace-nowrap">No</span>
                                     <select id="inputCredNumber" class="w-full text-xs font-bold bg-transparent p-2.5 focus:outline-none">
                                         <option value="-">-</option>
                                         <option value="1">1</option>
@@ -734,7 +740,7 @@
             const matches = window.appointments
                 .filter(a => {
                     if (!q) return true;
-                    const nameMatch = (a.name || '').toLowerCase().includes(q);
+                    const nameMatch = formatPatientDisplayName(a).toLowerCase().includes(q) || (a.name || '').toLowerCase().includes(q);
                     const dniMatch = (a.dni || '').toLowerCase().includes(q);
                     const hclMatch = (a.hcl || '').toLowerCase().includes(q);
                     return nameMatch || dniMatch || hclMatch;
@@ -759,7 +765,7 @@
                             <span class="font-extrabold text-ios-blue">📅 ${fechaFmt} • ${app.time}</span>
                             <span class="font-bold text-[10px] px-2 py-0.5 rounded-full ${badgeCls}">${app.status}</span>
                         </div>
-                        <div class="text-sm font-bold text-gray-900">${app.name}</div>
+                        <div class="text-sm font-bold text-gray-900">${formatPatientDisplayName(app)}</div>
                         <div class="text-[11px] text-gray-500">DNI: <strong>${app.dni}</strong> • H.Cl: <strong>${app.hcl}</strong> • Cons. ${app.consultorio}</div>
                     </div>
                 `;
@@ -833,7 +839,8 @@
             document.getElementById('inputExactDate').value = currentFechaSeleccionada;
             document.getElementById('inputHcl').value = '';
             document.getElementById('inputDni').value = '';
-            document.getElementById('inputName').value = '';
+            document.getElementById('inputLastName').value = '';
+            document.getElementById('inputFirstName').value = '';
             document.getElementById('inputDob').value = '';
             document.getElementById('calculatedAgeText').textContent = '--';
             document.getElementById('calculatedAgeBanner').classList.add('hidden');
@@ -966,6 +973,16 @@
             renderAppointments();
         }
 
+        function formatPatientDisplayName(app) {
+            if (!app) return '';
+            const ln = (app.lastName || '').trim();
+            const fn = (app.firstName || '').trim();
+            if (ln && fn) return `${ln}, ${fn}`;
+            if (ln) return ln;
+            if (fn) return fn;
+            return (app.name || '').trim();
+        }
+
         function formatServiceLabel(srv) {
             const map = {
                 'CRED': 'CRED',
@@ -1047,7 +1064,7 @@
                             <span class="font-extrabold text-ios-blue">${app.time} (${app.blocks * 20}m)</span>
                             <span class="font-bold text-[10px] px-2 py-0.5 rounded-full ${app.status==='ATENDIDO'?'bg-emerald-100 text-emerald-800':'bg-amber-100 text-amber-800'}">${app.status}</span>
                         </div>
-                        <div class="text-sm font-bold text-gray-900">${app.name}</div>
+                        <div class="text-sm font-bold text-gray-900">${formatPatientDisplayName(app)}</div>
                         <div class="text-[11px] text-gray-500">H.Cl: <strong>${app.hcl}</strong> • DNI: ${app.dni} • No. de CRED: <strong class="text-ios-blue">${app.credNumber && app.credNumber !== '-' ? app.credNumber : '-'}</strong></div>
                         <div class="flex items-center justify-between text-[10px] pt-0.5"><span class="text-ios-blue font-semibold">Agendado por: ${app.bookedBy}</span><span class="px-2 py-0.5 rounded-md bg-gray-100 text-gray-700 font-bold">${formatServiceLabel(app.service)}${app.isPrematuro ? ' • Prematuro' : ''}</span></div>
                     </div>
@@ -1062,7 +1079,7 @@
             if (!app) return;
             activeAppointmentId = id;
             document.getElementById('sheetConsBadge').textContent = `CONS. ${app.consultorio}`;
-            document.getElementById('sheetChildName').textContent = app.name;
+            document.getElementById('sheetChildName').textContent = formatPatientDisplayName(app);
             
             let dobFormatted = formatDateDDMMYY(app.dob);
             document.getElementById('sheetChildMeta').innerHTML = `H.Cl: <strong>${app.hcl}</strong> • DNI: ${app.dni} • No. de CRED: <strong>${app.credNumber && app.credNumber !== '-' ? app.credNumber : '-'}</strong><br>F.Nac: ${dobFormatted} (${app.ageText})`;
@@ -1070,7 +1087,7 @@
             document.getElementById('sheetTimeBadge').textContent = `${app.time} (${app.blocks * 20}m)`;
             document.getElementById('sheetBookedByMeta').textContent = `Agendado por: ${app.bookedBy}`;
 
-            const msg = `Hola ${app.parentName}, le recordamos que su menor hijo(a) ${app.name} tiene su cita programada en el C.S. Chilca
+            const msg = `Hola ${app.parentName}, le recordamos que su menor hijo(a) ${formatPatientDisplayName(app)} tiene su cita programada en el C.S. Chilca
 (Consultorio de CRED-Enfermería) el día ${formatDateDDMMYY(app.exactDate)} a las ${app.time}. Por favor asistir 20 minutos antes, con su DNI, Carnet de vacunación, Historia Clínica y Ficha de atención SIS si estuviera afiliado.`;
             document.getElementById('whatsappPreviewText').textContent = `"${msg}"`;
 
@@ -1305,7 +1322,7 @@
                     <tr class="border-b border-gray-100">
                         <td class="py-1.5 font-semibold text-[11px]">${a.time}</td>
                         <td class="py-1.5 font-bold text-ios-blue text-[11px]">${a.hcl}</td>
-                        <td class="py-1.5 text-[11px] leading-tight font-medium">${a.name}</td>
+                        <td class="py-1.5 text-[11px] leading-tight font-medium">${formatPatientDisplayName(a)}</td>
                         <td class="py-1.5 text-gray-500 text-[9px] leading-tight">${a.bookedBy}</td>
                     </tr>
                 `).join('');
@@ -1339,6 +1356,12 @@
             return h * 60 + m;
         }
 
+        function minutesToTime(totalMins) {
+            const h = String(Math.floor(totalMins / 60)).padStart(2, '0');
+            const m = String(totalMins % 60).padStart(2, '0');
+            return `${h}:${m}`;
+        }
+
         function renderTimeSlots() {
             const durationBlocks = parseInt(document.querySelector('input[name="blockDuration"]:checked').value, 10);
             const neededMinutes = durationBlocks * 20;
@@ -1349,7 +1372,9 @@
             const consRadio = document.querySelector('input[name="formConsultorio"]:checked');
             const targetCons = consRadio ? consRadio.value : 'A';
 
-            // Intervalos ocupados en minutos [inicio, fin) para calcular bloques libres de 20 min con precisión
+            // Fin real del turno (último bloque + 20 min: 12:10 en mañana, 17:40 en tarde)
+            const turnEndMinutes = timeToMinutes(slotList[slotList.length - 1]) + 20;
+
             const bookedIntervals = window.appointments
                 .filter(a => a.exactDate === targetDate && a.shift === formShift && a.status !== 'NO_ASISTIO' && a.status !== 'INASISTENTE' && a.consultorio === targetCons && a.id !== editingAppointmentId)
                 .map(a => {
@@ -1359,29 +1384,45 @@
                 })
                 .filter(iv => iv.start >= 0);
 
-            const availableButtons = slotList.map((time, idx) => {
-                // Si elige 2 bloques (40m), no puede empezar en el último bloque del turno
-                if (durationBlocks === 2 && idx + 1 >= slotList.length) return '';
+            const availableButtons = [];
+            let nextAllowedStart = 0;
 
+            for (let idx = 0; idx < slotList.length; idx++) {
+                const time = slotList[idx];
                 const slotStart = timeToMinutes(time);
+                if (slotStart < nextAllowedStart) continue;
+
                 const slotEnd = slotStart + neededMinutes;
+                if (slotEnd > turnEndMinutes) continue;
 
-                // Verificar si algún intervalo ocupado se cruza con este bloque
                 const overlaps = bookedIntervals.some(iv => slotStart < iv.end && slotEnd > iv.start);
-                if (overlaps) return '';
+                if (overlaps) continue;
 
-                return `
+                const displayLabel = durationBlocks === 2
+                    ? `${time} - ${minutesToTime(slotEnd)}`
+                    : time;
+
+                availableButtons.push(`
                     <label class="cursor-pointer">
                         <input type="radio" name="timeSlot" value="${time}" class="peer sr-only">
-                        <div class="p-2 rounded-xl bg-ios-bg border-2 border-transparent peer-checked:border-ios-blue text-center text-xs font-bold">
-                            ${time}
+                        <div class="p-2 rounded-xl bg-ios-bg border-2 border-transparent peer-checked:border-ios-blue text-center text-[11px] font-bold">
+                            ${displayLabel}
                         </div>
                     </label>
-                `;
-            }).filter(Boolean);
+                `);
+
+                // Avanzar de acuerdo a la duración elegida (20m o 40m continuos)
+                nextAllowedStart = slotEnd;
+            }
+
+            // Ajustar columnas: 2 columnas cuando son rangos de 40m para lectura cómoda, 3 columnas para 20m
+            grid.className = durationBlocks === 2
+                ? 'grid grid-cols-2 gap-1.5 pt-1'
+                : 'grid grid-cols-3 gap-1.5 pt-1';
 
             if (availableButtons.length === 0) {
-                grid.innerHTML = `<div class="col-span-3 text-center text-[11px] font-semibold text-gray-500 py-3 bg-ios-bg rounded-xl">No hay bloques libres de 20 min en este turno.</div>`;
+                const spanCls = durationBlocks === 2 ? 'col-span-2' : 'col-span-3';
+                grid.innerHTML = `<div class="${spanCls} text-center text-[11px] font-semibold text-gray-500 py-3 bg-ios-bg rounded-xl">No hay bloques libres de ${neededMinutes} min en este turno.</div>`;
             } else {
                 grid.innerHTML = availableButtons.join('');
                 const firstAvailable = grid.querySelector('input[name="timeSlot"]');
@@ -1437,7 +1478,9 @@
                 blocks: parseInt(document.querySelector('input[name="blockDuration"]:checked').value, 10),
                 hcl: document.getElementById('inputHcl').value,
                 dni: document.getElementById('inputDni').value,
-                name: document.getElementById('inputName').value,
+                lastName: document.getElementById('inputLastName').value.trim(),
+                firstName: document.getElementById('inputFirstName').value.trim(),
+                name: `${document.getElementById('inputLastName').value.trim()}, ${document.getElementById('inputFirstName').value.trim()}`, 
                 dob: document.getElementById('inputDob').value,
                 ageText: document.getElementById('calculatedAgeText').textContent || '3 meses',
                 parentName: document.getElementById('inputParentName').value,
@@ -1460,7 +1503,8 @@
 
         function lookupDni() {
             document.getElementById('inputHcl').value = '45892';
-            document.getElementById('inputName').value = 'Mateo Sebastián Quispe';
+            document.getElementById('inputLastName').value = 'Quispe Huamán';
+            document.getElementById('inputFirstName').value = 'Mateo Sebastián';
             document.getElementById('inputParentName').value = 'Rosa Huamán';
             document.getElementById('inputPhone1').value = '987451203';
         }
@@ -1508,7 +1552,23 @@
         function preloadFormWithPatient(p) {
             document.getElementById('inputHcl').value = p.hcl || '';
             document.getElementById('inputDni').value = p.dni || '';
-            document.getElementById('inputName').value = p.name || '';
+            if (p.lastName || p.firstName) {
+                document.getElementById('inputLastName').value = p.lastName || '';
+                document.getElementById('inputFirstName').value = p.firstName || '';
+            } else if (p.name && p.name.includes(',')) {
+                const [ln, ...fnParts] = p.name.split(',');
+                document.getElementById('inputLastName').value = (ln || '').trim();
+                document.getElementById('inputFirstName').value = fnParts.join(',').trim();
+            } else {
+                const words = (p.name || '').trim().split(/\s+/);
+                if (words.length >= 3) {
+                    document.getElementById('inputLastName').value = words.slice(-2).join(' ');
+                    document.getElementById('inputFirstName').value = words.slice(0, -2).join(' ');
+                } else {
+                    document.getElementById('inputLastName').value = words[1] || '';
+                    document.getElementById('inputFirstName').value = words[0] || '';
+                }
+            }
             document.getElementById('inputDob').value = p.dob || '';
             if (p.dob) calculateExactAge();
             else {

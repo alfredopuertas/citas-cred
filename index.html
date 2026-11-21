@@ -407,17 +407,43 @@
                         <button onclick="switchPorCitarTab('REC_1D')" id="tabRec1d" class="py-2 rounded-lg text-gray-600">Recordatorios 1d (0)</button>
                     </div>
 
-                    <div id="porCitarFiltros" class="bg-white rounded-2xl p-3 shadow-ios-card space-y-2">
-                        <input type="text" id="porCitarSearch" oninput="renderPorCitar()" placeholder="Buscar por DNI, nombre o sector..." class="w-full text-xs font-semibold bg-ios-bg px-3 py-2 rounded-xl focus:outline-none">
-                        <div class="grid grid-cols-2 gap-2">
-                            <select id="porCitarFiltroEstado" onchange="renderPorCitar()" class="text-xs font-bold bg-ios-bg px-2.5 py-2 rounded-xl focus:outline-none">
-                                <option value="TODOS">Todos (Atrasados + 30d)</option>
-                                <option value="PROXIMO_30D">Solo Próximos 30 días</option>
-                                <option value="ATRASADO">Solo Atrasados</option>
-                            </select>
-                            <select id="porCitarFiltroMes" onchange="renderPorCitar()" class="text-xs font-bold bg-ios-bg px-2.5 py-2 rounded-xl focus:outline-none">
-                                <option value="TODOS">Todos los meses</option>
-                            </select>
+                    <div id="porCitarFiltros" class="bg-white rounded-2xl p-3 shadow-ios-card space-y-2.5">
+                        <div class="flex gap-2">
+                            <input type="text" id="porCitarSearch" oninput="renderPorCitar()" placeholder="Buscar por DNI, nombre o sector..." class="flex-1 text-xs font-semibold bg-ios-bg px-3 py-2 rounded-xl focus:outline-none">
+                            <button type="button" onclick="togglePorCitarMenu()" class="bg-ios-bg text-gray-700 px-3 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1 ios-tap" title="Más filtros">
+                                <i class="ph-bold ph-list text-sm"></i> Filtros
+                            </button>
+                        </div>
+
+                        <!-- Chips rápidos de estado y atraso -->
+                        <div id="porCitarChips" class="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5 text-[11px] font-extrabold"></div>
+
+                        <!-- Menú desplegable de filtros flexibles (3 rayitas) -->
+                        <div id="porCitarAdvancedMenu" class="hidden pt-2 border-t border-gray-100 grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Mes Corresp.</label>
+                                <select id="porCitarFiltroMes" onchange="renderPorCitar()" class="w-full text-[11px] font-bold bg-ios-bg px-2 py-1.5 rounded-xl focus:outline-none">
+                                    <option value="TODOS">Todos</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">N° Control</label>
+                                <select id="porCitarFiltroCred" onchange="renderPorCitar()" class="w-full text-[11px] font-bold bg-ios-bg px-2 py-1.5 rounded-xl focus:outline-none">
+                                    <option value="TODOS">Todos</option>
+                                    <option value="1">CRED 1</option>
+                                    <option value="2">CRED 2</option>
+                                    <option value="3">CRED 3</option>
+                                    <option value="4">CRED 4</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Teléfono</label>
+                                <select id="porCitarFiltroCel" onchange="renderPorCitar()" class="w-full text-[11px] font-bold bg-ios-bg px-2 py-1.5 rounded-xl focus:outline-none">
+                                    <option value="TODOS">Todos</option>
+                                    <option value="CON_CEL">Con celular</option>
+                                    <option value="SIN_CEL">Sin celular</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -1900,6 +1926,65 @@
         // PASO 4: VISTA LIGERA "POR CITAR (30D)" Y "RECORDATORIOS (1D)"
         // ============================================================================
         let currentPorCitarTab = 'COLA_30D';
+        let currentPorCitarChip = 'TODOS';
+
+        function togglePorCitarMenu() {
+            const m = document.getElementById('porCitarAdvancedMenu');
+            if (m) m.classList.toggle('hidden');
+        }
+
+        function setPorCitarChip(chip) {
+            currentPorCitarChip = chip;
+            renderPorCitar();
+        }
+
+        const MESES_ES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+        function _normalizeMesYm(rawMes, fallbackFecha) {
+            const s = String(rawMes || '').trim();
+            if (/^\d{4}-\d{2}$/.test(s)) return s;
+            if (fallbackFecha && /^\d{4}-\d{2}/.test(String(fallbackFecha))) {
+                return String(fallbackFecha).substring(0, 7);
+            }
+            if (s) {
+                const dt = new Date(s);
+                if (!isNaN(dt.getTime())) {
+                    const y = dt.getFullYear();
+                    const m = String(dt.getMonth() + 1).padStart(2, '0');
+                    return `${y}-${m}`;
+                }
+            }
+            return '';
+        }
+
+        function _formatMesEs(ym) {
+            if (!/^\d{4}-\d{2}$/.test(ym)) return ym;
+            const [y, m] = ym.split('-');
+            const idx = Number(m) - 1;
+            return `${MESES_ES[idx] || m} ${y}`;
+        }
+
+        function _calcDiasAtraso(fechaProxStr, hoyStr) {
+            if (!fechaProxStr || fechaProxStr >= hoyStr) return 0;
+            const d1 = new Date(fechaProxStr + 'T00:00:00');
+            const d2 = new Date(hoyStr + 'T00:00:00');
+            return Math.max(0, Math.round((d2 - d1) / 86400000));
+        }
+
+        function _classifyAtraso(diasAtraso) {
+            if (diasAtraso <= 0) return 'AL_DIA';
+            if (diasAtraso <= 35) return 'ATRASO_1M';
+            if (diasAtraso <= 65) return 'ATRASO_2M';
+            return 'ATRASO_3M';
+        }
+
+        function _formatAtrasoHumano(diasAtraso) {
+            if (diasAtraso <= 0) return '';
+            if (diasAtraso < 30) return `${diasAtraso}d de atraso`;
+            const meses = Math.floor(diasAtraso / 30);
+            const resto = diasAtraso % 30;
+            return resto > 0 ? `${meses}m ${resto}d de atraso` : `${meses}m de atraso`;
+        }
 
         function switchPorCitarTab(tab) {
             currentPorCitarTab = tab;
@@ -1992,8 +2077,18 @@
 
         function renderPorCitar() {
             const pendingDnis = _getPendingDnisSet();
+            const hoyIso = getLocalDateISO(new Date());
             const raw30 = (window.colaGestion30d && window.colaGestion30d.items) || [];
-            const items30 = raw30.filter(it => !pendingDnis.has(String(it.dni || '').trim()));
+            const items30 = raw30
+                .filter(it => !pendingDnis.has(String(it.dni || '').trim()))
+                .map(it => {
+                    const fProx = String(it.fechaProxCred || '').substring(0, 10);
+                    const diasAtraso = _calcDiasAtraso(fProx, hoyIso);
+                    const catAtraso = _classifyAtraso(diasAtraso);
+                    const mesYm = _normalizeMesYm(it.mesProxCred, fProx);
+                    const faltanDatos = Boolean(it.alertaDatos && it.alertaDatos !== 'OK');
+                    return { ...it, fProx, diasAtraso, catAtraso, mesYm, faltanDatos };
+                });
             const items1d = (window.colaRecordatorios1d && window.colaRecordatorios1d.items) || [];
 
             const badgeNav = document.getElementById('navPorCitarBadge');
@@ -2009,13 +2104,38 @@
             if (t30) t30.textContent = `Por Citar (${items30.length})`;
             if (t1) t1.textContent = `Recordatorios 1d (${items1d.length})`;
 
-            // Poblar selector de meses dinámicamente
+            // Renderizar chips rápidos con conteos reales
+            const chipsEl = document.getElementById('porCitarChips');
+            if (chipsEl) {
+                const counts = {
+                    TODOS: items30.length,
+                    AL_DIA: items30.filter(x => x.catAtraso === 'AL_DIA').length,
+                    ATRASO_1M: items30.filter(x => x.catAtraso === 'ATRASO_1M').length,
+                    ATRASO_2M: items30.filter(x => x.catAtraso === 'ATRASO_2M').length,
+                    ATRASO_3M: items30.filter(x => x.catAtraso === 'ATRASO_3M').length,
+                    SIN_DATOS: items30.filter(x => x.faltanDatos).length,
+                };
+                const defs = [
+                    { id: 'TODOS', label: `Todos (${counts.TODOS})` },
+                    { id: 'AL_DIA', label: `Al día 30d (${counts.AL_DIA})` },
+                    { id: 'ATRASO_1M', label: `Atraso 1m (${counts.ATRASO_1M})` },
+                    { id: 'ATRASO_2M', label: `Atraso 2m (${counts.ATRASO_2M})` },
+                    { id: 'ATRASO_3M', label: `Atraso 3+m (${counts.ATRASO_3M})` },
+                    { id: 'SIN_DATOS', label: `⚠️ Faltan datos (${counts.SIN_DATOS})` },
+                ];
+                chipsEl.innerHTML = defs.map(c => {
+                    const active = currentPorCitarChip === c.id;
+                    return `<button type="button" onclick="setPorCitarChip('${c.id}')" class="px-2.5 py-1.5 rounded-full whitespace-nowrap transition-colors ${active ? 'bg-ios-blue text-white shadow-2xs' : 'bg-ios-bg text-gray-700'}">${c.label}</button>`;
+                }).join('');
+            }
+
+            // Poblar selector de meses en español (sin GMT ni texto en inglés)
             const selMes = document.getElementById('porCitarFiltroMes');
             if (selMes) {
                 const prevMes = selMes.value || 'TODOS';
-                const meses = Array.from(new Set(items30.map(x => x.mesProxCred).filter(Boolean))).sort();
-                selMes.innerHTML = '<option value="TODOS">Todos los meses</option>' +
-                    meses.map(m => `<option value="${m}">${m}</option>`).join('');
+                const meses = Array.from(new Set(items30.map(x => x.mesYm).filter(Boolean))).sort();
+                selMes.innerHTML = '<option value="TODOS">Todos</option>' +
+                    meses.map(m => `<option value="${m}">${_formatMesEs(m)}</option>`).join('');
                 selMes.value = meses.includes(prevMes) ? prevMes : 'TODOS';
             }
 
@@ -2046,12 +2166,21 @@
             }
 
             const q = (document.getElementById('porCitarSearch')?.value || '').trim().toLowerCase();
-            const fEstado = document.getElementById('porCitarFiltroEstado')?.value || 'TODOS';
             const fMes = document.getElementById('porCitarFiltroMes')?.value || 'TODOS';
+            const fCred = document.getElementById('porCitarFiltroCred')?.value || 'TODOS';
+            const fCel = document.getElementById('porCitarFiltroCel')?.value || 'TODOS';
 
             const filtrados = items30.filter(it => {
-                if (fEstado !== 'TODOS' && it.estadoCred !== fEstado) return false;
-                if (fMes !== 'TODOS' && it.mesProxCred !== fMes) return false;
+                if (currentPorCitarChip === 'SIN_DATOS') {
+                    if (!it.faltanDatos) return false;
+                } else if (currentPorCitarChip !== 'TODOS') {
+                    if (it.catAtraso !== currentPorCitarChip) return false;
+                }
+                if (fMes !== 'TODOS' && it.mesYm !== fMes) return false;
+                if (fCred !== 'TODOS' && String(it.proxCredNum) !== fCred) return false;
+                const celOk = /^9\d{8}$/.test(String(it.celular || '').replace(/\D/g, ''));
+                if (fCel === 'CON_CEL' && !celOk) return false;
+                if (fCel === 'SIN_CEL' && celOk) return false;
                 if (q) {
                     const blob = `${it.dni} ${it.apellidosNombres} ${it.sector} ${it.direccion}`.toLowerCase();
                     if (!blob.includes(q)) return false;
@@ -2060,27 +2189,31 @@
             });
 
             if (filtrados.length === 0) {
-                container.innerHTML = `<div class="bg-white rounded-2xl p-6 text-center text-xs text-gray-500 shadow-ios-card">No hay niños en esta vista.</div>`;
+                container.innerHTML = `<div class="bg-white rounded-2xl p-6 text-center text-xs text-gray-500 shadow-ios-card">No hay niños con estos filtros.</div>`;
                 return;
             }
 
             container.innerHTML = filtrados.slice(0, 80).map(it => {
                 const celOk = /^9\d{8}$/.test(String(it.celular || '').replace(/\D/g, ''));
-                const esAtrasado = it.estadoCred === 'ATRASADO';
-                const alerta = it.alertaDatos && it.alertaDatos !== 'OK'
+                const esAtrasado = it.diasAtraso > 0;
+                const atrasoTxt = _formatAtrasoHumano(it.diasAtraso);
+                const fechaLabel = esAtrasado
+                    ? `<span class="text-red-700">⏰ Debió controlarse: <b>${it.fProx}</b> (${atrasoTxt})</span>`
+                    : `<span class="text-emerald-700">📅 Corresponde: <b>${it.fProx || '-'}</b> (A tiempo)</span>`;
+                const alerta = it.faltanDatos
                     ? `<div class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded-lg">${it.alertaDatos}</div>`
                     : '';
                 return `
-                <div class="bg-white rounded-2xl p-3.5 shadow-ios-card border-l-4 ${esAtrasado ? 'border-l-ios-red' : 'border-l-ios-orange'} space-y-2">
+                <div class="bg-white rounded-2xl p-3.5 shadow-ios-card border-l-4 ${esAtrasado ? 'border-l-ios-red' : 'border-l-ios-green'} space-y-2">
                     <div class="flex justify-between items-center text-[11px]">
-                        <span class="font-extrabold px-2 py-0.5 rounded-full ${esAtrasado ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-800'}">
-                            ${esAtrasado ? 'ATRASADO' : 'PRÓXIMO 30D'} • CRED ${it.proxCredNum || '-'}
+                        <span class="font-extrabold px-2 py-0.5 rounded-full ${esAtrasado ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-800'}">
+                            ${esAtrasado ? 'ATRASADO' : 'AL DÍA'} • CRED ${it.proxCredNum || '-'}
                         </span>
                         <span class="font-bold text-gray-500">DNI ${it.dni || '-'} ${it.hcl ? '• HCL ' + it.hcl : ''}</span>
                     </div>
                     <div class="text-sm font-extrabold text-gray-900">${it.apellidosNombres || '⚠️ Sin nombre registrado'}</div>
                     <div class="text-xs text-gray-600 flex flex-wrap gap-x-3 gap-y-0.5">
-                        <span>📅 Sugerida: <b>${it.fechaProxCred || '-'}</b></span>
+                        ${fechaLabel}
                         <span>🎂 ${it.edadMeses ? it.edadMeses + 'm' : '-'}</span>
                         ${it.sector || it.direccion ? `<span>📍 ${[it.sector, it.direccion].filter(Boolean).join(' - ')}</span>` : ''}
                     </div>

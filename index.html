@@ -62,9 +62,9 @@
 </head>
 <body class="min-h-screen bg-ios-bg sm:bg-slate-200 flex flex-col items-center justify-center p-0 sm:p-4">
 
-    <!-- CLEAN NATIVE MOBILE APP VIEW (NO FAKE PHONE FRAME OR STATUS BAR) -->
-    <div id="workspaceMobile" class="w-full max-w-md mx-auto flex items-center justify-center">
-        <div class="relative w-full h-[100dvh] sm:h-[850px] sm:max-h-[94vh] bg-ios-bg sm:rounded-3xl sm:border sm:border-gray-200/90 sm:shadow-xl overflow-hidden flex flex-col select-none">
+    <!-- CLEAN NATIVE MOBILE + DESKTOP RESPONSIVE APP VIEW -->
+    <div id="workspaceMobile" class="w-full max-w-md lg:max-w-7xl mx-auto flex items-center justify-center">
+        <div class="relative w-full h-[100dvh] sm:h-[850px] lg:h-[92vh] sm:max-h-[94vh] bg-ios-bg sm:rounded-3xl sm:border sm:border-gray-200/90 sm:shadow-xl overflow-hidden flex flex-col select-none">
 
             <!-- UNIFIED SCROLLABLE VIEWPORT (Full screen scrolls together smoothly) -->
             <main id="appViewport" class="flex-1 overflow-y-auto no-scrollbar pb-28 relative">
@@ -394,60 +394,117 @@
 
                 <!-- ================= SCREEN 5: POR CITAR (30D) Y RECORDATORIOS (1D) ================= -->
                 <section id="screen-porcitar" class="hidden space-y-3.5 pb-8 p-4">
-                    <div class="flex items-center justify-between pb-2 border-b border-gray-200">
+                    <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-gray-200">
                         <div>
-                            <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Por Citar (30d)</h1>
-                            <p id="porCitarSubtitle" class="text-[11px] text-gray-500">Cola ligera sincronizada desde Master</p>
+                            <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Por Citar y Seguimiento</h1>
+                            <p id="porCitarSubtitle" class="text-[11px] text-gray-500">Filtros combinables en vivo desde Master</p>
                         </div>
-                        <span id="porCitarTotalBadge" class="bg-ios-blue/10 text-ios-blue px-2.5 py-1 rounded-full text-xs font-extrabold">0 niños</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="togglePorCitarViewMode()" id="btnPorCitarViewMode" class="hidden lg:inline-flex items-center gap-1 bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-xl text-xs font-bold shadow-2xs ios-tap">
+                                <i class="ph-bold ph-table"></i> Vista Tabla
+                            </button>
+                            <button type="button" onclick="exportarPorCitarCsv()" class="bg-emerald-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-2xs ios-tap flex items-center gap-1">
+                                <i class="ph-bold ph-download-simple"></i> Excel
+                            </button>
+                            <span id="porCitarTotalBadge" class="bg-ios-blue/10 text-ios-blue px-2.5 py-1 rounded-full text-xs font-extrabold">0</span>
+                        </div>
                     </div>
 
-                    <div class="grid grid-cols-2 bg-gray-200 p-0.5 rounded-xl text-xs font-bold">
+                    <div class="grid grid-cols-2 max-w-md bg-gray-200 p-0.5 rounded-xl text-xs font-bold">
                         <button onclick="switchPorCitarTab('COLA_30D')" id="tabCola30d" class="py-2 rounded-lg bg-white shadow-xs">Por Citar (0)</button>
                         <button onclick="switchPorCitarTab('REC_1D')" id="tabRec1d" class="py-2 rounded-lg text-gray-600">Recordatorios 1d (0)</button>
                     </div>
 
-                    <div id="porCitarFiltros" class="bg-white rounded-2xl p-3 shadow-ios-card space-y-2.5">
-                        <div class="flex gap-2">
-                            <input type="text" id="porCitarSearch" oninput="renderPorCitar()" placeholder="Buscar por DNI, nombre o sector..." class="flex-1 text-xs font-semibold bg-ios-bg px-3 py-2 rounded-xl focus:outline-none">
-                            <button type="button" onclick="togglePorCitarMenu()" class="bg-ios-bg text-gray-700 px-3 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1 ios-tap" title="Más filtros">
-                                <i class="ph-bold ph-list text-sm"></i> Filtros
-                            </button>
+                    <div class="lg:grid lg:grid-cols-12 lg:gap-4 items-start space-y-3 lg:space-y-0">
+                        <!-- PANEL DE FILTROS COMBINABLES (siempre visible en PC, colapsable en móvil) -->
+                        <div id="porCitarFiltros" class="lg:col-span-4 bg-white rounded-2xl p-3.5 shadow-ios-card space-y-3">
+                            <div class="flex gap-2">
+                                <input type="text" id="porCitarSearch" oninput="renderPorCitar()" placeholder="Buscar DNI, nombre o sector..." class="flex-1 text-xs font-semibold bg-ios-bg px-3 py-2 rounded-xl focus:outline-none">
+                                <button type="button" onclick="togglePorCitarMenu()" class="lg:hidden bg-ios-bg text-gray-700 px-3 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1 ios-tap">
+                                    <i class="ph-bold ph-sliders-horizontal text-sm"></i> Filtros
+                                </button>
+                            </div>
+
+                            <div id="porCitarAdvancedMenu" class="hidden lg:block space-y-3 pt-1">
+                                <!-- Multi-select Estado / Atraso -->
+                                <div>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-[10px] font-extrabold uppercase text-gray-400">Estado / Atraso (Multi)</span>
+                                        <button type="button" onclick="resetPorCitarFiltros()" class="text-[10px] font-bold text-ios-blue">Limpiar todo</button>
+                                    </div>
+                                    <div id="porCitarChipsEstado" class="flex flex-wrap gap-1.5 text-[11px] font-bold"></div>
+                                </div>
+
+                                <!-- Multi-select CRED -->
+                                <div>
+                                    <span class="block text-[10px] font-extrabold uppercase text-gray-400 mb-1">Control CRED (Multi)</span>
+                                    <div id="porCitarChipsCred" class="flex flex-wrap gap-1.5 text-[11px] font-bold"></div>
+                                </div>
+
+                                <!-- Multi-select Sulfato Ferroso -->
+                                <div>
+                                    <span class="block text-[10px] font-extrabold uppercase text-gray-400 mb-1">Hierro / Sulfato Ferroso (Multi)</span>
+                                    <div id="porCitarChipsSf" class="flex flex-wrap gap-1.5 text-[11px] font-bold"></div>
+                                </div>
+
+                                <!-- Multi-select Datos Faltantes -->
+                                <div>
+                                    <span class="block text-[10px] font-extrabold uppercase text-gray-400 mb-1">Datos Faltantes (ON/OFF)</span>
+                                    <div id="porCitarChipsFaltan" class="flex flex-wrap gap-1.5 text-[11px] font-bold"></div>
+                                </div>
+
+                                <!-- Slider de Edad Actual -->
+                                <div class="bg-ios-bg p-2.5 rounded-xl space-y-1.5">
+                                    <div class="flex justify-between text-[10px] font-extrabold text-gray-600">
+                                        <span>Rango Edad Actual:</span>
+                                        <span id="porCitarEdadLabel" class="text-ios-blue">1a 0m – 1a 11m</span>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2 items-center">
+                                        <input type="range" id="porCitarEdadMin" min="0" max="36" value="12" oninput="onPorCitarEdadSlider()" class="w-full accent-ios-blue">
+                                        <input type="range" id="porCitarEdadMax" min="0" max="36" value="23" oninput="onPorCitarEdadSlider()" class="w-full accent-ios-blue">
+                                    </div>
+                                </div>
+
+                                <!-- Fechas, Mes y Orden -->
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Desde fecha</label>
+                                        <input type="date" id="porCitarFechaDesde" onchange="renderPorCitar()" class="w-full text-[11px] font-bold bg-ios-bg px-2 py-1.5 rounded-xl focus:outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Hasta fecha</label>
+                                        <input type="date" id="porCitarFechaHasta" onchange="renderPorCitar()" class="w-full text-[11px] font-bold bg-ios-bg px-2 py-1.5 rounded-xl focus:outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Mes Corresp.</label>
+                                        <select id="porCitarFiltroMes" onchange="renderPorCitar()" class="w-full text-[11px] font-bold bg-ios-bg px-2 py-1.5 rounded-xl focus:outline-none">
+                                            <option value="TODOS">Todos</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Ordenar por</label>
+                                        <select id="porCitarOrden" onchange="renderPorCitar()" class="w-full text-[11px] font-bold bg-ios-bg px-2 py-1.5 rounded-xl focus:outline-none">
+                                            <option value="URGENCIA">Más urgentes</option>
+                                            <option value="PROXIMOS">Próximos cercanos</option>
+                                            <option value="EDAD_ASC">Menor edad</option>
+                                            <option value="NOMBRE">Nombre A-Z</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Switch incluir niños con cita ya programada -->
+                                <label class="flex items-center justify-between bg-ios-bg px-3 py-2 rounded-xl cursor-pointer">
+                                    <span class="text-[11px] font-bold text-gray-700">Incluir ya citados (con fecha)</span>
+                                    <input type="checkbox" id="porCitarToggleYaCitados" onchange="renderPorCitar()" class="w-4 h-4 accent-ios-blue">
+                                </label>
+                            </div>
                         </div>
 
-                        <!-- Chips rápidos de estado y atraso -->
-                        <div id="porCitarChips" class="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5 text-[11px] font-extrabold"></div>
-
-                        <!-- Menú desplegable de filtros flexibles (3 rayitas) -->
-                        <div id="porCitarAdvancedMenu" class="hidden pt-2 border-t border-gray-100 grid grid-cols-3 gap-2">
-                            <div>
-                                <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Mes Corresp.</label>
-                                <select id="porCitarFiltroMes" onchange="renderPorCitar()" class="w-full text-[11px] font-bold bg-ios-bg px-2 py-1.5 rounded-xl focus:outline-none">
-                                    <option value="TODOS">Todos</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">N° Control</label>
-                                <select id="porCitarFiltroCred" onchange="renderPorCitar()" class="w-full text-[11px] font-bold bg-ios-bg px-2 py-1.5 rounded-xl focus:outline-none">
-                                    <option value="TODOS">Todos</option>
-                                    <option value="1">CRED 1</option>
-                                    <option value="2">CRED 2</option>
-                                    <option value="3">CRED 3</option>
-                                    <option value="4">CRED 4</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Teléfono</label>
-                                <select id="porCitarFiltroCel" onchange="renderPorCitar()" class="w-full text-[11px] font-bold bg-ios-bg px-2 py-1.5 rounded-xl focus:outline-none">
-                                    <option value="TODOS">Todos</option>
-                                    <option value="CON_CEL">Con celular</option>
-                                    <option value="SIN_CEL">Sin celular</option>
-                                </select>
-                            </div>
+                        <!-- RESULTADOS -->
+                        <div class="lg:col-span-8">
+                            <div id="porCitarContainer" class="space-y-3"></div>
                         </div>
                     </div>
-
-                    <div id="porCitarContainer" class="space-y-3"></div>
                 </section>
 
             </main>
@@ -1923,19 +1980,89 @@
         }
 
         // ============================================================================
-        // PASO 4: VISTA LIGERA "POR CITAR (30D)" Y "RECORDATORIOS (1D)"
+        // PASO 4: VISTA LIGERA "POR CITAR (30D)" + FILTROS COMBINABLES + DESKTOP
         // ============================================================================
         let currentPorCitarTab = 'COLA_30D';
-        let currentPorCitarChip = 'TODOS';
+        let porCitarDesktopTable = false;
+        const porCitarMulti = {
+            estados: new Set(),
+            cred: new Set(),
+            sf: new Set(),
+            faltan: new Set()
+        };
+        window._ultimoFiltradoPorCitar = [];
 
         function togglePorCitarMenu() {
             const m = document.getElementById('porCitarAdvancedMenu');
             if (m) m.classList.toggle('hidden');
         }
 
-        function setPorCitarChip(chip) {
-            currentPorCitarChip = chip;
+        function togglePorCitarFilter(group, val) {
+            const set = porCitarMulti[group];
+            if (!set) return;
+            if (set.has(val)) set.delete(val);
+            else set.add(val);
             renderPorCitar();
+        }
+
+        function resetPorCitarFiltros() {
+            porCitarMulti.estados.clear();
+            porCitarMulti.cred.clear();
+            porCitarMulti.sf.clear();
+            porCitarMulti.faltan.clear();
+            const ids = ['porCitarSearch', 'porCitarFechaDesde', 'porCitarFechaHasta'];
+            ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+            const mes = document.getElementById('porCitarFiltroMes'); if (mes) mes.value = 'TODOS';
+            const minEl = document.getElementById('porCitarEdadMin'); if (minEl) minEl.value = 12;
+            const maxEl = document.getElementById('porCitarEdadMax'); if (maxEl) maxEl.value = 23;
+            const chk = document.getElementById('porCitarToggleYaCitados'); if (chk) chk.checked = false;
+            onPorCitarEdadSlider();
+        }
+
+        function onPorCitarEdadSlider() {
+            const minEl = document.getElementById('porCitarEdadMin');
+            const maxEl = document.getElementById('porCitarEdadMax');
+            if (!minEl || !maxEl) return;
+            let v1 = parseInt(minEl.value, 10);
+            let v2 = parseInt(maxEl.value, 10);
+            if (v1 > v2) { const t = v1; v1 = v2; v2 = t; }
+            const lbl = document.getElementById('porCitarEdadLabel');
+            if (lbl) lbl.textContent = `${_formatEdadAniosMeses(v1)} – ${_formatEdadAniosMeses(v2)}`;
+            renderPorCitar();
+        }
+
+        function togglePorCitarViewMode() {
+            porCitarDesktopTable = !porCitarDesktopTable;
+            const btn = document.getElementById('btnPorCitarViewMode');
+            if (btn) {
+                btn.innerHTML = porCitarDesktopTable
+                    ? '<i class="ph-bold ph-squares-four"></i> Vista Tarjetas'
+                    : '<i class="ph-bold ph-table"></i> Vista Tabla';
+            }
+            renderPorCitar();
+        }
+
+        function exportarPorCitarCsv() {
+            const rows = window._ultimoFiltradoPorCitar || [];
+            if (!rows.length) {
+                alert('No hay registros filtrados para exportar.');
+                return;
+            }
+            const headers = ['DNI', 'HCL', 'Apellidos_Nombres', 'Edad_Actual', 'Celular', 'Sector', 'Direccion', 'Prox_CRED', 'Fecha_CRED', 'Estado_CRED', 'Prox_SF', 'Fecha_SF', 'Ya_Citado', 'Alerta_Datos'];
+            const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+            const lines = [headers.join(';')].concat(rows.map(it => [
+                it.dni, it.hcl, it.apellidosNombres, _formatEdadAniosMeses(it.edadMeses),
+                it.celular, it.sector, it.direccion,
+                it.proxCredNum, it.fProx, it.diasAtraso > 0 ? `Atraso ${it.diasAtraso}d` : 'Al día',
+                it.proxSfNum, it.fSf, it.yaCitado ? 'SI' : 'NO', it.alertaDatos
+            ].map(esc).join(';')));
+            const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `CITEN_PorCitar_${getLocalDateISO(new Date())}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
         }
 
         const MESES_ES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
@@ -1976,6 +2103,18 @@
             if (diasAtraso <= 35) return 'ATRASO_1M';
             if (diasAtraso <= 65) return 'ATRASO_2M';
             return 'ATRASO_3M';
+        }
+
+        const CRED_EDAD_LABELS = { '1': '1a', '2': '1a 3m', '3': '1a 6m', '4': '1a 9m' };
+        const SF_EDAD_LABELS = { '1': '1a 3m', '2': '1a 5m', '3': '1a 7m' };
+
+        function _formatEdadAniosMeses(mesesRaw) {
+            const m = parseInt(mesesRaw, 10);
+            if (isNaN(m)) return '-';
+            const anios = Math.floor(m / 12);
+            const resto = m % 12;
+            if (anios === 0) return `${resto}m`;
+            return resto === 0 ? `${anios}a` : `${anios}a ${resto}m`;
         }
 
         function _formatAtrasoHumano(diasAtraso) {
@@ -2078,62 +2217,92 @@
         function renderPorCitar() {
             const pendingDnis = _getPendingDnisSet();
             const hoyIso = getLocalDateISO(new Date());
+            const incluirYaCitados = Boolean(document.getElementById('porCitarToggleYaCitados')?.checked);
             const raw30 = (window.colaGestion30d && window.colaGestion30d.items) || [];
-            const items30 = raw30
-                .filter(it => !pendingDnis.has(String(it.dni || '').trim()))
-                .map(it => {
-                    const fProx = String(it.fechaProxCred || '').substring(0, 10);
-                    const diasAtraso = _calcDiasAtraso(fProx, hoyIso);
-                    const catAtraso = _classifyAtraso(diasAtraso);
-                    const mesYm = _normalizeMesYm(it.mesProxCred, fProx);
-                    const faltanDatos = Boolean(it.alertaDatos && it.alertaDatos !== 'OK');
-                    return { ...it, fProx, diasAtraso, catAtraso, mesYm, faltanDatos };
-                });
+
+            const baseItems = raw30.map(it => {
+                const dniClean = String(it.dni || '').trim();
+                const yaCitado = pendingDnis.has(dniClean);
+                const fProx = String(it.fechaProxCred || '').substring(0, 10);
+                const fSf = String(it.fechaProxSf || '').substring(0, 10);
+                const tieneCred = Boolean(it.proxCredNum && it.proxCredNum !== 'COMPLETO' && fProx);
+                const tieneSf = Boolean(it.proxSfNum && it.proxSfNum !== 'COMPLETO' && fSf);
+                const diasAtrasoCred = tieneCred ? _calcDiasAtraso(fProx, hoyIso) : 0;
+                const diasAtrasoSf = tieneSf ? _calcDiasAtraso(fSf, hoyIso) : 0;
+                const diasAtraso = tieneCred ? diasAtrasoCred : diasAtrasoSf;
+                const catAtraso = _classifyAtraso(diasAtraso);
+                const mesYm = _normalizeMesYm(it.mesProxCred, fProx);
+                const mesSfYm = _normalizeMesYm(it.mesProxSf, fSf);
+                const celOk = /^9\d{8}$/.test(String(it.celular || '').replace(/\D/g, ''));
+                const faltaNombre = !String(it.apellidosNombres || '').trim();
+                const faltaDni = !dniClean;
+                const faltaCel = !celOk;
+                const faltaDir = !String(it.sector || '').trim() && !String(it.direccion || '').trim();
+                const faltanDatos = faltaNombre || faltaDni || faltaCel || faltaDir;
+                const edadNum = parseInt(it.edadMeses, 10);
+                return {
+                    ...it, dniClean, yaCitado, fProx, fSf, tieneCred, tieneSf,
+                    diasAtraso, diasAtrasoSf, catAtraso, mesYm, mesSfYm,
+                    celOk, faltaNombre, faltaDni, faltaCel, faltaDir, faltanDatos, edadNum
+                };
+            });
+
+            const items30 = incluirYaCitados ? baseItems : baseItems.filter(it => !it.yaCitado);
             const items1d = (window.colaRecordatorios1d && window.colaRecordatorios1d.items) || [];
 
+            const sinCitaCount = baseItems.filter(it => !it.yaCitado).length;
             const badgeNav = document.getElementById('navPorCitarBadge');
             if (badgeNav) {
-                badgeNav.textContent = items30.length;
-                badgeNav.classList.toggle('hidden', items30.length === 0);
+                badgeNav.textContent = sinCitaCount;
+                badgeNav.classList.toggle('hidden', sinCitaCount === 0);
             }
-            const totalBadge = document.getElementById('porCitarTotalBadge');
-            if (totalBadge) totalBadge.textContent = `${items30.length} por citar`;
 
             const t30 = document.getElementById('tabCola30d');
             const t1 = document.getElementById('tabRec1d');
-            if (t30) t30.textContent = `Por Citar (${items30.length})`;
+            if (t30) t30.textContent = `Por Citar (${sinCitaCount})`;
             if (t1) t1.textContent = `Recordatorios 1d (${items1d.length})`;
 
-            // Renderizar chips rápidos con conteos reales
-            const chipsEl = document.getElementById('porCitarChips');
-            if (chipsEl) {
-                const counts = {
-                    TODOS: items30.length,
-                    AL_DIA: items30.filter(x => x.catAtraso === 'AL_DIA').length,
-                    ATRASO_1M: items30.filter(x => x.catAtraso === 'ATRASO_1M').length,
-                    ATRASO_2M: items30.filter(x => x.catAtraso === 'ATRASO_2M').length,
-                    ATRASO_3M: items30.filter(x => x.catAtraso === 'ATRASO_3M').length,
-                    SIN_DATOS: items30.filter(x => x.faltanDatos).length,
-                };
-                const defs = [
-                    { id: 'TODOS', label: `Todos (${counts.TODOS})` },
-                    { id: 'AL_DIA', label: `Al día 30d (${counts.AL_DIA})` },
-                    { id: 'ATRASO_1M', label: `Atraso 1m (${counts.ATRASO_1M})` },
-                    { id: 'ATRASO_2M', label: `Atraso 2m (${counts.ATRASO_2M})` },
-                    { id: 'ATRASO_3M', label: `Atraso 3+m (${counts.ATRASO_3M})` },
-                    { id: 'SIN_DATOS', label: `⚠️ Faltan datos (${counts.SIN_DATOS})` },
-                ];
-                chipsEl.innerHTML = defs.map(c => {
-                    const active = currentPorCitarChip === c.id;
-                    return `<button type="button" onclick="setPorCitarChip('${c.id}')" class="px-2.5 py-1.5 rounded-full whitespace-nowrap transition-colors ${active ? 'bg-ios-blue text-white shadow-2xs' : 'bg-ios-bg text-gray-700'}">${c.label}</button>`;
-                }).join('');
+            const mkChip = (group, id, label, count) => {
+                const active = porCitarMulti[group].has(id);
+                return `<button type="button" onclick="togglePorCitarFilter('${group}','${id}')" class="px-2.5 py-1 rounded-full border transition-colors ${active ? 'bg-ios-blue text-white border-ios-blue shadow-2xs' : 'bg-ios-bg text-gray-700 border-gray-200/80'}">${label}${count !== undefined ? ` (${count})` : ''}</button>`;
+            };
+
+            const elEst = document.getElementById('porCitarChipsEstado');
+            if (elEst) {
+                elEst.innerHTML = [
+                    mkChip('estados', 'AL_DIA', 'Al día', items30.filter(x => x.catAtraso === 'AL_DIA').length),
+                    mkChip('estados', 'ATRASO_1M', 'Atraso 1m', items30.filter(x => x.catAtraso === 'ATRASO_1M').length),
+                    mkChip('estados', 'ATRASO_2M', 'Atraso 2m', items30.filter(x => x.catAtraso === 'ATRASO_2M').length),
+                    mkChip('estados', 'ATRASO_3M', 'Atraso 3+m', items30.filter(x => x.catAtraso === 'ATRASO_3M').length),
+                ].join('');
+            }
+            const elCred = document.getElementById('porCitarChipsCred');
+            if (elCred) {
+                elCred.innerHTML = ['1', '2', '3', '4'].map(n => mkChip('cred', n, `CRED ${n}`)).join('');
+            }
+            const elSf = document.getElementById('porCitarChipsSf');
+            if (elSf) {
+                elSf.innerHTML = [
+                    mkChip('sf', 'PENDIENTE', 'Con SF pend.'),
+                    mkChip('sf', '1', 'SF 1°'),
+                    mkChip('sf', '2', 'SF 2°'),
+                    mkChip('sf', '3', 'SF 3°'),
+                ].join('');
+            }
+            const elFal = document.getElementById('porCitarChipsFaltan');
+            if (elFal) {
+                elFal.innerHTML = [
+                    mkChip('faltan', 'NOMBRE', 'Falta Nombre', items30.filter(x => x.faltaNombre).length),
+                    mkChip('faltan', 'DNI', 'Falta DNI', items30.filter(x => x.faltaDni).length),
+                    mkChip('faltan', 'CELULAR', 'Falta Teléfono', items30.filter(x => x.faltaCel).length),
+                    mkChip('faltan', 'DIRECCION', 'Falta Dirección', items30.filter(x => x.faltaDir).length),
+                ].join('');
             }
 
-            // Poblar selector de meses en español (sin GMT ni texto en inglés)
             const selMes = document.getElementById('porCitarFiltroMes');
             if (selMes) {
                 const prevMes = selMes.value || 'TODOS';
-                const meses = Array.from(new Set(items30.map(x => x.mesYm).filter(Boolean))).sort();
+                const meses = Array.from(new Set(items30.flatMap(x => [x.mesYm, x.mesSfYm]).filter(Boolean))).sort();
                 selMes.innerHTML = '<option value="TODOS">Todos</option>' +
                     meses.map(m => `<option value="${m}">${_formatMesEs(m)}</option>`).join('');
                 selMes.value = meses.includes(prevMes) ? prevMes : 'TODOS';
@@ -2167,20 +2336,36 @@
 
             const q = (document.getElementById('porCitarSearch')?.value || '').trim().toLowerCase();
             const fMes = document.getElementById('porCitarFiltroMes')?.value || 'TODOS';
-            const fCred = document.getElementById('porCitarFiltroCred')?.value || 'TODOS';
-            const fCel = document.getElementById('porCitarFiltroCel')?.value || 'TODOS';
+            const fDesde = document.getElementById('porCitarFechaDesde')?.value || '';
+            const fHasta = document.getElementById('porCitarFechaHasta')?.value || '';
+            const fOrden = document.getElementById('porCitarOrden')?.value || 'URGENCIA';
+            let edadMin = parseInt(document.getElementById('porCitarEdadMin')?.value ?? 0, 10);
+            let edadMax = parseInt(document.getElementById('porCitarEdadMax')?.value ?? 36, 10);
+            if (edadMin > edadMax) { const t = edadMin; edadMin = edadMax; edadMax = t; }
 
             const filtrados = items30.filter(it => {
-                if (currentPorCitarChip === 'SIN_DATOS') {
-                    if (!it.faltanDatos) return false;
-                } else if (currentPorCitarChip !== 'TODOS') {
-                    if (it.catAtraso !== currentPorCitarChip) return false;
+                if (porCitarMulti.estados.size > 0 && !porCitarMulti.estados.has(it.catAtraso)) return false;
+                if (porCitarMulti.cred.size > 0 && !porCitarMulti.cred.has(String(it.proxCredNum))) return false;
+                if (porCitarMulti.sf.size > 0) {
+                    const matchPend = porCitarMulti.sf.has('PENDIENTE') && it.tieneSf;
+                    const matchNum = porCitarMulti.sf.has(String(it.proxSfNum));
+                    if (!matchPend && !matchNum) return false;
                 }
-                if (fMes !== 'TODOS' && it.mesYm !== fMes) return false;
-                if (fCred !== 'TODOS' && String(it.proxCredNum) !== fCred) return false;
-                const celOk = /^9\d{8}$/.test(String(it.celular || '').replace(/\D/g, ''));
-                if (fCel === 'CON_CEL' && !celOk) return false;
-                if (fCel === 'SIN_CEL' && celOk) return false;
+                if (porCitarMulti.faltan.size > 0) {
+                    const checks = {
+                        NOMBRE: it.faltaNombre,
+                        DNI: it.faltaDni,
+                        CELULAR: it.faltaCel,
+                        DIRECCION: it.faltaDir
+                    };
+                    let okFalta = false;
+                    porCitarMulti.faltan.forEach(k => { if (checks[k]) okFalta = true; });
+                    if (!okFalta) return false;
+                }
+                if (!isNaN(it.edadNum) && (it.edadNum < edadMin || it.edadNum > edadMax)) return false;
+                if (fMes !== 'TODOS' && it.mesYm !== fMes && it.mesSfYm !== fMes) return false;
+                if (fDesde && (!it.fProx || it.fProx < fDesde) && (!it.fSf || it.fSf < fDesde)) return false;
+                if (fHasta && (!it.fProx || it.fProx > fHasta) && (!it.fSf || it.fSf > fHasta)) return false;
                 if (q) {
                     const blob = `${it.dni} ${it.apellidosNombres} ${it.sector} ${it.direccion}`.toLowerCase();
                     if (!blob.includes(q)) return false;
@@ -2188,18 +2373,85 @@
                 return true;
             });
 
+            filtrados.sort((a, b) => {
+                if (fOrden === 'NOMBRE') return String(a.apellidosNombres || 'ZZZ').localeCompare(String(b.apellidosNombres || 'ZZZ'));
+                if (fOrden === 'PROXIMOS') return String(a.fProx || '9999').localeCompare(String(b.fProx || '9999'));
+                if (fOrden === 'EDAD_ASC') return (a.edadNum || 99) - (b.edadNum || 99);
+                return b.diasAtraso - a.diasAtraso || String(a.fProx || '9999').localeCompare(String(b.fProx || '9999'));
+            });
+
+            window._ultimoFiltradoPorCitar = filtrados;
+            const totalBadge = document.getElementById('porCitarTotalBadge');
+            if (totalBadge) totalBadge.textContent = `${filtrados.length} resultados`;
+
             if (filtrados.length === 0) {
-                container.innerHTML = `<div class="bg-white rounded-2xl p-6 text-center text-xs text-gray-500 shadow-ios-card">No hay niños con estos filtros.</div>`;
+                container.innerHTML = `<div class="bg-white rounded-2xl p-6 text-center text-xs text-gray-500 shadow-ios-card">No hay niños con esta combinación de filtros.</div>`;
                 return;
             }
 
-            container.innerHTML = filtrados.slice(0, 80).map(it => {
-                const celOk = /^9\d{8}$/.test(String(it.celular || '').replace(/\D/g, ''));
+            if (porCitarDesktopTable) {
+                container.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-ios-card overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-gray-50 text-[10px] font-extrabold uppercase text-gray-500 border-b">
+                            <tr>
+                                <th class="p-3">Niño / DNI</th>
+                                <th class="p-3">Edad actual</th>
+                                <th class="p-3">Próximo CRED</th>
+                                <th class="p-3">Hierro / SF</th>
+                                <th class="p-3">Estado / Datos</th>
+                                <th class="p-3 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            ${filtrados.slice(0, 150).map(it => {
+                                const esAtrasado = it.diasAtraso > 0;
+                                const edadTxt = _formatEdadAniosMeses(it.edadMeses);
+                                return `
+                                <tr class="hover:bg-blue-50/30">
+                                    <td class="p-3">
+                                        <div class="font-extrabold text-gray-900">${it.apellidosNombres || '⚠️ Sin nombre'}</div>
+                                        <div class="text-[11px] text-gray-500">DNI ${it.dni || '-'} ${it.sector || it.direccion ? '• ' + [it.sector, it.direccion].filter(Boolean).join(' ') : ''}</div>
+                                    </td>
+                                    <td class="p-3 font-bold text-gray-700 whitespace-nowrap">${edadTxt}</td>
+                                    <td class="p-3 whitespace-nowrap">
+                                        <span class="font-bold ${esAtrasado ? 'text-red-700' : 'text-emerald-700'}">CRED ${it.proxCredNum || '-'}</span>
+                                        <div class="text-[11px] text-gray-500">${it.fProx || '-'}</div>
+                                    </td>
+                                    <td class="p-3 whitespace-nowrap">
+                                        ${it.tieneSf ? `<span class="font-bold text-indigo-700">SF ${it.proxSfNum}°</span><div class="text-[11px] text-gray-500">${it.fSf}</div>` : '<span class="text-gray-400">-</span>'}
+                                    </td>
+                                    <td class="p-3">
+                                        ${it.yaCitado ? '<span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold">Ya citado</span>' : ''}
+                                        ${esAtrasado ? `<span class="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-bold">${_formatAtrasoHumano(it.diasAtraso)}</span>` : '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">Al día</span>'}
+                                        ${it.faltanDatos ? `<div class="text-[10px] text-amber-700 mt-0.5">${it.alertaDatos}</div>` : ''}
+                                    </td>
+                                    <td class="p-3 text-right whitespace-nowrap space-x-1">
+                                        <button ${it.celOk ? '' : 'disabled'} onclick='abrirWhatsappCola(${JSON.stringify(it.celular||"")}, ${JSON.stringify(it.apellidosNombres||"")}, ${JSON.stringify(it.proxCredNum||"")}, ${JSON.stringify(it.fechaProxCred||"")})' class="px-2.5 py-1.5 rounded-lg text-[11px] font-bold ${it.celOk ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-400'}">💬</button>
+                                        <button onclick='agendarDesdeCola(${JSON.stringify(it.dni||"")})' class="px-2.5 py-1.5 rounded-lg bg-ios-blue text-white text-[11px] font-bold">Agendar</button>
+                                    </td>
+                                </tr>`;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>`;
+                return;
+            }
+
+            container.innerHTML = `<div class="grid grid-cols-1 lg:grid-cols-2 gap-3">` + filtrados.slice(0, 100).map(it => {
                 const esAtrasado = it.diasAtraso > 0;
                 const atrasoTxt = _formatAtrasoHumano(it.diasAtraso);
-                const fechaLabel = esAtrasado
-                    ? `<span class="text-red-700">⏰ Debió controlarse: <b>${it.fProx}</b> (${atrasoTxt})</span>`
-                    : `<span class="text-emerald-700">📅 Corresponde: <b>${it.fProx || '-'}</b> (A tiempo)</span>`;
+                const edadTxt = _formatEdadAniosMeses(it.edadMeses);
+                const credEdad = CRED_EDAD_LABELS[String(it.proxCredNum)] || '';
+                const sfEdad = SF_EDAD_LABELS[String(it.proxSfNum)] || '';
+                const fechaLabel = it.tieneCred
+                    ? (esAtrasado
+                        ? `<span class="text-red-700">⏰ Debió controlarse: <b>${it.fProx}</b> (${atrasoTxt})</span>`
+                        : `<span class="text-emerald-700">📅 Cita CRED (${credEdad}): <b>${it.fProx}</b></span>`)
+                    : `<span class="text-gray-600">✅ CRED de 1a completo</span>`;
+                const sfBadge = it.tieneSf
+                    ? `<div class="text-[11px] font-semibold ${it.diasAtrasoSf > 0 ? 'text-rose-700' : 'text-indigo-700'}">💊 Hierro/SF ${it.proxSfNum}° (${sfEdad}): <b>${it.fSf}</b> ${it.diasAtrasoSf > 0 ? `(${_formatAtrasoHumano(it.diasAtrasoSf)})` : '(A tiempo)'}</div>`
+                    : '';
                 const alerta = it.faltanDatos
                     ? `<div class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded-lg">${it.alertaDatos}</div>`
                     : '';
@@ -2207,28 +2459,28 @@
                 <div class="bg-white rounded-2xl p-3.5 shadow-ios-card border-l-4 ${esAtrasado ? 'border-l-ios-red' : 'border-l-ios-green'} space-y-2">
                     <div class="flex justify-between items-center text-[11px]">
                         <span class="font-extrabold px-2 py-0.5 rounded-full ${esAtrasado ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-800'}">
-                            ${esAtrasado ? 'ATRASADO' : 'AL DÍA'} • CRED ${it.proxCredNum || '-'}
+                            ${esAtrasado ? 'ATRASADO' : 'AL DÍA'} • CRED ${it.proxCredNum || '-'}${credEdad ? ' (' + credEdad + ')' : ''}
                         </span>
                         <span class="font-bold text-gray-500">DNI ${it.dni || '-'} ${it.hcl ? '• HCL ' + it.hcl : ''}</span>
                     </div>
                     <div class="text-sm font-extrabold text-gray-900">${it.apellidosNombres || '⚠️ Sin nombre registrado'}</div>
                     <div class="text-xs text-gray-600 flex flex-wrap gap-x-3 gap-y-0.5">
                         ${fechaLabel}
-                        <span>🎂 ${it.edadMeses ? it.edadMeses + 'm' : '-'}</span>
+                        <span>🎂 Edad actual: <b>${edadTxt}</b></span>
                         ${it.sector || it.direccion ? `<span>📍 ${[it.sector, it.direccion].filter(Boolean).join(' - ')}</span>` : ''}
                     </div>
-                    ${it.proxSfNum && it.proxSfNum !== 'COMPLETO' ? `<div class="text-[11px] font-semibold text-indigo-700">💊 Sulfato Ferroso ${it.proxSfNum}°: ${it.fechaProxSf || '-'}</div>` : ''}
+                    ${sfBadge}
                     ${alerta}
                     <div class="grid grid-cols-2 gap-2 pt-1">
-                        <button ${celOk ? '' : 'disabled'} onclick='abrirWhatsappCola(${JSON.stringify(it.celular||"")}, ${JSON.stringify(it.apellidosNombres||"")}, ${JSON.stringify(it.proxCredNum||"")}, ${JSON.stringify(it.fechaProxCred||"")})' class="py-2 rounded-xl text-xs font-extrabold ${celOk ? 'bg-emerald-100 text-emerald-800 ios-tap' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}">
-                            ${celOk ? '💬 WhatsApp' : 'Sin celular'}
+                        <button ${it.celOk ? '' : 'disabled'} onclick='abrirWhatsappCola(${JSON.stringify(it.celular||"")}, ${JSON.stringify(it.apellidosNombres||"")}, ${JSON.stringify(it.proxCredNum||"")}, ${JSON.stringify(it.fechaProxCred||"")})' class="py-2 rounded-xl text-xs font-extrabold ${it.celOk ? 'bg-emerald-100 text-emerald-800 ios-tap' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}">
+                            ${it.celOk ? '💬 WhatsApp' : 'Sin celular'}
                         </button>
                         <button onclick='agendarDesdeCola(${JSON.stringify(it.dni||"")})' class="py-2 rounded-xl bg-ios-blue text-white text-xs font-extrabold shadow-2xs ios-tap">
                             📅 Agendar ahora
                         </button>
                     </div>
                 </div>`;
-            }).join('');
+            }).join('') + `</div>`;
         }
     </script>
 </body>

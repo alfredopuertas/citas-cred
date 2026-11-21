@@ -70,7 +70,7 @@
             <main id="appViewport" class="flex-1 overflow-y-auto no-scrollbar pb-28 relative">
                 
                 <!-- ================= SCREEN 1: AGENDA ================= -->
-                <section id="screen-agenda" class="p-4 space-y-3">
+                <section id="screen-agenda" class="p-4 space-y-3 max-w-xl mx-auto">
                     <!-- Top Header Row -->
                     <div class="flex items-center justify-between gap-2">
                         <div class="text-left leading-tight flex-shrink-0">
@@ -148,7 +148,7 @@
                 </section>
 
                 <!-- ================= SCREEN 2: NUEVA CITA ================= -->
-                <section id="screen-new" class="hidden space-y-3.5 pb-8 p-4">
+                <section id="screen-new" class="hidden space-y-3.5 pb-8 p-4 max-w-xl mx-auto">
                     <div class="flex items-center justify-between gap-2 pb-2 border-b border-gray-200">
                         <div>
                             <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Nueva Cita</h1>
@@ -341,7 +341,7 @@
                 </section>
 
                 <!-- ================= SCREEN 3: ALERTAS ================= -->
-                <section id="screen-alerts" class="hidden space-y-3.5 pb-8 p-4">
+                <section id="screen-alerts" class="hidden space-y-3.5 pb-8 p-4 max-w-xl mx-auto">
                     <div class="flex items-center justify-between pb-2 border-b border-gray-200">
                         <div>
                             <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Alertas</h1>
@@ -357,7 +357,7 @@
                 </section>
 
                 <!-- ================= SCREEN 4: ESTADÍSTICAS ================= -->
-                <section id="screen-stats" class="hidden space-y-4 pb-8 p-4">
+                <section id="screen-stats" class="hidden space-y-4 pb-8 p-4 max-w-xl mx-auto">
                     <div class="flex items-center justify-between pb-2 border-b border-gray-200">
                         <div>
                             <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Estadísticas</h1>
@@ -535,6 +535,48 @@
                 </button>
             </nav>
 
+
+            <!-- MODAL EDITAR DATOS DESDE POR CITAR -->
+            <div id="editColaBackdrop" onclick="closeEditColaModal()" class="hidden absolute inset-0 z-50 bg-black/40 backdrop-blur-[2px] flex items-center justify-center p-4">
+                <form onsubmit="guardarEdicionCola(event)" onclick="event.stopPropagation()" class="w-full max-w-md bg-white rounded-3xl p-5 space-y-3 shadow-2xl max-h-[90%] overflow-y-auto">
+                    <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                        <div>
+                            <h3 class="text-base font-extrabold text-gray-900">Completar / Editar Datos</h3>
+                            <p id="editColaSubtitle" class="text-[11px] text-gray-500">DNI: -</p>
+                        </div>
+                        <button type="button" onclick="closeEditColaModal()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 font-bold">✕</button>
+                    </div>
+                    <input type="hidden" id="editColaDni">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Apellidos y Nombres</label>
+                        <input type="text" id="editColaNombre" placeholder="APELLIDOS NOMBRES" class="w-full text-xs font-bold bg-ios-bg p-2.5 rounded-xl focus:outline-none uppercase">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">N° H.Cl.</label>
+                            <input type="text" id="editColaHcl" placeholder="Ej. 45892" class="w-full text-xs font-bold bg-ios-bg p-2.5 rounded-xl focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-emerald-700 uppercase mb-1">Celular (9 dígitos)</label>
+                            <input type="tel" id="editColaCelular" maxlength="9" placeholder="9xxxxxxxx" class="w-full text-xs font-bold bg-ios-bg p-2.5 rounded-xl focus:outline-none">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Sector</label>
+                            <input type="text" id="editColaSector" placeholder="Ej. Cerro de Oro" class="w-full text-xs font-bold bg-ios-bg p-2.5 rounded-xl focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Dirección</label>
+                            <input type="text" id="editColaDireccion" placeholder="Av. / Jr. / Mz / Lt" class="w-full text-xs font-bold bg-ios-bg p-2.5 rounded-xl focus:outline-none">
+                        </div>
+                    </div>
+                    <div class="flex gap-2 pt-2">
+                        <button type="button" onclick="closeEditColaModal()" class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-700 text-xs font-extrabold">Cancelar</button>
+                        <button type="submit" class="flex-1 py-2.5 rounded-xl bg-ios-blue text-white text-xs font-extrabold shadow-sm">💾 Guardar cambios</button>
+                    </div>
+                </form>
+            </div>
 
             <!-- MODALS -->
             <div id="actionSheetBackdrop" onclick="closeActionSheet()" class="hidden absolute inset-0 z-50 bg-black/40 backdrop-blur-[2px] flex items-end">
@@ -805,6 +847,14 @@
                 if (window.renderPorCitar) window.renderPorCitar();
             }
         });
+
+        window.saveCola30dToFirebase = async function(colaObj) {
+            try {
+                await setDoc(doc(db, "citen_chilca_colas", "cola_gestion_30d"), colaObj);
+            } catch (e) {
+                console.error("Error guardando cola_gestion_30d:", e);
+            }
+        };
 
         // Global function to push updates
         window.saveToFirebase = async function() {
@@ -2178,6 +2228,70 @@
             window.open(`https://wa.me/51${cel}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
+        function openEditColaModal(dniKey) {
+            const items = (window.colaGestion30d && window.colaGestion30d.items) || [];
+            const it = items.find(x => String(x.dni) === String(dniKey));
+            if (!it) return;
+            document.getElementById('editColaDni').value = it.dni || '';
+            document.getElementById('editColaSubtitle').textContent = `DNI: ${it.dni || '-'} • Nac: ${it.fechaNac || '-'}`;
+            document.getElementById('editColaNombre').value = it.apellidosNombres || '';
+            document.getElementById('editColaHcl').value = it.hcl || '';
+            document.getElementById('editColaCelular').value = it.celular || '';
+            document.getElementById('editColaSector').value = it.sector || '';
+            document.getElementById('editColaDireccion').value = it.direccion || '';
+            document.getElementById('editColaBackdrop').classList.remove('hidden');
+        }
+
+        function closeEditColaModal() {
+            document.getElementById('editColaBackdrop').classList.add('hidden');
+        }
+
+        async function guardarEdicionCola(e) {
+            e.preventDefault();
+            const dni = document.getElementById('editColaDni').value.trim();
+            const nombre = document.getElementById('editColaNombre').value.trim().toUpperCase();
+            const hcl = document.getElementById('editColaHcl').value.trim();
+            const cel = document.getElementById('editColaCelular').value.replace(/\D/g, '').slice(0, 9);
+            const sector = document.getElementById('editColaSector').value.trim();
+            const dir = document.getElementById('editColaDireccion').value.trim();
+
+            if (cel && !/^9\d{8}$/.test(cel)) {
+                alert('El celular debe tener 9 dígitos y empezar con 9.');
+                return;
+            }
+
+            const items = (window.colaGestion30d && window.colaGestion30d.items) || [];
+            const idx = items.findIndex(x => String(x.dni) === dni);
+            if (idx !== -1) {
+                items[idx].apellidosNombres = nombre;
+                items[idx].hcl = hcl;
+                items[idx].celular = cel;
+                items[idx].sector = sector;
+                items[idx].direccion = dir;
+
+                const faltan = [];
+                if (!dni) faltan.push('DNI');
+                if (!nombre) faltan.push('Nombres');
+                if (!cel) faltan.push('Celular');
+                if (!dir && !sector) faltan.push('Dirección');
+                items[idx].alertaDatos = faltan.length ? `⚠️ Completar: ${faltan.join(', ')}` : 'OK';
+
+                if (window.saveCola30dToFirebase) {
+                    window.saveCola30dToFirebase(window.colaGestion30d);
+                }
+            }
+
+            if (typeof syncToGoogleDrive === 'function') {
+                syncToGoogleDrive({
+                    action: 'ACTUALIZAR_DATOS_MASTER',
+                    data: { dni, hcl, apellidosNombres: nombre, celular: cel, sector, direccion: dir }
+                });
+            }
+
+            closeEditColaModal();
+            renderPorCitar();
+        }
+
         function agendarDesdeCola(dniKey) {
             const items = (window.colaGestion30d && window.colaGestion30d.items) || [];
             const item = items.find(x => String(x.dni) === String(dniKey));
@@ -2427,6 +2541,7 @@
                                         ${it.faltanDatos ? `<div class="text-[10px] text-amber-700 mt-0.5">${it.alertaDatos}</div>` : ''}
                                     </td>
                                     <td class="p-3 text-right whitespace-nowrap space-x-1">
+                                        <button onclick='openEditColaModal(${JSON.stringify(it.dni||"")})' class="px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-[11px] font-bold" title="Editar datos">✏️</button>
                                         <button ${it.celOk ? '' : 'disabled'} onclick='abrirWhatsappCola(${JSON.stringify(it.celular||"")}, ${JSON.stringify(it.apellidosNombres||"")}, ${JSON.stringify(it.proxCredNum||"")}, ${JSON.stringify(it.fechaProxCred||"")})' class="px-2.5 py-1.5 rounded-lg text-[11px] font-bold ${it.celOk ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-400'}">💬</button>
                                         <button onclick='agendarDesdeCola(${JSON.stringify(it.dni||"")})' class="px-2.5 py-1.5 rounded-lg bg-ios-blue text-white text-[11px] font-bold">Agendar</button>
                                     </td>
@@ -2471,12 +2586,15 @@
                     </div>
                     ${sfBadge}
                     ${alerta}
-                    <div class="grid grid-cols-2 gap-2 pt-1">
+                    <div class="grid grid-cols-3 gap-2 pt-1">
+                        <button onclick='openEditColaModal(${JSON.stringify(it.dni||"")})' class="py-2 rounded-xl bg-gray-100 text-gray-700 text-xs font-extrabold ios-tap">
+                            ✏️ Editar
+                        </button>
                         <button ${it.celOk ? '' : 'disabled'} onclick='abrirWhatsappCola(${JSON.stringify(it.celular||"")}, ${JSON.stringify(it.apellidosNombres||"")}, ${JSON.stringify(it.proxCredNum||"")}, ${JSON.stringify(it.fechaProxCred||"")})' class="py-2 rounded-xl text-xs font-extrabold ${it.celOk ? 'bg-emerald-100 text-emerald-800 ios-tap' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}">
                             ${it.celOk ? '💬 WhatsApp' : 'Sin celular'}
                         </button>
                         <button onclick='agendarDesdeCola(${JSON.stringify(it.dni||"")})' class="py-2 rounded-xl bg-ios-blue text-white text-xs font-extrabold shadow-2xs ios-tap">
-                            📅 Agendar ahora
+                            📅 Agendar
                         </button>
                     </div>
                 </div>`;

@@ -452,118 +452,130 @@
                     </div>
 
                     <div class="lg:grid lg:grid-cols-12 lg:gap-4 items-start space-y-3 lg:space-y-0">
-                        <!-- PANEL DE FILTROS COMBINABLES (siempre visible en PC, colapsable en móvil) -->
-                        <div id="porCitarFiltros" class="lg:col-span-4 bg-white rounded-2xl p-3.5 shadow-ios-card space-y-3">
+                        <!-- PANEL DE FILTROS COMBINABLES (barra compacta en móvil + bottom-sheet; panel lateral en PC) -->
+                        <div id="porCitarFiltros" class="lg:col-span-4 bg-white rounded-2xl p-3 shadow-ios-card space-y-2.5">
                             <div class="flex gap-2">
                                 <input type="text" id="porCitarSearch" oninput="renderPorCitar()" placeholder="Buscar DNI, nombre o sector..." class="flex-1 text-xs font-semibold bg-ios-bg px-3 py-2 rounded-xl focus:outline-none">
-                                <button type="button" onclick="togglePorCitarMenu()" class="lg:hidden bg-ios-bg text-gray-700 px-3 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1 ios-tap">
-                                    <i class="ph-bold ph-sliders-horizontal text-sm"></i> Filtros
+                                <button type="button" onclick="togglePorCitarMenu()" id="btnPorCitarFiltros" class="lg:hidden bg-ios-blue/10 text-ios-blue px-3 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1 ios-tap whitespace-nowrap">
+                                    <i class="ph-bold ph-sliders-horizontal text-sm"></i> <span id="btnPorCitarFiltrosLbl">Filtros</span>
                                 </button>
                             </div>
 
-                            <div id="porCitarAdvancedMenu" class="hidden lg:block space-y-3 pt-1">
-                                <!-- Multi-select Estado / Atraso -->
-                                <div>
-                                    <div class="flex justify-between items-center mb-1">
-                                        <span class="text-[10px] font-extrabold uppercase text-gray-400">Estado / Atraso (Multi)</span>
-                                        <button type="button" onclick="resetPorCitarFiltros()" class="text-[10px] font-bold text-ios-blue">Limpiar todo</button>
+                            <!-- Barra rápida horizontal en móvil (1 sola fila limpia) -->
+                            <div id="porCitarQuickBar" class="flex lg:hidden gap-1.5 overflow-x-auto no-scrollbar text-[11px] font-bold"></div>
+
+                            <!-- Backdrop para Bottom Sheet en móvil -->
+                            <div id="porCitarMenuBackdrop" onclick="togglePorCitarMenu(false)" class="hidden lg:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px]"></div>
+
+                            <div id="porCitarAdvancedMenu" class="hidden lg:block fixed lg:static inset-x-0 bottom-0 z-50 lg:z-auto bg-white rounded-t-3xl lg:rounded-none p-4 lg:p-0 max-h-[82vh] lg:max-h-none overflow-y-auto shadow-2xl lg:shadow-none space-y-2.5">
+                                <div class="flex justify-between items-center pb-2 border-b border-gray-100">
+                                    <span class="text-xs font-extrabold text-gray-800">🎛️ Filtros Combinables</span>
+                                    <div class="flex items-center gap-3">
+                                        <button type="button" onclick="resetPorCitarFiltros()" class="text-[11px] font-bold text-ios-blue">Limpiar todo</button>
+                                        <button type="button" onclick="togglePorCitarMenu(false)" class="lg:hidden w-7 h-7 rounded-full bg-gray-100 text-gray-600 font-bold text-xs">✕</button>
                                     </div>
-                                    <div id="porCitarChipsEstado" class="flex flex-wrap gap-1.5 text-[11px] font-bold"></div>
                                 </div>
 
-                                <!-- Multi-select CRED -->
-                                <div>
-                                    <span class="block text-[10px] font-extrabold uppercase text-gray-400 mb-1">Control CRED (Multi)</span>
-                                    <div id="porCitarChipsCred" class="flex flex-wrap gap-1.5 text-[11px] font-bold"></div>
-                                </div>
+                                <!-- Acordeón 1: Estado / Atraso -->
+                                <details open class="bg-ios-bg/70 rounded-xl p-2.5">
+                                    <summary class="text-[11px] font-extrabold text-gray-700 cursor-pointer select-none">⏱️ Estado / Atraso</summary>
+                                    <div id="porCitarChipsEstado" class="flex flex-wrap gap-1.5 text-[11px] font-bold pt-2"></div>
+                                </details>
 
-                                <!-- Multi-select Sulfato Ferroso -->
-                                <div>
-                                    <span class="block text-[10px] font-extrabold uppercase text-gray-400 mb-1">Hierro / Sulfato Ferroso (Multi)</span>
-                                    <div id="porCitarChipsSf" class="flex flex-wrap gap-1.5 text-[11px] font-bold"></div>
-                                </div>
+                                <!-- Acordeón 2: CRED y Hierro -->
+                                <details open class="bg-ios-bg/70 rounded-xl p-2.5 space-y-2">
+                                    <summary class="text-[11px] font-extrabold text-gray-700 cursor-pointer select-none">🩺 Control CRED y Hierro / SF</summary>
+                                    <div class="pt-1 space-y-2">
+                                        <div id="porCitarChipsCred" class="flex flex-wrap gap-1.5 text-[11px] font-bold"></div>
+                                        <div id="porCitarChipsSf" class="flex flex-wrap gap-1.5 text-[11px] font-bold"></div>
+                                    </div>
+                                </details>
 
-                                <!-- Multi-select Datos Faltantes -->
-                                <div>
-                                    <span class="block text-[10px] font-extrabold uppercase text-gray-400 mb-1">Datos Faltantes (ON/OFF)</span>
-                                    <div id="porCitarChipsFaltan" class="flex flex-wrap gap-1.5 text-[11px] font-bold"></div>
-                                </div>
+                                <!-- Acordeón 3: Datos Faltantes -->
+                                <details class="bg-ios-bg/70 rounded-xl p-2.5">
+                                    <summary class="text-[11px] font-extrabold text-gray-700 cursor-pointer select-none">⚠️ Datos Faltantes</summary>
+                                    <div id="porCitarChipsFaltan" class="flex flex-wrap gap-1.5 text-[11px] font-bold pt-2"></div>
+                                </details>
 
-                                <!-- Multi-select Motivos de No Control -->
-                                <div>
-                                    <span class="block text-[10px] font-extrabold uppercase text-gray-400 mb-1">Motivos de No Control (ON/OFF)</span>
-                                    <div id="porCitarChipsMotivos" class="flex flex-wrap gap-1.5 text-[11px] font-bold"></div>
-                                </div>
+                                <!-- Acordeón 4: Motivos de No Control -->
+                                <details class="bg-ios-bg/70 rounded-xl p-2.5">
+                                    <summary class="text-[11px] font-extrabold text-gray-700 cursor-pointer select-none">📋 Motivos de No Control</summary>
+                                    <div id="porCitarChipsMotivos" class="flex flex-wrap gap-1.5 text-[11px] font-bold pt-2"></div>
+                                </details>
 
-                                <!-- Rango de Edad Actual (casillas simples Años y Meses) -->
-                                <div class="bg-ios-bg p-2.5 rounded-xl space-y-2">
-                                    <span class="block text-[10px] font-extrabold text-gray-600 uppercase">Edad Actual (Desde / Hasta)</span>
-                                    <div class="grid grid-cols-2 gap-2 text-[11px] font-bold">
-                                        <div class="flex items-center gap-1">
-                                            <span class="text-[10px] text-gray-500">De:</span>
-                                            <select id="porCitarEdadMinA" onchange="onPorCitarEdadChanged()" class="flex-1 bg-white px-1.5 py-1 rounded-lg">
-                                                <option value="0">0a</option>
-                                                <option value="1" selected>1a</option>
-                                                <option value="2">2a</option>
-                                                <option value="3">3a</option>
-                                            </select>
-                                            <select id="porCitarEdadMinM" onchange="onPorCitarEdadChanged()" class="flex-1 bg-white px-1.5 py-1 rounded-lg">
-                                                <option value="0" selected>0m</option><option value="1">1m</option><option value="2">2m</option>
-                                                <option value="3">3m</option><option value="4">4m</option><option value="5">5m</option>
-                                                <option value="6">6m</option><option value="7">7m</option><option value="8">8m</option>
-                                                <option value="9">9m</option><option value="10">10m</option><option value="11">11m</option>
-                                            </select>
+                                <!-- Acordeón 5: Edad, Fechas y Orden -->
+                                <details class="bg-ios-bg/70 rounded-xl p-2.5 space-y-2">
+                                    <summary class="text-[11px] font-extrabold text-gray-700 cursor-pointer select-none">📅 Edad, Fechas y Orden</summary>
+                                    <div class="pt-1 space-y-2">
+                                        <div class="grid grid-cols-2 gap-2 text-[11px] font-bold">
+                                            <div class="flex items-center gap-1">
+                                                <span class="text-[10px] text-gray-500">De:</span>
+                                                <select id="porCitarEdadMinA" onchange="onPorCitarEdadChanged()" class="flex-1 bg-white px-1.5 py-1 rounded-lg">
+                                                    <option value="0">0a</option>
+                                                    <option value="1" selected>1a</option>
+                                                    <option value="2">2a</option>
+                                                    <option value="3">3a</option>
+                                                </select>
+                                                <select id="porCitarEdadMinM" onchange="onPorCitarEdadChanged()" class="flex-1 bg-white px-1.5 py-1 rounded-lg">
+                                                    <option value="0" selected>0m</option><option value="1">1m</option><option value="2">2m</option>
+                                                    <option value="3">3m</option><option value="4">4m</option><option value="5">5m</option>
+                                                    <option value="6">6m</option><option value="7">7m</option><option value="8">8m</option>
+                                                    <option value="9">9m</option><option value="10">10m</option><option value="11">11m</option>
+                                                </select>
+                                            </div>
+                                            <div class="flex items-center gap-1">
+                                                <span class="text-[10px] text-gray-500">A:</span>
+                                                <select id="porCitarEdadMaxA" onchange="onPorCitarEdadChanged()" class="flex-1 bg-white px-1.5 py-1 rounded-lg">
+                                                    <option value="0">0a</option>
+                                                    <option value="1" selected>1a</option>
+                                                    <option value="2">2a</option>
+                                                    <option value="3">3a</option>
+                                                </select>
+                                                <select id="porCitarEdadMaxM" onchange="onPorCitarEdadChanged()" class="flex-1 bg-white px-1.5 py-1 rounded-lg">
+                                                    <option value="0">0m</option><option value="1">1m</option><option value="2">2m</option>
+                                                    <option value="3">3m</option><option value="4">4m</option><option value="5">5m</option>
+                                                    <option value="6">6m</option><option value="7">7m</option><option value="8">8m</option>
+                                                    <option value="9">9m</option><option value="10">10m</option><option value="11" selected>11m</option>
+                                                </select>
+                                            </div>
                                         </div>
-                                        <div class="flex items-center gap-1">
-                                            <span class="text-[10px] text-gray-500">A:</span>
-                                            <select id="porCitarEdadMaxA" onchange="onPorCitarEdadChanged()" class="flex-1 bg-white px-1.5 py-1 rounded-lg">
-                                                <option value="0">0a</option>
-                                                <option value="1" selected>1a</option>
-                                                <option value="2">2a</option>
-                                                <option value="3">3a</option>
-                                            </select>
-                                            <select id="porCitarEdadMaxM" onchange="onPorCitarEdadChanged()" class="flex-1 bg-white px-1.5 py-1 rounded-lg">
-                                                <option value="0">0m</option><option value="1">1m</option><option value="2">2m</option>
-                                                <option value="3">3m</option><option value="4">4m</option><option value="5">5m</option>
-                                                <option value="6">6m</option><option value="7">7m</option><option value="8">8m</option>
-                                                <option value="9">9m</option><option value="10">10m</option><option value="11" selected>11m</option>
-                                            </select>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Desde fecha</label>
+                                                <input type="date" id="porCitarFechaDesde" onchange="renderPorCitar()" class="w-full text-[11px] font-bold bg-white px-2 py-1.5 rounded-xl focus:outline-none">
+                                            </div>
+                                            <div>
+                                                <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Hasta fecha</label>
+                                                <input type="date" id="porCitarFechaHasta" onchange="renderPorCitar()" class="w-full text-[11px] font-bold bg-white px-2 py-1.5 rounded-xl focus:outline-none">
+                                            </div>
+                                            <div>
+                                                <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Mes Corresp.</label>
+                                                <select id="porCitarFiltroMes" onchange="renderPorCitar()" class="w-full text-[11px] font-bold bg-white px-2 py-1.5 rounded-xl focus:outline-none">
+                                                    <option value="TODOS">Todos</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Ordenar por</label>
+                                                <select id="porCitarOrden" onchange="renderPorCitar()" class="w-full text-[11px] font-bold bg-white px-2 py-1.5 rounded-xl focus:outline-none">
+                                                    <option value="URGENCIA">Más urgentes</option>
+                                                    <option value="PROXIMOS">Próximos cercanos</option>
+                                                    <option value="EDAD_ASC">Menor edad</option>
+                                                    <option value="NOMBRE">Nombre A-Z</option>
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-
-                                <!-- Fechas, Mes y Orden -->
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Desde fecha</label>
-                                        <input type="date" id="porCitarFechaDesde" onchange="renderPorCitar()" class="w-full text-[11px] font-bold bg-ios-bg px-2 py-1.5 rounded-xl focus:outline-none">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Hasta fecha</label>
-                                        <input type="date" id="porCitarFechaHasta" onchange="renderPorCitar()" class="w-full text-[11px] font-bold bg-ios-bg px-2 py-1.5 rounded-xl focus:outline-none">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Mes Corresp.</label>
-                                        <select id="porCitarFiltroMes" onchange="renderPorCitar()" class="w-full text-[11px] font-bold bg-ios-bg px-2 py-1.5 rounded-xl focus:outline-none">
-                                            <option value="TODOS">Todos</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Ordenar por</label>
-                                        <select id="porCitarOrden" onchange="renderPorCitar()" class="w-full text-[11px] font-bold bg-ios-bg px-2 py-1.5 rounded-xl focus:outline-none">
-                                            <option value="URGENCIA">Más urgentes</option>
-                                            <option value="PROXIMOS">Próximos cercanos</option>
-                                            <option value="EDAD_ASC">Menor edad</option>
-                                            <option value="NOMBRE">Nombre A-Z</option>
-                                        </select>
-                                    </div>
-                                </div>
+                                </details>
 
                                 <!-- Switch incluir niños con cita ya programada -->
-                                <label class="flex items-center justify-between bg-ios-bg px-3 py-2 rounded-xl cursor-pointer">
+                                <label class="flex items-center justify-between bg-ios-bg/70 px-3 py-2 rounded-xl cursor-pointer">
                                     <span class="text-[11px] font-bold text-gray-700">Incluir ya citados (con fecha)</span>
                                     <input type="checkbox" id="porCitarToggleYaCitados" onchange="renderPorCitar()" class="w-4 h-4 accent-ios-blue">
                                 </label>
+
+                                <button type="button" onclick="togglePorCitarMenu(false)" class="lg:hidden w-full py-2.5 rounded-xl bg-ios-blue text-white text-xs font-extrabold shadow-sm">
+                                    Aplicar y ver resultados
+                                </button>
                             </div>
                         </div>
 
@@ -2266,9 +2278,13 @@
         };
         window._ultimoFiltradoPorCitar = [];
 
-        function togglePorCitarMenu() {
+        function togglePorCitarMenu(forceState) {
             const m = document.getElementById('porCitarAdvancedMenu');
-            if (m) m.classList.toggle('hidden');
+            const bd = document.getElementById('porCitarMenuBackdrop');
+            if (!m) return;
+            const willOpen = typeof forceState === 'boolean' ? forceState : m.classList.contains('hidden');
+            m.classList.toggle('hidden', !willOpen);
+            if (bd) bd.classList.toggle('hidden', !willOpen);
         }
 
         function togglePorCitarFilter(group, val) {
@@ -2377,8 +2393,8 @@
 
         function _classifyAtraso(diasAtraso) {
             if (diasAtraso <= 0) return 'AL_DIA';
-            if (diasAtraso <= 35) return 'ATRASO_1M';
-            if (diasAtraso <= 65) return 'ATRASO_2M';
+            if (diasAtraso < 60) return 'ATRASO_1M';
+            if (diasAtraso < 90) return 'ATRASO_2M';
             return 'ATRASO_3M';
         }
 
@@ -2648,14 +2664,27 @@
             };
 
             const elEst = document.getElementById('porCitarChipsEstado');
-            if (elEst) {
-                elEst.innerHTML = [
+            const estHtml = [
+                mkChip('estados', 'AL_DIA', 'Al día', items30.filter(x => x.catAtraso === 'AL_DIA').length),
+                mkChip('estados', 'ATRASO_1M', 'Atraso 1m', items30.filter(x => x.catAtraso === 'ATRASO_1M').length),
+                mkChip('estados', 'ATRASO_2M', 'Atraso 2m', items30.filter(x => x.catAtraso === 'ATRASO_2M').length),
+                mkChip('estados', 'ATRASO_3M', 'Atraso 3+m', items30.filter(x => x.catAtraso === 'ATRASO_3M').length),
+            ].join('');
+            if (elEst) elEst.innerHTML = estHtml;
+
+            const quickBar = document.getElementById('porCitarQuickBar');
+            if (quickBar) {
+                quickBar.innerHTML = [
                     mkChip('estados', 'AL_DIA', 'Al día', items30.filter(x => x.catAtraso === 'AL_DIA').length),
                     mkChip('estados', 'ATRASO_1M', 'Atraso 1m', items30.filter(x => x.catAtraso === 'ATRASO_1M').length),
                     mkChip('estados', 'ATRASO_2M', 'Atraso 2m', items30.filter(x => x.catAtraso === 'ATRASO_2M').length),
                     mkChip('estados', 'ATRASO_3M', 'Atraso 3+m', items30.filter(x => x.catAtraso === 'ATRASO_3M').length),
+                    mkChip('faltan', 'CELULAR', 'Sin Cel.', items30.filter(x => x.faltaCel).length),
                 ].join('');
             }
+            const activeCount = porCitarMulti.estados.size + porCitarMulti.cred.size + porCitarMulti.sf.size + porCitarMulti.faltan.size + porCitarMulti.motivos.size;
+            const lblF = document.getElementById('btnPorCitarFiltrosLbl');
+            if (lblF) lblF.textContent = activeCount > 0 ? `Filtros (${activeCount})` : 'Filtros';
             const elCred = document.getElementById('porCitarChipsCred');
             if (elCred) {
                 elCred.innerHTML = ['1', '2', '3', '4'].map(n => mkChip('cred', n, `CRED ${n}`)).join('');

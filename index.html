@@ -2341,13 +2341,13 @@
                 alert('No hay registros filtrados para exportar.');
                 return;
             }
-            const headers = ['DNI', 'HCL', 'Apellidos_Nombres', 'Edad_Actual', 'Celular', 'Sector', 'Direccion', 'Prox_CRED', 'Fecha_CRED', 'Estado_CRED', 'Prox_SF', 'Fecha_SF', 'Ya_Citado', 'Alerta_Datos'];
+            const headers = ['DNI', 'Fecha_Nac', 'HCL', 'Apellidos_Nombres', 'Edad_Actual', 'Celular', 'Sector', 'Direccion', 'Prox_CRED', 'Fecha_CRED', 'Estado_CRED', 'Prox_SF', 'Fecha_SF', 'Ya_Citado', 'Alerta_Datos'];
             const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
             const lines = [headers.join(';')].concat(rows.map(it => [
-                it.dni, it.hcl, it.apellidosNombres, _formatEdadAniosMeses(it.edadMeses),
+                it.dni, formatDateDDMMYY(it.fechaNac), it.hcl, it.apellidosNombres, _formatEdadAniosMeses(it.edadMeses),
                 it.celular, it.sector, it.direccion,
-                it.proxCredNum, it.fProx, it.diasAtraso > 0 ? `Atraso ${it.diasAtraso}d` : 'Al día',
-                it.proxSfNum, it.fSf, it.yaCitado ? 'SI' : 'NO', it.alertaDatos
+                it.proxCredNum, formatDateDDMMYY(it.fProx), it.diasAtraso > 0 ? `Atraso ${it.diasAtraso}d` : 'Al día',
+                it.proxSfNum, formatDateDDMMYY(it.fSf), it.yaCitado ? 'SI' : 'NO', it.alertaDatos
             ].map(esc).join(';')));
             const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
@@ -2459,7 +2459,7 @@
             if (!/^9\d{8}$/.test(cel)) return;
             const nombreTxt = nombre ? `de ${nombre}` : 'de su menor hijo(a)';
             const ctrlTxt = proxCred && proxCred !== 'COMPLETO' ? `su ${proxCred}° control CRED` : 'su control CRED';
-            const fechaTxt = fechaProx ? ` (fecha sugerida: ${fechaProx})` : '';
+            const fechaTxt = fechaProx ? ` (fecha sugerida: ${formatDateDDMMYY(fechaProx)})` : '';
             const msg = `Hola, le escribimos del Centro de Salud Chilca (CRED). Le recordamos que corresponde programar ${ctrlTxt} ${nombreTxt}${fechaTxt}. ¿Qué día y hora le gustaría confirmar su cita?`;
             window.open(`https://wa.me/51${cel}?text=${encodeURIComponent(msg)}`, '_blank');
         }
@@ -2467,7 +2467,7 @@
         function abrirWhatsappRecordatorio(celular, nombre, fecha, hora, consultorio, servicio) {
             const cel = String(celular || '').replace(/\D/g, '');
             if (!/^9\d{8}$/.test(cel)) return;
-            const msg = `Hola, le recordamos del Centro de Salud Chilca que mañana ${fecha} a las ${hora} tiene cita de ${servicio} para ${nombre || 'su menor'} en ${consultorio || 'Consultorio A'}. ¡Los esperamos puntual!`;
+            const msg = `Hola, le recordamos del Centro de Salud Chilca que mañana ${formatDateDDMMYY(fecha)} a las ${hora} tiene cita de ${servicio} para ${nombre || 'su menor'} en ${consultorio || 'Consultorio A'}. ¡Los esperamos puntual!`;
             window.open(`https://wa.me/51${cel}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
@@ -2482,7 +2482,7 @@
             const it = items.find(x => String(x.dni) === String(dniKey));
             if (!it) return;
             document.getElementById('editColaDni').value = it.dni || '';
-            document.getElementById('editColaSubtitle').textContent = `DNI: ${it.dni || '-'} • Nac: ${it.fechaNac || '-'}`;
+            document.getElementById('editColaSubtitle').textContent = `DNI: ${it.dni || '-'} • Nac: ${formatDateDDMMYY(it.fechaNac)}`;
             document.getElementById('editColaNombre').value = it.apellidosNombres || '';
             document.getElementById('editColaHcl').value = it.hcl || '';
             document.getElementById('editColaCelular').value = it.celular || '';
@@ -2745,7 +2745,7 @@
                             <span class="font-bold text-gray-500">DNI ${r.dni || '-'}</span>
                         </div>
                         <div class="text-sm font-extrabold text-gray-900">${r.nombreMenor || 'Sin nombre'}</div>
-                        <div class="text-xs text-gray-600">${r.servicio || 'CRED'} • Mañana ${r.fecha}</div>
+                        <div class="text-xs text-gray-600">${r.servicio || 'CRED'} • Mañana ${formatDateDDMMYY(r.fecha)}</div>
                         <button ${celOk ? '' : 'disabled'} onclick='abrirWhatsappRecordatorio(${JSON.stringify(r.celular||"")}, ${JSON.stringify(r.nombreMenor||"")}, ${JSON.stringify(r.fecha||"")}, ${JSON.stringify(r.hora||"")}, ${JSON.stringify(r.consultorio||"")}, ${JSON.stringify(r.servicio||"")})' class="w-full py-2 rounded-xl text-xs font-extrabold ${celOk ? 'bg-emerald-100 text-emerald-800 ios-tap' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}">
                             ${celOk ? '💬 Enviar Recordatorio WhatsApp' : 'Sin celular válido'}
                         </button>
@@ -2844,15 +2844,15 @@
                                 <tr class="hover:bg-blue-50/30">
                                     <td class="p-3">
                                         <div class="font-extrabold text-gray-900">${it.apellidosNombres || '⚠️ Sin nombre'}</div>
-                                        <div class="text-[11px] text-gray-500">DNI ${it.dni || '-'} ${it.sector || it.direccion ? '• ' + [it.sector, it.direccion].filter(Boolean).join(' ') : ''}</div>
+                                        <div class="text-[11px] text-gray-500">DNI ${it.dni || '-'} • Nac: ${formatDateDDMMYY(it.fechaNac)} ${it.sector || it.direccion ? '• ' + [it.sector, it.direccion].filter(Boolean).join(' ') : ''}</div>
                                     </td>
                                     <td class="p-3 font-bold text-gray-700 whitespace-nowrap">${edadTxt}</td>
                                     <td class="p-3 whitespace-nowrap">
                                         <span class="font-bold ${esAtrasado ? 'text-red-700' : 'text-emerald-700'}">CRED ${it.proxCredNum || '-'}</span>
-                                        <div class="text-[11px] text-gray-500">${it.fProx || '-'}</div>
+                                        <div class="text-[11px] text-gray-500">${formatDateDDMMYY(it.fProx)}</div>
                                     </td>
                                     <td class="p-3 whitespace-nowrap">
-                                        ${it.tieneSf ? `<span class="font-bold text-indigo-700">SF ${it.proxSfNum}°</span><div class="text-[11px] text-gray-500">${it.fSf}</div>` : '<span class="text-gray-400">-</span>'}
+                                        ${it.tieneSf ? `<span class="font-bold text-indigo-700">SF ${it.proxSfNum}°</span><div class="text-[11px] text-gray-500">${formatDateDDMMYY(it.fSf)}</div>` : '<span class="text-gray-400">-</span>'}
                                     </td>
                                     <td class="p-3">
                                         ${it.yaCitado ? '<span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold">Ya citado</span>' : ''}
@@ -2881,11 +2881,11 @@
                 const sfEdad = SF_EDAD_LABELS[String(it.proxSfNum)] || '';
                 const fechaLabel = it.tieneCred
                     ? (esAtrasado
-                        ? `<span class="text-red-700">⏰ Debió controlarse: <b>${it.fProx}</b> (${atrasoTxt})</span>`
-                        : `<span class="text-emerald-700">📅 Cita CRED (${credEdad}): <b>${it.fProx}</b></span>`)
+                        ? `<span class="text-red-700">⏰ Debió controlarse: <b>${formatDateDDMMYY(it.fProx)}</b> (${atrasoTxt})</span>`
+                        : `<span class="text-emerald-700">📅 Cita CRED (${credEdad}): <b>${formatDateDDMMYY(it.fProx)}</b></span>`)
                     : `<span class="text-gray-600">✅ CRED de 1a completo</span>`;
                 const sfBadge = it.tieneSf
-                    ? `<div class="text-[11px] font-semibold ${it.diasAtrasoSf > 0 ? 'text-rose-700' : 'text-indigo-700'}">💊 Hierro/SF ${it.proxSfNum}° (${sfEdad}): <b>${it.fSf}</b> ${it.diasAtrasoSf > 0 ? `(${_formatAtrasoHumano(it.diasAtrasoSf)})` : '(A tiempo)'}</div>`
+                    ? `<div class="text-[11px] font-semibold ${it.diasAtrasoSf > 0 ? 'text-rose-700' : 'text-indigo-700'}">💊 Hierro/SF ${it.proxSfNum}° (${sfEdad}): <b>${formatDateDDMMYY(it.fSf)}</b> ${it.diasAtrasoSf > 0 ? `(${_formatAtrasoHumano(it.diasAtrasoSf)})` : '(A tiempo)'}</div>`
                     : '';
                 const motivoBadge = it.motivo !== 'NINGUNO'
                     ? `<div class="text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-1 rounded-lg">${MOTIVO_LABELS[it.motivo] || it.motivo}${it.motivoDetalle ? ': ' + it.motivoDetalle : ''}</div>`
@@ -2895,11 +2895,14 @@
                     : '';
                 return `
                 <div class="bg-white rounded-2xl p-3.5 shadow-ios-card border-l-4 ${esAtrasado ? 'border-l-ios-red' : 'border-l-ios-green'} space-y-2">
-                    <div class="flex justify-between items-center text-[11px]">
+                    <div class="flex justify-between items-start text-[11px]">
                         <span class="font-extrabold px-2 py-0.5 rounded-full ${esAtrasado ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-800'}">
                             ${esAtrasado ? 'ATRASADO' : 'AL DÍA'} • CRED ${it.proxCredNum || '-'}${credEdad ? ' (' + credEdad + ')' : ''}
                         </span>
-                        <span class="font-bold text-gray-500">DNI ${it.dni || '-'} ${it.hcl ? '• HCL ' + it.hcl : ''}</span>
+                        <div class="text-right leading-tight">
+                            <div class="font-bold text-gray-500">DNI ${it.dni || '-'} ${it.hcl ? '• HCL ' + it.hcl : ''}</div>
+                            <div class="text-[10px] font-semibold text-gray-400">Nac: ${formatDateDDMMYY(it.fechaNac)}</div>
+                        </div>
                     </div>
                     <div class="text-sm font-extrabold text-gray-900">${it.apellidosNombres || '⚠️ Sin nombre registrado'}</div>
                     <div class="text-xs text-gray-600 flex flex-wrap gap-x-3 gap-y-0.5">

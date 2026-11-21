@@ -392,10 +392,42 @@
                     </div>
                 </section>
 
+                <!-- ================= SCREEN 5: POR CITAR (30D) Y RECORDATORIOS (1D) ================= -->
+                <section id="screen-porcitar" class="hidden space-y-3.5 pb-8 p-4">
+                    <div class="flex items-center justify-between pb-2 border-b border-gray-200">
+                        <div>
+                            <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Por Citar (30d)</h1>
+                            <p id="porCitarSubtitle" class="text-[11px] text-gray-500">Cola ligera sincronizada desde Master</p>
+                        </div>
+                        <span id="porCitarTotalBadge" class="bg-ios-blue/10 text-ios-blue px-2.5 py-1 rounded-full text-xs font-extrabold">0 niños</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 bg-gray-200 p-0.5 rounded-xl text-xs font-bold">
+                        <button onclick="switchPorCitarTab('COLA_30D')" id="tabCola30d" class="py-2 rounded-lg bg-white shadow-xs">Por Citar (0)</button>
+                        <button onclick="switchPorCitarTab('REC_1D')" id="tabRec1d" class="py-2 rounded-lg text-gray-600">Recordatorios 1d (0)</button>
+                    </div>
+
+                    <div id="porCitarFiltros" class="bg-white rounded-2xl p-3 shadow-ios-card space-y-2">
+                        <input type="text" id="porCitarSearch" oninput="renderPorCitar()" placeholder="Buscar por DNI, nombre o sector..." class="w-full text-xs font-semibold bg-ios-bg px-3 py-2 rounded-xl focus:outline-none">
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="porCitarFiltroEstado" onchange="renderPorCitar()" class="text-xs font-bold bg-ios-bg px-2.5 py-2 rounded-xl focus:outline-none">
+                                <option value="TODOS">Todos (Atrasados + 30d)</option>
+                                <option value="PROXIMO_30D">Solo Próximos 30 días</option>
+                                <option value="ATRASADO">Solo Atrasados</option>
+                            </select>
+                            <select id="porCitarFiltroMes" onchange="renderPorCitar()" class="text-xs font-bold bg-ios-bg px-2.5 py-2 rounded-xl focus:outline-none">
+                                <option value="TODOS">Todos los meses</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="porCitarContainer" class="space-y-3"></div>
+                </section>
+
             </main>
 
             <!-- BOTTOM TAB BAR -->
-            <nav class="absolute bottom-0 inset-x-0 z-40 ios-glass-white border-t border-gray-200/80 px-4 pt-2 pb-3 flex items-center justify-around">
+            <nav class="absolute bottom-0 inset-x-0 z-40 ios-glass-white border-t border-gray-200/80 px-2 pt-2 pb-3 flex items-center justify-around">
                 <button onclick="switchScreen('agenda')" class="nav-tab flex flex-col items-center gap-1 text-ios-blue ios-tap" data-screen="agenda">
                     <i class="ph-fill ph-calendar-blank text-2xl"></i>
                     <span class="text-[10px] font-semibold">Agenda</span>
@@ -403,6 +435,11 @@
                 <button onclick="switchScreen('new')" class="nav-tab flex flex-col items-center gap-1 text-gray-400 ios-tap" data-screen="new">
                     <i class="ph-fill ph-plus-circle text-2xl"></i>
                     <span class="text-[10px] font-semibold">Nueva Cita</span>
+                </button>
+                <button onclick="switchScreen('porcitar')" class="nav-tab relative flex flex-col items-center gap-1 text-gray-400 ios-tap" data-screen="porcitar">
+                    <span id="navPorCitarBadge" class="hidden absolute -top-1 right-1 px-1 min-w-[16px] h-4 rounded-full bg-ios-orange text-white text-[9px] font-bold flex items-center justify-center">0</span>
+                    <i class="ph-fill ph-phone-call text-2xl"></i>
+                    <span class="text-[10px] font-semibold">Por Citar</span>
                 </button>
                 <button onclick="switchScreen('alerts')" class="nav-tab relative flex flex-col items-center gap-1 text-gray-400 ios-tap" data-screen="alerts">
                     <span id="navAlertBadge" class="hidden absolute -top-1 right-2 w-4 h-4 rounded-full bg-ios-red text-white text-[9px] font-bold flex items-center justify-center">0</span>
@@ -662,8 +699,27 @@
                     if (window.renderAppointments) window.renderAppointments();
                     if (window.renderAlerts) window.renderAlerts();
                     if (window.renderTimeSlots) window.renderTimeSlots();
+                    if (window.renderPorCitar) window.renderPorCitar();
                     document.getElementById('syncText').innerHTML = "🟢 Sincronizado en Vivo";
                 }
+            }
+        });
+
+        // Listen for light queues (Por Citar 30d + Recordatorios 1d)
+        window.colaGestion30d = { items: [], updatedAt: '' };
+        window.colaRecordatorios1d = { items: [], updatedAt: '' };
+
+        onSnapshot(doc(db, "citen_chilca_colas", "cola_gestion_30d"), (snap) => {
+            if (snap.exists()) {
+                window.colaGestion30d = snap.data() || { items: [] };
+                if (window.renderPorCitar) window.renderPorCitar();
+            }
+        });
+
+        onSnapshot(doc(db, "citen_chilca_colas", "cola_recordatorios_1d"), (snap) => {
+            if (snap.exists()) {
+                window.colaRecordatorios1d = snap.data() || { items: [] };
+                if (window.renderPorCitar) window.renderPorCitar();
             }
         });
 
@@ -917,18 +973,22 @@
 
         function switchScreen(screenName) {
             if (screenName !== 'new') editingAppointmentId = null;
-            ['agenda', 'new', 'alerts', 'stats'].forEach(s => document.getElementById(`screen-${s}`).classList.add('hidden'));
+            ['agenda', 'new', 'porcitar', 'alerts', 'stats'].forEach(s => document.getElementById(`screen-${s}`).classList.add('hidden'));
             document.getElementById(`screen-${screenName}`).classList.remove('hidden');
             document.querySelectorAll('.nav-tab').forEach(t => {
                 if(t.dataset.screen === screenName) t.className = "nav-tab flex flex-col items-center gap-1 text-ios-blue ios-tap";
                 else t.className = "nav-tab flex flex-col items-center gap-1 text-gray-400 ios-tap";
             });
             if (screenName === 'new') {
-                if (!editingAppointmentId) {
+                if (!editingAppointmentId && !window._prefillingFromCola) {
                     resetNewAppointmentForm();
                 } else {
+                    window._prefillingFromCola = false;
                     onFormScheduleChange();
                 }
+            }
+            if (screenName === 'porcitar') {
+                renderPorCitar();
             }
         }
 
@@ -1834,6 +1894,208 @@
                     <button onclick="window.open('https://wa.me/51${a.phone1}')" class="w-full py-2 bg-emerald-100 text-emerald-800 font-bold text-xs rounded-xl">💬 WhatsApp</button>
                 </div>
             `).join('');
+        }
+
+        // ============================================================================
+        // PASO 4: VISTA LIGERA "POR CITAR (30D)" Y "RECORDATORIOS (1D)"
+        // ============================================================================
+        let currentPorCitarTab = 'COLA_30D';
+
+        function switchPorCitarTab(tab) {
+            currentPorCitarTab = tab;
+            const t30 = document.getElementById('tabCola30d');
+            const t1 = document.getElementById('tabRec1d');
+            const filtros = document.getElementById('porCitarFiltros');
+            if (tab === 'COLA_30D') {
+                t30.className = "py-2 rounded-lg bg-white shadow-xs";
+                t1.className = "py-2 rounded-lg text-gray-600";
+                if (filtros) filtros.classList.remove('hidden');
+            } else {
+                t1.className = "py-2 rounded-lg bg-white shadow-xs";
+                t30.className = "py-2 rounded-lg text-gray-600";
+                if (filtros) filtros.classList.add('hidden');
+            }
+            renderPorCitar();
+        }
+
+        function _getPendingDnisSet() {
+            const s = new Set();
+            (window.appointments || []).forEach(a => {
+                if (a.status === 'PENDIENTE' && a.dni) s.add(String(a.dni).trim());
+            });
+            return s;
+        }
+
+        function _splitApellidosNombres(fullName) {
+            const parts = String(fullName || '').trim().split(/\s+/).filter(Boolean);
+            if (parts.length === 0) return { apellidos: '', nombres: '' };
+            if (parts.length === 1) return { apellidos: parts[0], nombres: '' };
+            if (parts.length === 2) return { apellidos: parts[0], nombres: parts[1] };
+            return {
+                apellidos: parts.slice(0, 2).join(' '),
+                nombres: parts.slice(2).join(' ')
+            };
+        }
+
+        function abrirWhatsappCola(celular, nombre, proxCred, fechaProx) {
+            const cel = String(celular || '').replace(/\D/g, '');
+            if (!/^9\d{8}$/.test(cel)) return;
+            const nombreTxt = nombre ? `de ${nombre}` : 'de su menor hijo(a)';
+            const ctrlTxt = proxCred && proxCred !== 'COMPLETO' ? `su ${proxCred}° control CRED` : 'su control CRED';
+            const fechaTxt = fechaProx ? ` (fecha sugerida: ${fechaProx})` : '';
+            const msg = `Hola, le escribimos del Centro de Salud Chilca (CRED). Le recordamos que corresponde programar ${ctrlTxt} ${nombreTxt}${fechaTxt}. ¿Qué día y hora le gustaría confirmar su cita?`;
+            window.open(`https://wa.me/51${cel}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function abrirWhatsappRecordatorio(celular, nombre, fecha, hora, consultorio, servicio) {
+            const cel = String(celular || '').replace(/\D/g, '');
+            if (!/^9\d{8}$/.test(cel)) return;
+            const msg = `Hola, le recordamos del Centro de Salud Chilca que mañana ${fecha} a las ${hora} tiene cita de ${servicio} para ${nombre || 'su menor'} en ${consultorio || 'Consultorio A'}. ¡Los esperamos puntual!`;
+            window.open(`https://wa.me/51${cel}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function agendarDesdeCola(dniKey) {
+            const items = (window.colaGestion30d && window.colaGestion30d.items) || [];
+            const item = items.find(x => String(x.dni) === String(dniKey));
+            if (!item) return;
+
+            window._prefillingFromCola = true;
+            resetNewAppointmentForm();
+            switchScreen('new');
+
+            const { apellidos, nombres } = _splitApellidosNombres(item.apellidosNombres);
+            document.getElementById('inputDni').value = item.dni || '';
+            document.getElementById('inputHcl').value = item.hcl || '';
+            document.getElementById('inputLastName').value = apellidos;
+            document.getElementById('inputFirstName').value = nombres;
+            if (item.fechaNac) {
+                document.getElementById('inputDob').value = item.fechaNac;
+                calculateExactAge();
+            }
+            document.getElementById('inputPhone1').value = item.celular || '';
+
+            const srvCred = document.getElementById('srvCred');
+            const srvCredRn = document.getElementById('srvCredRn');
+            const numSel = document.getElementById('inputCredNumber');
+            if (srvCredRn) srvCredRn.checked = false;
+            if (srvCred) srvCred.checked = true;
+            if (numSel && item.proxCredNum && item.proxCredNum !== 'COMPLETO') {
+                numSel.value = String(item.proxCredNum);
+            }
+            if (item.fechaProxCred) {
+                const hoyIso = getLocalDateISO(new Date());
+                const targetDate = item.fechaProxCred >= hoyIso ? item.fechaProxCred : hoyIso;
+                document.getElementById('inputExactDate').value = targetDate;
+                onExactDateChanged();
+            }
+        }
+
+        function renderPorCitar() {
+            const pendingDnis = _getPendingDnisSet();
+            const raw30 = (window.colaGestion30d && window.colaGestion30d.items) || [];
+            const items30 = raw30.filter(it => !pendingDnis.has(String(it.dni || '').trim()));
+            const items1d = (window.colaRecordatorios1d && window.colaRecordatorios1d.items) || [];
+
+            const badgeNav = document.getElementById('navPorCitarBadge');
+            if (badgeNav) {
+                badgeNav.textContent = items30.length;
+                badgeNav.classList.toggle('hidden', items30.length === 0);
+            }
+            const totalBadge = document.getElementById('porCitarTotalBadge');
+            if (totalBadge) totalBadge.textContent = `${items30.length} por citar`;
+
+            const t30 = document.getElementById('tabCola30d');
+            const t1 = document.getElementById('tabRec1d');
+            if (t30) t30.textContent = `Por Citar (${items30.length})`;
+            if (t1) t1.textContent = `Recordatorios 1d (${items1d.length})`;
+
+            // Poblar selector de meses dinámicamente
+            const selMes = document.getElementById('porCitarFiltroMes');
+            if (selMes) {
+                const prevMes = selMes.value || 'TODOS';
+                const meses = Array.from(new Set(items30.map(x => x.mesProxCred).filter(Boolean))).sort();
+                selMes.innerHTML = '<option value="TODOS">Todos los meses</option>' +
+                    meses.map(m => `<option value="${m}">${m}</option>`).join('');
+                selMes.value = meses.includes(prevMes) ? prevMes : 'TODOS';
+            }
+
+            const container = document.getElementById('porCitarContainer');
+            if (!container) return;
+
+            if (currentPorCitarTab === 'REC_1D') {
+                if (items1d.length === 0) {
+                    container.innerHTML = `<div class="bg-white rounded-2xl p-6 text-center text-xs text-gray-500 shadow-ios-card">No hay citas confirmadas para mañana.</div>`;
+                    return;
+                }
+                container.innerHTML = items1d.map(r => {
+                    const celOk = /^9\d{8}$/.test(String(r.celular || '').replace(/\D/g, ''));
+                    return `
+                    <div class="bg-white rounded-2xl p-3.5 shadow-ios-card border-l-4 border-l-ios-blue space-y-2">
+                        <div class="flex justify-between items-center text-[11px]">
+                            <span class="font-extrabold text-ios-blue">⏰ ${r.hora || '--:--'} • ${r.consultorio || 'Cons. A'}</span>
+                            <span class="font-bold text-gray-500">DNI ${r.dni || '-'}</span>
+                        </div>
+                        <div class="text-sm font-extrabold text-gray-900">${r.nombreMenor || 'Sin nombre'}</div>
+                        <div class="text-xs text-gray-600">${r.servicio || 'CRED'} • Mañana ${r.fecha}</div>
+                        <button ${celOk ? '' : 'disabled'} onclick='abrirWhatsappRecordatorio(${JSON.stringify(r.celular||"")}, ${JSON.stringify(r.nombreMenor||"")}, ${JSON.stringify(r.fecha||"")}, ${JSON.stringify(r.hora||"")}, ${JSON.stringify(r.consultorio||"")}, ${JSON.stringify(r.servicio||"")})' class="w-full py-2 rounded-xl text-xs font-extrabold ${celOk ? 'bg-emerald-100 text-emerald-800 ios-tap' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}">
+                            ${celOk ? '💬 Enviar Recordatorio WhatsApp' : 'Sin celular válido'}
+                        </button>
+                    </div>`;
+                }).join('');
+                return;
+            }
+
+            const q = (document.getElementById('porCitarSearch')?.value || '').trim().toLowerCase();
+            const fEstado = document.getElementById('porCitarFiltroEstado')?.value || 'TODOS';
+            const fMes = document.getElementById('porCitarFiltroMes')?.value || 'TODOS';
+
+            const filtrados = items30.filter(it => {
+                if (fEstado !== 'TODOS' && it.estadoCred !== fEstado) return false;
+                if (fMes !== 'TODOS' && it.mesProxCred !== fMes) return false;
+                if (q) {
+                    const blob = `${it.dni} ${it.apellidosNombres} ${it.sector} ${it.direccion}`.toLowerCase();
+                    if (!blob.includes(q)) return false;
+                }
+                return true;
+            });
+
+            if (filtrados.length === 0) {
+                container.innerHTML = `<div class="bg-white rounded-2xl p-6 text-center text-xs text-gray-500 shadow-ios-card">No hay niños en esta vista.</div>`;
+                return;
+            }
+
+            container.innerHTML = filtrados.slice(0, 80).map(it => {
+                const celOk = /^9\d{8}$/.test(String(it.celular || '').replace(/\D/g, ''));
+                const esAtrasado = it.estadoCred === 'ATRASADO';
+                const alerta = it.alertaDatos && it.alertaDatos !== 'OK'
+                    ? `<div class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded-lg">${it.alertaDatos}</div>`
+                    : '';
+                return `
+                <div class="bg-white rounded-2xl p-3.5 shadow-ios-card border-l-4 ${esAtrasado ? 'border-l-ios-red' : 'border-l-ios-orange'} space-y-2">
+                    <div class="flex justify-between items-center text-[11px]">
+                        <span class="font-extrabold px-2 py-0.5 rounded-full ${esAtrasado ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-800'}">
+                            ${esAtrasado ? 'ATRASADO' : 'PRÓXIMO 30D'} • CRED ${it.proxCredNum || '-'}
+                        </span>
+                        <span class="font-bold text-gray-500">DNI ${it.dni || '-'} ${it.hcl ? '• HCL ' + it.hcl : ''}</span>
+                    </div>
+                    <div class="text-sm font-extrabold text-gray-900">${it.apellidosNombres || '⚠️ Sin nombre registrado'}</div>
+                    <div class="text-xs text-gray-600 flex flex-wrap gap-x-3 gap-y-0.5">
+                        <span>📅 Sugerida: <b>${it.fechaProxCred || '-'}</b></span>
+                        <span>🎂 ${it.edadMeses ? it.edadMeses + 'm' : '-'}</span>
+                        ${it.sector || it.direccion ? `<span>📍 ${[it.sector, it.direccion].filter(Boolean).join(' - ')}</span>` : ''}
+                    </div>
+                    ${it.proxSfNum && it.proxSfNum !== 'COMPLETO' ? `<div class="text-[11px] font-semibold text-indigo-700">💊 Sulfato Ferroso ${it.proxSfNum}°: ${it.fechaProxSf || '-'}</div>` : ''}
+                    ${alerta}
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <button ${celOk ? '' : 'disabled'} onclick='abrirWhatsappCola(${JSON.stringify(it.celular||"")}, ${JSON.stringify(it.apellidosNombres||"")}, ${JSON.stringify(it.proxCredNum||"")}, ${JSON.stringify(it.fechaProxCred||"")})' class="py-2 rounded-xl text-xs font-extrabold ${celOk ? 'bg-emerald-100 text-emerald-800 ios-tap' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}">
+                            ${celOk ? '💬 WhatsApp' : 'Sin celular'}
+                        </button>
+                        <button onclick='agendarDesdeCola(${JSON.stringify(it.dni||"")})' class="py-2 rounded-xl bg-ios-blue text-white text-xs font-extrabold shadow-2xs ios-tap">
+                            📅 Agendar ahora
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
         }
     </script>
 </body>

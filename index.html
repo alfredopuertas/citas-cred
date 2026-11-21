@@ -357,16 +357,49 @@
                 </section>
 
                 <!-- ================= SCREEN 4: ESTADÍSTICAS ================= -->
-                <section id="screen-stats" class="hidden space-y-4 pb-8 p-4 max-w-xl mx-auto">
-                    <div class="flex items-center justify-between pb-2 border-b border-gray-200">
+                <section id="screen-stats" class="hidden space-y-4 pb-8 p-4 max-w-4xl mx-auto">
+                    <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-gray-200">
                         <div>
                             <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Estadísticas</h1>
-                            <p class="text-[11px] text-gray-500">Cortes en vivo HIS</p>
+                            <p class="text-[11px] text-gray-500">Agenda en vivo + Seguimiento Master CRED/SF</p>
                         </div>
                         <span class="bg-purple-100 text-purple-800 px-2.5 py-1 rounded-full text-xs font-extrabold">Cortes en Vivo</span>
                     </div>
+
+                    <!-- Filtros flexibles de Estadísticas -->
+                    <div class="bg-white rounded-2xl p-3 shadow-ios-card grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Filtrar por Mes</label>
+                            <select id="statsFiltroMes" onchange="renderStats()" class="w-full text-xs font-bold bg-ios-bg px-2.5 py-1.5 rounded-xl focus:outline-none">
+                                <option value="TODOS">Todos los meses</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Estado / Atraso</label>
+                            <select id="statsFiltroEstado" onchange="renderStats()" class="w-full text-xs font-bold bg-ios-bg px-2.5 py-1.5 rounded-xl focus:outline-none">
+                                <option value="TODOS">Todos</option>
+                                <option value="AL_DIA">Solo Al día</option>
+                                <option value="ATRASADO">Solo Atrasados</option>
+                                <option value="YA_CITADO">Solo Ya citados</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Motivo No Control</label>
+                            <select id="statsFiltroMotivo" onchange="renderStats()" class="w-full text-xs font-bold bg-ios-bg px-2.5 py-1.5 rounded-xl focus:outline-none">
+                                <option value="TODOS">Todos</option>
+                                <option value="NINGUNO">Sin motivo (Activos)</option>
+                                <option value="CAMBIO_DOMICILIO">Cambio de domicilio</option>
+                                <option value="RECHAZO">Rechazo</option>
+                                <option value="NO_UBICADO">No ubicado</option>
+                                <option value="FALLECIDO">Fallecido</option>
+                                <option value="OTRO">Otro</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 1. Resumen Agenda de Citas -->
                     <div class="bg-white rounded-3xl p-4 shadow-ios-card text-center space-y-2">
-                        <span class="text-xs font-bold text-gray-400 uppercase">Progreso General del Mes</span>
+                        <span class="text-xs font-bold text-gray-400 uppercase">Agenda de Citas Confirmadas</span>
                         <div class="text-4xl font-extrabold text-ios-blue" id="statPorcentaje">0%</div>
                         <div class="flex justify-around text-xs font-bold pt-2">
                             <span class="text-ios-green">🟢 Atendidos: <strong id="statAtendidos">0</strong></span>
@@ -374,6 +407,9 @@
                             <span class="text-ios-red">🔴 Inasist.: <strong id="statInasistentes">0</strong></span>
                         </div>
                     </div>
+
+                    <!-- 2. Resumen Nominal de Seguimiento Master (dinámico con filtros) -->
+                    <div id="statsSeguimientoContainer" class="space-y-3"></div>
 
                     <!-- Acceso directo en pantalla del celular -->
                     <div class="bg-white rounded-3xl p-4 shadow-ios-card flex items-center justify-between gap-3">
@@ -453,15 +489,46 @@
                                     <div id="porCitarChipsFaltan" class="flex flex-wrap gap-1.5 text-[11px] font-bold"></div>
                                 </div>
 
-                                <!-- Slider de Edad Actual -->
-                                <div class="bg-ios-bg p-2.5 rounded-xl space-y-1.5">
-                                    <div class="flex justify-between text-[10px] font-extrabold text-gray-600">
-                                        <span>Rango Edad Actual:</span>
-                                        <span id="porCitarEdadLabel" class="text-ios-blue">1a 0m – 1a 11m</span>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-2 items-center">
-                                        <input type="range" id="porCitarEdadMin" min="0" max="36" value="12" oninput="onPorCitarEdadSlider()" class="w-full accent-ios-blue">
-                                        <input type="range" id="porCitarEdadMax" min="0" max="36" value="23" oninput="onPorCitarEdadSlider()" class="w-full accent-ios-blue">
+                                <!-- Multi-select Motivos de No Control -->
+                                <div>
+                                    <span class="block text-[10px] font-extrabold uppercase text-gray-400 mb-1">Motivos de No Control (ON/OFF)</span>
+                                    <div id="porCitarChipsMotivos" class="flex flex-wrap gap-1.5 text-[11px] font-bold"></div>
+                                </div>
+
+                                <!-- Rango de Edad Actual (casillas simples Años y Meses) -->
+                                <div class="bg-ios-bg p-2.5 rounded-xl space-y-2">
+                                    <span class="block text-[10px] font-extrabold text-gray-600 uppercase">Edad Actual (Desde / Hasta)</span>
+                                    <div class="grid grid-cols-2 gap-2 text-[11px] font-bold">
+                                        <div class="flex items-center gap-1">
+                                            <span class="text-[10px] text-gray-500">De:</span>
+                                            <select id="porCitarEdadMinA" onchange="onPorCitarEdadChanged()" class="flex-1 bg-white px-1.5 py-1 rounded-lg">
+                                                <option value="0">0a</option>
+                                                <option value="1" selected>1a</option>
+                                                <option value="2">2a</option>
+                                                <option value="3">3a</option>
+                                            </select>
+                                            <select id="porCitarEdadMinM" onchange="onPorCitarEdadChanged()" class="flex-1 bg-white px-1.5 py-1 rounded-lg">
+                                                <option value="0" selected>0m</option><option value="1">1m</option><option value="2">2m</option>
+                                                <option value="3">3m</option><option value="4">4m</option><option value="5">5m</option>
+                                                <option value="6">6m</option><option value="7">7m</option><option value="8">8m</option>
+                                                <option value="9">9m</option><option value="10">10m</option><option value="11">11m</option>
+                                            </select>
+                                        </div>
+                                        <div class="flex items-center gap-1">
+                                            <span class="text-[10px] text-gray-500">A:</span>
+                                            <select id="porCitarEdadMaxA" onchange="onPorCitarEdadChanged()" class="flex-1 bg-white px-1.5 py-1 rounded-lg">
+                                                <option value="0">0a</option>
+                                                <option value="1" selected>1a</option>
+                                                <option value="2">2a</option>
+                                                <option value="3">3a</option>
+                                            </select>
+                                            <select id="porCitarEdadMaxM" onchange="onPorCitarEdadChanged()" class="flex-1 bg-white px-1.5 py-1 rounded-lg">
+                                                <option value="0">0m</option><option value="1">1m</option><option value="2">2m</option>
+                                                <option value="3">3m</option><option value="4">4m</option><option value="5">5m</option>
+                                                <option value="6">6m</option><option value="7">7m</option><option value="8">8m</option>
+                                                <option value="9">9m</option><option value="10">10m</option><option value="11" selected>11m</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -557,19 +624,42 @@
                             <input type="text" id="editColaHcl" placeholder="Ej. 45892" class="w-full text-xs font-bold bg-ios-bg p-2.5 rounded-xl focus:outline-none">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-emerald-700 uppercase mb-1">Celular (9 dígitos)</label>
+                            <label class="block text-[10px] font-bold text-emerald-700 uppercase mb-1">Celular 1 (9 dígitos)</label>
                             <input type="tel" id="editColaCelular" maxlength="9" placeholder="9xxxxxxxx" class="w-full text-xs font-bold bg-ios-bg p-2.5 rounded-xl focus:outline-none">
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Celular 2 (Opcional)</label>
+                            <input type="tel" id="editColaCelular2" maxlength="9" placeholder="9xxxxxxxx" class="w-full text-xs font-bold bg-ios-bg p-2.5 rounded-xl focus:outline-none">
+                        </div>
+                        <div>
                             <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Sector</label>
                             <input type="text" id="editColaSector" placeholder="Ej. Cerro de Oro" class="w-full text-xs font-bold bg-ios-bg p-2.5 rounded-xl focus:outline-none">
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Dirección</label>
-                            <input type="text" id="editColaDireccion" placeholder="Av. / Jr. / Mz / Lt" class="w-full text-xs font-bold bg-ios-bg p-2.5 rounded-xl focus:outline-none">
-                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Dirección</label>
+                        <input type="text" id="editColaDireccion" placeholder="Av. / Jr. / Mz / Lt" class="w-full text-xs font-bold bg-ios-bg p-2.5 rounded-xl focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Referencia de domicilio</label>
+                        <input type="text" id="editColaReferencia" placeholder="Ej. Frente a la posta / Casa portón azul" class="w-full text-xs font-bold bg-ios-bg p-2.5 rounded-xl focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-rose-700 uppercase mb-1">Motivo de No Control</label>
+                        <select id="editColaMotivo" onchange="toggleEditMotivoOtro()" class="w-full text-xs font-bold bg-ios-bg p-2.5 rounded-xl focus:outline-none">
+                            <option value="NINGUNO">Ninguno (Niño activo en seguimiento)</option>
+                            <option value="CAMBIO_DOMICILIO">Cambio de domicilio</option>
+                            <option value="RECHAZO">Rechazo (padres no quieren)</option>
+                            <option value="NO_UBICADO">No ubicado</option>
+                            <option value="FALLECIDO">Fallecido</option>
+                            <option value="OTRO">Otro (especificar)</option>
+                        </select>
+                    </div>
+                    <div id="editColaMotivoOtroWrap" class="hidden">
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Explicar otro motivo (corto)</label>
+                        <input type="text" id="editColaMotivoOtro" maxlength="80" placeholder="Breve explicación..." class="w-full text-xs font-bold bg-ios-bg p-2.5 rounded-xl focus:outline-none">
                     </div>
                     <div class="flex gap-2 pt-2">
                         <button type="button" onclick="closeEditColaModal()" class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-700 text-xs font-extrabold">Cancelar</button>
@@ -838,6 +928,7 @@
             if (snap.exists()) {
                 window.colaGestion30d = snap.data() || { items: [] };
                 if (window.renderPorCitar) window.renderPorCitar();
+                if (window.renderStats) window.renderStats();
             }
         });
 
@@ -1122,6 +1213,9 @@
             }
             if (screenName === 'porcitar') {
                 renderPorCitar();
+            }
+            if (screenName === 'stats') {
+                renderStats();
             }
         }
 
@@ -2003,6 +2097,134 @@
             if (elAt) elAt.textContent = atendidos;
             if (elPe) elPe.textContent = pendientes;
             if (elIn) elIn.textContent = inasistentes;
+
+            const segContainer = document.getElementById('statsSeguimientoContainer');
+            if (!segContainer) return;
+
+            const pendingDnis = _getPendingDnisSet();
+            const hoyIso = getLocalDateISO(new Date());
+            const raw30 = (window.colaGestion30d && window.colaGestion30d.items) || [];
+            const allBase = raw30.map(it => {
+                const fProx = String(it.fechaProxCred || '').substring(0, 10);
+                const fSf = String(it.fechaProxSf || '').substring(0, 10);
+                const tieneCred = Boolean(it.proxCredNum && it.proxCredNum !== 'COMPLETO' && fProx);
+                const tieneSf = Boolean(it.proxSfNum && it.proxSfNum !== 'COMPLETO' && fSf);
+                const diasAtraso = tieneCred ? _calcDiasAtraso(fProx, hoyIso) : (tieneSf ? _calcDiasAtraso(fSf, hoyIso) : 0);
+                const catAtraso = _classifyAtraso(diasAtraso);
+                const mesYm = _normalizeMesYm(it.mesProxCred, fProx);
+                const yaCitado = pendingDnis.has(String(it.dni || '').trim());
+                const motivo = String(it.motivoNoControl || 'NINGUNO').trim() || 'NINGUNO';
+                const celOk = /^9\d{8}$/.test(String(it.celular || '').replace(/\D/g, ''));
+                return { ...it, fProx, fSf, tieneCred, tieneSf, diasAtraso, catAtraso, mesYm, yaCitado, motivo, celOk };
+            });
+
+            // Poblar selector de meses en Estadísticas
+            const selMes = document.getElementById('statsFiltroMes');
+            if (selMes) {
+                const prev = selMes.value || 'TODOS';
+                const meses = Array.from(new Set(allBase.map(x => x.mesYm).filter(Boolean))).sort();
+                selMes.innerHTML = '<option value="TODOS">Todos los meses</option>' +
+                    meses.map(m => `<option value="${m}">${_formatMesEs(m)}</option>`).join('');
+                selMes.value = meses.includes(prev) ? prev : 'TODOS';
+            }
+
+            const fMes = document.getElementById('statsFiltroMes')?.value || 'TODOS';
+            const fEst = document.getElementById('statsFiltroEstado')?.value || 'TODOS';
+            const fMot = document.getElementById('statsFiltroMotivo')?.value || 'TODOS';
+
+            const filtered = allBase.filter(x => {
+                if (fMes !== 'TODOS' && x.mesYm !== fMes) return false;
+                if (fEst === 'AL_DIA' && x.diasAtraso > 0) return false;
+                if (fEst === 'ATRASADO' && x.diasAtraso <= 0) return false;
+                if (fEst === 'YA_CITADO' && !x.yaCitado) return false;
+                if (fMot !== 'TODOS' && x.motivo !== fMot) return false;
+                return true;
+            });
+
+            const nTot = filtered.length;
+            const nCit = filtered.filter(x => x.yaCitado).length;
+            const nDia = filtered.filter(x => x.catAtraso === 'AL_DIA').length;
+            const nA1 = filtered.filter(x => x.catAtraso === 'ATRASO_1M').length;
+            const nA2 = filtered.filter(x => x.catAtraso === 'ATRASO_2M').length;
+            const nA3 = filtered.filter(x => x.catAtraso === 'ATRASO_3M').length;
+            const nSinNom = filtered.filter(x => !String(x.apellidosNombres || '').trim()).length;
+            const nSinCel = filtered.filter(x => !x.celOk).length;
+            const nSinDir = filtered.filter(x => !String(x.sector || '').trim() && !String(x.direccion || '').trim()).length;
+
+            const motivosCount = {
+                CAMBIO_DOMICILIO: filtered.filter(x => x.motivo === 'CAMBIO_DOMICILIO').length,
+                RECHAZO: filtered.filter(x => x.motivo === 'RECHAZO').length,
+                NO_UBICADO: filtered.filter(x => x.motivo === 'NO_UBICADO').length,
+                FALLECIDO: filtered.filter(x => x.motivo === 'FALLECIDO').length,
+                OTRO: filtered.filter(x => x.motivo === 'OTRO').length,
+            };
+
+            const credCounts = [1, 2, 3, 4].map(n => ({ n, c: filtered.filter(x => String(x.proxCredNum) === String(n)).length }));
+            const sfCounts = [1, 2, 3].map(n => ({ n, c: filtered.filter(x => String(x.proxSfNum) === String(n)).length }));
+
+            segContainer.innerHTML = `
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <div class="bg-white rounded-2xl p-3 shadow-ios-card text-center">
+                        <div class="text-[10px] font-bold text-gray-400 uppercase">Total Filtrado</div>
+                        <div class="text-2xl font-extrabold text-gray-900">${nTot}</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-3 shadow-ios-card text-center">
+                        <div class="text-[10px] font-bold text-emerald-600 uppercase">Al Día</div>
+                        <div class="text-2xl font-extrabold text-emerald-700">${nDia}</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-3 shadow-ios-card text-center">
+                        <div class="text-[10px] font-bold text-red-600 uppercase">Atrasados</div>
+                        <div class="text-2xl font-extrabold text-red-700">${nA1 + nA2 + nA3}</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-3 shadow-ios-card text-center">
+                        <div class="text-[10px] font-bold text-ios-blue uppercase">Ya Citados</div>
+                        <div class="text-2xl font-extrabold text-ios-blue">${nCit}</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="bg-white rounded-2xl p-3.5 shadow-ios-card space-y-2">
+                        <div class="text-xs font-extrabold text-gray-700">⏱️ Desglose de Atrasos</div>
+                        <div class="grid grid-cols-3 gap-2 text-center text-xs font-bold">
+                            <div class="bg-amber-50 text-amber-800 p-2 rounded-xl">1 mes<br><span class="text-base font-extrabold">${nA1}</span></div>
+                            <div class="bg-orange-50 text-orange-800 p-2 rounded-xl">2 meses<br><span class="text-base font-extrabold">${nA2}</span></div>
+                            <div class="bg-red-50 text-red-800 p-2 rounded-xl">3+ meses<br><span class="text-base font-extrabold">${nA3}</span></div>
+                        </div>
+                        <div class="text-xs font-extrabold text-gray-700 pt-1">⚠️ Datos por Completar</div>
+                        <div class="grid grid-cols-3 gap-2 text-center text-[11px] font-bold">
+                            <div class="bg-ios-bg p-2 rounded-xl">Sin Nombre<br><span class="text-sm font-extrabold">${nSinNom}</span></div>
+                            <div class="bg-ios-bg p-2 rounded-xl">Sin Teléfono<br><span class="text-sm font-extrabold">${nSinCel}</span></div>
+                            <div class="bg-ios-bg p-2 rounded-xl">Sin Dirección<br><span class="text-sm font-extrabold">${nSinDir}</span></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-3.5 shadow-ios-card space-y-2">
+                        <div class="text-xs font-extrabold text-gray-700">📋 Motivos de No Control</div>
+                        <div class="space-y-1 text-xs font-semibold text-gray-700">
+                            <div class="flex justify-between"><span>Cambio de domicilio</span><b>${motivosCount.CAMBIO_DOMICILIO}</b></div>
+                            <div class="flex justify-between"><span>Rechazo (padres no quieren)</span><b>${motivosCount.RECHAZO}</b></div>
+                            <div class="flex justify-between"><span>No ubicado</span><b>${motivosCount.NO_UBICADO}</b></div>
+                            <div class="flex justify-between"><span>Fallecido</span><b>${motivosCount.FALLECIDO}</b></div>
+                            <div class="flex justify-between"><span>Otro</span><b>${motivosCount.OTRO}</b></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-3.5 shadow-ios-card grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div>
+                        <div class="font-extrabold text-gray-700 mb-1.5">🩺 Próximo Control CRED</div>
+                        <div class="grid grid-cols-4 gap-1.5 text-center font-bold">
+                            ${credCounts.map(x => `<div class="bg-blue-50 text-ios-blue p-2 rounded-xl">C${x.n}<br><span class="text-sm font-extrabold">${x.c}</span></div>`).join('')}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="font-extrabold text-gray-700 mb-1.5">💊 Próximo Hierro / SF</div>
+                        <div class="grid grid-cols-3 gap-1.5 text-center font-bold">
+                            ${sfCounts.map(x => `<div class="bg-indigo-50 text-indigo-700 p-2 rounded-xl">SF ${x.n}°<br><span class="text-sm font-extrabold">${x.c}</span></div>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         function renderAlerts() {
@@ -2034,11 +2256,13 @@
         // ============================================================================
         let currentPorCitarTab = 'COLA_30D';
         let porCitarDesktopTable = false;
+        let porCitarPageLimit = 25;
         const porCitarMulti = {
             estados: new Set(),
             cred: new Set(),
             sf: new Set(),
-            faltan: new Set()
+            faltan: new Set(),
+            motivos: new Set()
         };
         window._ultimoFiltradoPorCitar = [];
 
@@ -2052,7 +2276,13 @@
             if (!set) return;
             if (set.has(val)) set.delete(val);
             else set.add(val);
+            porCitarPageLimit = 25;
             renderPorCitar();
+        }
+
+        function cargarMasPorCitar() {
+            porCitarPageLimit += 25;
+            renderPorCitar(true);
         }
 
         function resetPorCitarFiltros() {
@@ -2060,24 +2290,21 @@
             porCitarMulti.cred.clear();
             porCitarMulti.sf.clear();
             porCitarMulti.faltan.clear();
+            porCitarMulti.motivos.clear();
+            porCitarPageLimit = 25;
             const ids = ['porCitarSearch', 'porCitarFechaDesde', 'porCitarFechaHasta'];
             ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
             const mes = document.getElementById('porCitarFiltroMes'); if (mes) mes.value = 'TODOS';
-            const minEl = document.getElementById('porCitarEdadMin'); if (minEl) minEl.value = 12;
-            const maxEl = document.getElementById('porCitarEdadMax'); if (maxEl) maxEl.value = 23;
+            const minA = document.getElementById('porCitarEdadMinA'); if (minA) minA.value = '1';
+            const minM = document.getElementById('porCitarEdadMinM'); if (minM) minM.value = '0';
+            const maxA = document.getElementById('porCitarEdadMaxA'); if (maxA) maxA.value = '1';
+            const maxM = document.getElementById('porCitarEdadMaxM'); if (maxM) maxM.value = '11';
             const chk = document.getElementById('porCitarToggleYaCitados'); if (chk) chk.checked = false;
-            onPorCitarEdadSlider();
+            renderPorCitar();
         }
 
-        function onPorCitarEdadSlider() {
-            const minEl = document.getElementById('porCitarEdadMin');
-            const maxEl = document.getElementById('porCitarEdadMax');
-            if (!minEl || !maxEl) return;
-            let v1 = parseInt(minEl.value, 10);
-            let v2 = parseInt(maxEl.value, 10);
-            if (v1 > v2) { const t = v1; v1 = v2; v2 = t; }
-            const lbl = document.getElementById('porCitarEdadLabel');
-            if (lbl) lbl.textContent = `${_formatEdadAniosMeses(v1)} – ${_formatEdadAniosMeses(v2)}`;
+        function onPorCitarEdadChanged() {
+            porCitarPageLimit = 25;
             renderPorCitar();
         }
 
@@ -2228,6 +2455,12 @@
             window.open(`https://wa.me/51${cel}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
+        function toggleEditMotivoOtro() {
+            const mot = document.getElementById('editColaMotivo')?.value;
+            const wrap = document.getElementById('editColaMotivoOtroWrap');
+            if (wrap) wrap.classList.toggle('hidden', mot !== 'OTRO');
+        }
+
         function openEditColaModal(dniKey) {
             const items = (window.colaGestion30d && window.colaGestion30d.items) || [];
             const it = items.find(x => String(x.dni) === String(dniKey));
@@ -2237,8 +2470,13 @@
             document.getElementById('editColaNombre').value = it.apellidosNombres || '';
             document.getElementById('editColaHcl').value = it.hcl || '';
             document.getElementById('editColaCelular').value = it.celular || '';
+            document.getElementById('editColaCelular2').value = it.celular2 || '';
             document.getElementById('editColaSector').value = it.sector || '';
             document.getElementById('editColaDireccion').value = it.direccion || '';
+            document.getElementById('editColaReferencia').value = it.referencia || '';
+            document.getElementById('editColaMotivo').value = it.motivoNoControl || 'NINGUNO';
+            document.getElementById('editColaMotivoOtro').value = it.motivoDetalle || '';
+            toggleEditMotivoOtro();
             document.getElementById('editColaBackdrop').classList.remove('hidden');
         }
 
@@ -2252,11 +2490,19 @@
             const nombre = document.getElementById('editColaNombre').value.trim().toUpperCase();
             const hcl = document.getElementById('editColaHcl').value.trim();
             const cel = document.getElementById('editColaCelular').value.replace(/\D/g, '').slice(0, 9);
+            const cel2 = document.getElementById('editColaCelular2').value.replace(/\D/g, '').slice(0, 9);
             const sector = document.getElementById('editColaSector').value.trim();
             const dir = document.getElementById('editColaDireccion').value.trim();
+            const ref = document.getElementById('editColaReferencia').value.trim();
+            const motivo = document.getElementById('editColaMotivo').value;
+            const motivoOtro = document.getElementById('editColaMotivoOtro').value.trim();
 
             if (cel && !/^9\d{8}$/.test(cel)) {
-                alert('El celular debe tener 9 dígitos y empezar con 9.');
+                alert('El Celular 1 debe tener 9 dígitos y empezar con 9.');
+                return;
+            }
+            if (cel2 && !/^9\d{8}$/.test(cel2)) {
+                alert('El Celular 2 debe tener 9 dígitos y empezar con 9.');
                 return;
             }
 
@@ -2266,8 +2512,12 @@
                 items[idx].apellidosNombres = nombre;
                 items[idx].hcl = hcl;
                 items[idx].celular = cel;
+                items[idx].celular2 = cel2;
                 items[idx].sector = sector;
                 items[idx].direccion = dir;
+                items[idx].referencia = ref;
+                items[idx].motivoNoControl = motivo;
+                items[idx].motivoDetalle = motivo === 'OTRO' ? motivoOtro : '';
 
                 const faltan = [];
                 if (!dni) faltan.push('DNI');
@@ -2284,12 +2534,17 @@
             if (typeof syncToGoogleDrive === 'function') {
                 syncToGoogleDrive({
                     action: 'ACTUALIZAR_DATOS_MASTER',
-                    data: { dni, hcl, apellidosNombres: nombre, celular: cel, sector, direccion: dir }
+                    data: {
+                        dni, hcl, apellidosNombres: nombre, celular: cel, celular2: cel2,
+                        sector, direccion: dir, referencia: ref,
+                        motivoNoControl: motivo, motivoDetalle: motivo === 'OTRO' ? motivoOtro : ''
+                    }
                 });
             }
 
             closeEditColaModal();
             renderPorCitar();
+            if (typeof renderStats === 'function') renderStats();
         }
 
         function agendarDesdeCola(dniKey) {
@@ -2328,7 +2583,17 @@
             }
         }
 
-        function renderPorCitar() {
+        const MOTIVO_LABELS = {
+            NINGUNO: '',
+            CAMBIO_DOMICILIO: '📦 Cambio de domicilio',
+            RECHAZO: '🚫 Rechazo (padres no quieren)',
+            NO_UBICADO: '❓ No ubicado',
+            FALLECIDO: '🕊️ Fallecido',
+            OTRO: '📝 Otro'
+        };
+
+        function renderPorCitar(keepPage) {
+            if (!keepPage) porCitarPageLimit = 25;
             const pendingDnis = _getPendingDnisSet();
             const hoyIso = getLocalDateISO(new Date());
             const incluirYaCitados = Boolean(document.getElementById('porCitarToggleYaCitados')?.checked);
@@ -2354,10 +2619,11 @@
                 const faltaDir = !String(it.sector || '').trim() && !String(it.direccion || '').trim();
                 const faltanDatos = faltaNombre || faltaDni || faltaCel || faltaDir;
                 const edadNum = parseInt(it.edadMeses, 10);
+                const motivo = String(it.motivoNoControl || 'NINGUNO').trim() || 'NINGUNO';
                 return {
                     ...it, dniClean, yaCitado, fProx, fSf, tieneCred, tieneSf,
                     diasAtraso, diasAtrasoSf, catAtraso, mesYm, mesSfYm,
-                    celOk, faltaNombre, faltaDni, faltaCel, faltaDir, faltanDatos, edadNum
+                    celOk, faltaNombre, faltaDni, faltaCel, faltaDir, faltanDatos, edadNum, motivo
                 };
             });
 
@@ -2412,6 +2678,17 @@
                     mkChip('faltan', 'DIRECCION', 'Falta Dirección', items30.filter(x => x.faltaDir).length),
                 ].join('');
             }
+            const elMot = document.getElementById('porCitarChipsMotivos');
+            if (elMot) {
+                elMot.innerHTML = [
+                    mkChip('motivos', 'NINGUNO', 'Sin motivo', items30.filter(x => x.motivo === 'NINGUNO').length),
+                    mkChip('motivos', 'CAMBIO_DOMICILIO', 'Cambio dom.', items30.filter(x => x.motivo === 'CAMBIO_DOMICILIO').length),
+                    mkChip('motivos', 'RECHAZO', 'Rechazo', items30.filter(x => x.motivo === 'RECHAZO').length),
+                    mkChip('motivos', 'NO_UBICADO', 'No ubicado', items30.filter(x => x.motivo === 'NO_UBICADO').length),
+                    mkChip('motivos', 'FALLECIDO', 'Fallecido', items30.filter(x => x.motivo === 'FALLECIDO').length),
+                    mkChip('motivos', 'OTRO', 'Otro', items30.filter(x => x.motivo === 'OTRO').length),
+                ].join('');
+            }
 
             const selMes = document.getElementById('porCitarFiltroMes');
             if (selMes) {
@@ -2453,8 +2730,13 @@
             const fDesde = document.getElementById('porCitarFechaDesde')?.value || '';
             const fHasta = document.getElementById('porCitarFechaHasta')?.value || '';
             const fOrden = document.getElementById('porCitarOrden')?.value || 'URGENCIA';
-            let edadMin = parseInt(document.getElementById('porCitarEdadMin')?.value ?? 0, 10);
-            let edadMax = parseInt(document.getElementById('porCitarEdadMax')?.value ?? 36, 10);
+
+            const minA = parseInt(document.getElementById('porCitarEdadMinA')?.value ?? 1, 10);
+            const minM = parseInt(document.getElementById('porCitarEdadMinM')?.value ?? 0, 10);
+            const maxA = parseInt(document.getElementById('porCitarEdadMaxA')?.value ?? 1, 10);
+            const maxM = parseInt(document.getElementById('porCitarEdadMaxM')?.value ?? 11, 10);
+            let edadMin = minA * 12 + minM;
+            let edadMax = maxA * 12 + maxM;
             if (edadMin > edadMax) { const t = edadMin; edadMin = edadMax; edadMax = t; }
 
             const filtrados = items30.filter(it => {
@@ -2476,12 +2758,13 @@
                     porCitarMulti.faltan.forEach(k => { if (checks[k]) okFalta = true; });
                     if (!okFalta) return false;
                 }
+                if (porCitarMulti.motivos.size > 0 && !porCitarMulti.motivos.has(it.motivo)) return false;
                 if (!isNaN(it.edadNum) && (it.edadNum < edadMin || it.edadNum > edadMax)) return false;
                 if (fMes !== 'TODOS' && it.mesYm !== fMes && it.mesSfYm !== fMes) return false;
                 if (fDesde && (!it.fProx || it.fProx < fDesde) && (!it.fSf || it.fSf < fDesde)) return false;
                 if (fHasta && (!it.fProx || it.fProx > fHasta) && (!it.fSf || it.fSf > fHasta)) return false;
                 if (q) {
-                    const blob = `${it.dni} ${it.apellidosNombres} ${it.sector} ${it.direccion}`.toLowerCase();
+                    const blob = `${it.dni} ${it.apellidosNombres} ${it.sector} ${it.direccion} ${it.referencia || ''}`.toLowerCase();
                     if (!blob.includes(q)) return false;
                 }
                 return true;
@@ -2503,6 +2786,12 @@
                 return;
             }
 
+            const visibles = filtrados.slice(0, porCitarPageLimit);
+            const restantes = filtrados.length - visibles.length;
+            const paginadorHtml = restantes > 0
+                ? `<button type="button" onclick="cargarMasPorCitar()" class="w-full mt-3 py-3 rounded-2xl bg-white border border-gray-200 text-ios-blue text-xs font-extrabold shadow-2xs ios-tap">Ver 25 más (quedan ${restantes})</button>`
+                : '';
+
             if (porCitarDesktopTable) {
                 container.innerHTML = `
                 <div class="bg-white rounded-2xl shadow-ios-card overflow-x-auto">
@@ -2513,14 +2802,15 @@
                                 <th class="p-3">Edad actual</th>
                                 <th class="p-3">Próximo CRED</th>
                                 <th class="p-3">Hierro / SF</th>
-                                <th class="p-3">Estado / Datos</th>
+                                <th class="p-3">Estado / Motivo</th>
                                 <th class="p-3 text-right">Acciones</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
-                            ${filtrados.slice(0, 150).map(it => {
+                            ${visibles.map(it => {
                                 const esAtrasado = it.diasAtraso > 0;
                                 const edadTxt = _formatEdadAniosMeses(it.edadMeses);
+                                const motTxt = it.motivo !== 'NINGUNO' ? `${MOTIVO_LABELS[it.motivo] || it.motivo}${it.motivoDetalle ? ': ' + it.motivoDetalle : ''}` : '';
                                 return `
                                 <tr class="hover:bg-blue-50/30">
                                     <td class="p-3">
@@ -2538,6 +2828,7 @@
                                     <td class="p-3">
                                         ${it.yaCitado ? '<span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold">Ya citado</span>' : ''}
                                         ${esAtrasado ? `<span class="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-bold">${_formatAtrasoHumano(it.diasAtraso)}</span>` : '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">Al día</span>'}
+                                        ${motTxt ? `<div class="text-[10px] font-bold text-rose-700 mt-0.5">${motTxt}</div>` : ''}
                                         ${it.faltanDatos ? `<div class="text-[10px] text-amber-700 mt-0.5">${it.alertaDatos}</div>` : ''}
                                     </td>
                                     <td class="p-3 text-right whitespace-nowrap space-x-1">
@@ -2549,11 +2840,11 @@
                             }).join('')}
                         </tbody>
                     </table>
-                </div>`;
+                </div>` + paginadorHtml;
                 return;
             }
 
-            container.innerHTML = `<div class="grid grid-cols-1 lg:grid-cols-2 gap-3">` + filtrados.slice(0, 100).map(it => {
+            container.innerHTML = `<div class="grid grid-cols-1 lg:grid-cols-2 gap-3">` + visibles.map(it => {
                 const esAtrasado = it.diasAtraso > 0;
                 const atrasoTxt = _formatAtrasoHumano(it.diasAtraso);
                 const edadTxt = _formatEdadAniosMeses(it.edadMeses);
@@ -2566,6 +2857,9 @@
                     : `<span class="text-gray-600">✅ CRED de 1a completo</span>`;
                 const sfBadge = it.tieneSf
                     ? `<div class="text-[11px] font-semibold ${it.diasAtrasoSf > 0 ? 'text-rose-700' : 'text-indigo-700'}">💊 Hierro/SF ${it.proxSfNum}° (${sfEdad}): <b>${it.fSf}</b> ${it.diasAtrasoSf > 0 ? `(${_formatAtrasoHumano(it.diasAtrasoSf)})` : '(A tiempo)'}</div>`
+                    : '';
+                const motivoBadge = it.motivo !== 'NINGUNO'
+                    ? `<div class="text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-1 rounded-lg">${MOTIVO_LABELS[it.motivo] || it.motivo}${it.motivoDetalle ? ': ' + it.motivoDetalle : ''}</div>`
                     : '';
                 const alerta = it.faltanDatos
                     ? `<div class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded-lg">${it.alertaDatos}</div>`
@@ -2583,8 +2877,11 @@
                         ${fechaLabel}
                         <span>🎂 Edad actual: <b>${edadTxt}</b></span>
                         ${it.sector || it.direccion ? `<span>📍 ${[it.sector, it.direccion].filter(Boolean).join(' - ')}</span>` : ''}
+                        ${it.referencia ? `<span>🏠 Ref: ${it.referencia}</span>` : ''}
+                        ${it.celular2 ? `<span>📱 Cel2: ${it.celular2}</span>` : ''}
                     </div>
                     ${sfBadge}
+                    ${motivoBadge}
                     ${alerta}
                     <div class="grid grid-cols-3 gap-2 pt-1">
                         <button onclick='openEditColaModal(${JSON.stringify(it.dni||"")})' class="py-2 rounded-xl bg-gray-100 text-gray-700 text-xs font-extrabold ios-tap">
@@ -2598,7 +2895,7 @@
                         </button>
                     </div>
                 </div>`;
-            }).join('') + `</div>`;
+            }).join('') + `</div>` + paginadorHtml;
         }
     </script>
 </body>

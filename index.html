@@ -805,6 +805,10 @@
                         <button onclick="closeLoginModal()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 font-bold flex items-center justify-center">✕</button>
                     </div>
 
+                    <button id="btnOpenAdminStaffModal" onclick="closeLoginModal(); switchMainWorkspace('GDRIVE');" class="hidden w-full py-3 rounded-2xl bg-ios-blue text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-sm ios-tap">
+                        <i class="ph-bold ph-shield-check text-base"></i> Gestionar Personal y Claves (Admin)
+                    </button>
+
                     <button onclick="logoutUser()" class="w-full py-3 rounded-2xl bg-ios-red/10 text-ios-red font-extrabold text-xs flex items-center justify-center gap-1.5 ios-tap">
                         <i class="ph-bold ph-sign-out text-base"></i> Cerrar Sesión / Cambiar Profesional
                     </button>
@@ -872,17 +876,66 @@
     </div>
 
     <!-- GOOGLE DRIVE WORKSPACE (ADMIN) -->
-    <div id="workspaceGDrive" class="hidden w-full max-w-6xl bg-white rounded-2xl shadow-2xl border border-gray-300 overflow-hidden flex flex-col min-h-[82vh]">
-        <div class="bg-[#F9FBFD] border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-            <h2 class="text-sm font-bold text-gray-800">📊 Hoja Maestra de Google Drive (Control de Administrador)</h2>
-            <button onclick="switchMainWorkspace('MOBILE')" class="px-3.5 py-1.5 rounded-lg bg-ios-blue text-white text-xs font-bold">Volver al Celular</button>
+    <div id="workspaceGDrive" class="hidden w-full max-w-4xl bg-white sm:rounded-2xl shadow-2xl border border-gray-300 overflow-hidden flex flex-col min-h-[100dvh] sm:min-h-[82vh]">
+        <div class="bg-[#F9FBFD] border-b border-gray-200 px-4 py-3 flex items-center justify-between gap-2">
+            <div>
+                <h2 class="text-sm font-extrabold text-gray-900">🔐 Administración de Personal y Claves</h2>
+                <p class="text-[11px] text-gray-500">Exclusivo Administrador • Los cambios se sincronizan en vivo con todos los equipos</p>
+            </div>
+            <button onclick="switchMainWorkspace('MOBILE')" class="px-3.5 py-1.5 rounded-xl bg-ios-blue text-white text-xs font-bold flex-shrink-0 ios-tap">Volver al App</button>
         </div>
-        <div class="p-4 overflow-x-auto flex-1 space-y-3">
-            <p class="text-xs text-gray-600">Aquí el administrador autoriza qué enfermeras, técnicas o secretarias pueden ingresar al aplicativo (Seguridad institucional C.S. Chilca).</p>
-            <table class="w-full gsheet-table border-collapse">
-                <thead><tr><th>#</th><th>Nombre Completo</th><th>Rol</th><th>PIN</th><th>Estado (Autorizado)</th></tr></thead>
-                <tbody id="gsheetStaffBody"></tbody>
-            </table>
+
+        <div class="p-4 overflow-y-auto flex-1 space-y-4">
+            <!-- Form to Add / Edit User -->
+            <div class="bg-ios-bg rounded-2xl p-3.5 border border-gray-200 space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <h3 id="adminUserFormTitle" class="text-xs font-extrabold uppercase text-gray-600">Agregar Nuevo Usuario</h3>
+                    <button type="button" id="btnCancelEditUser" onclick="resetAdminUserForm()" class="hidden text-[11px] font-bold text-ios-red">Cancelar edición</button>
+                </div>
+                <input type="hidden" id="adminEditUserIndex" value="-1">
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+                    <div class="sm:col-span-5">
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1">Nombre completo</label>
+                        <input type="text" id="adminUserName" placeholder="Ej. Lic. María Pérez" class="w-full px-3 py-2 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-900 focus:outline-none focus:border-ios-blue">
+                    </div>
+                    <div class="sm:col-span-4">
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1">Rol</label>
+                        <select id="adminUserRole" class="w-full px-3 py-2 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-900 focus:outline-none focus:border-ios-blue">
+                            <option value="Enfermera">Enfermera</option>
+                            <option value="Técnica de Enfermería">Técnica de Enfermería</option>
+                            <option value="Secretaria">Secretaria</option>
+                            <option value="Administrador">Administrador</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1">PIN (4 dígitos)</label>
+                        <input type="text" id="adminUserPin" maxlength="4" inputmode="numeric" pattern="\d{4}" placeholder="Ej. 1234" class="w-full px-3 py-2 rounded-xl bg-white border border-gray-200 text-xs font-mono font-bold text-gray-900 focus:outline-none focus:border-ios-blue">
+                    </div>
+                </div>
+                <div class="flex items-center justify-between gap-2 pt-1">
+                    <span id="adminUserFeedback" class="text-[11px] font-bold text-gray-500"></span>
+                    <button type="button" onclick="saveAdminUserForm()" class="px-4 py-2 rounded-xl bg-ios-blue text-white text-xs font-extrabold shadow-sm ios-tap">
+                        <span id="btnSaveAdminUserLabel">Guardar Usuario</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Staff List Table -->
+            <div class="overflow-x-auto rounded-2xl border border-gray-200">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead class="bg-gray-50 text-[10px] uppercase text-gray-500 border-b border-gray-200">
+                        <tr>
+                            <th class="p-2.5">#</th>
+                            <th class="p-2.5">Nombre Completo</th>
+                            <th class="p-2.5">Rol</th>
+                            <th class="p-2.5">PIN</th>
+                            <th class="p-2.5">Estado</th>
+                            <th class="p-2.5 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gsheetStaffBody" class="divide-y divide-gray-100 bg-white"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -1043,6 +1096,12 @@
 
         function switchMainWorkspace(mode) {
             if (mode === 'GDRIVE') {
+                if (!isCurrentUserAdmin()) {
+                    alert('Acceso denegado: solo el Administrador puede gestionar usuarios y claves.');
+                    return;
+                }
+                resetAdminUserForm();
+                renderGoogleDriveStaffTable();
                 document.getElementById('workspaceMobile').classList.add('hidden');
                 document.getElementById('workspaceGDrive').classList.remove('hidden');
             } else {
@@ -1653,12 +1712,21 @@
             return `${parts[0]} ${parts[1]}`;
         }
 
+        function isCurrentUserAdmin() {
+            return !!(window.loggedInUser && window.loggedInUser.active === true && /admin/i.test(String(window.loggedInUser.role || '')));
+        }
+
         function applyLoggedUserUI() {
             if (!window.loggedInUser) return;
             const displayName = formatUserDisplayName(window.loggedInUser.name);
             document.getElementById('currentRoleLabel').textContent = displayName;
             document.getElementById('modalActiveUserName').textContent = window.loggedInUser.name;
             document.getElementById('modalActiveUserRole').textContent = `${window.loggedInUser.role} • Autorizado`;
+
+            const adminBtn = document.getElementById('btnOpenAdminStaffModal');
+            if (adminBtn) {
+                adminBtn.classList.toggle('hidden', !isCurrentUserAdmin());
+            }
 
             const staffSelect = document.getElementById('inputBookedByStaff');
             if (staffSelect) {
@@ -1705,6 +1773,9 @@
         }
 
         function openLoginModal() {
+            const adminBtn = document.getElementById('btnOpenAdminStaffModal');
+            if (adminBtn) adminBtn.classList.toggle('hidden', !isCurrentUserAdmin());
+
             const active = window.authorizedUsers.filter(u => u.active);
             document.getElementById('activeStaffCountBadge').textContent = `${active.length} activos`;
             document.getElementById('staffLoginList').innerHTML = active.map(u => `
@@ -1777,9 +1848,124 @@
         function closePrintHclModal() { document.getElementById('printHclModal').classList.add('hidden'); }
 
         function renderGoogleDriveStaffTable() {
-            document.getElementById('gsheetStaffBody').innerHTML = window.authorizedUsers.map((u, idx) => `
-                <tr class="border-b"><td class="p-2">${idx+1}</td><td class="p-2 font-bold">${u.name}</td><td class="p-2">${u.role}</td><td class="p-2 font-mono">${u.pin}</td><td class="p-2 text-emerald-700 font-bold">✓ ACTIVO</td></tr>
-            `).join('');
+            const tbody = document.getElementById('gsheetStaffBody');
+            if (!tbody) return;
+            tbody.innerHTML = window.authorizedUsers.map((u, idx) => {
+                const isSelf = window.loggedInUser && window.loggedInUser.id === u.id;
+                const statusBadge = u.active
+                    ? '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-[10px]">✓ ACTIVO</span>'
+                    : '<span class="px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-bold text-[10px]">SUSPENDIDO</span>';
+                const toggleBtn = isSelf
+                    ? ''
+                    : `<button type="button" onclick="toggleAdminUserActive(${idx})" class="px-2 py-1 rounded-lg ${u.active ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'} font-bold text-[10px] ios-tap">${u.active ? 'Suspender' : 'Activar'}</button>`;
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-2.5 text-gray-500 font-semibold">${idx + 1}</td>
+                        <td class="p-2.5 font-bold text-gray-900">${u.name}</td>
+                        <td class="p-2.5 text-gray-600">${u.role}</td>
+                        <td class="p-2.5 font-mono font-bold text-ios-blue">${u.pin}</td>
+                        <td class="p-2.5">${statusBadge}</td>
+                        <td class="p-2.5 text-right space-x-1 whitespace-nowrap">
+                            <button type="button" onclick="editAdminUser(${idx})" class="px-2 py-1 rounded-lg bg-blue-50 text-ios-blue font-bold text-[10px] ios-tap">Editar</button>
+                            ${toggleBtn}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function resetAdminUserForm() {
+            document.getElementById('adminEditUserIndex').value = '-1';
+            document.getElementById('adminUserName').value = '';
+            document.getElementById('adminUserRole').value = 'Enfermera';
+            document.getElementById('adminUserPin').value = '';
+            document.getElementById('adminUserFormTitle').textContent = 'Agregar Nuevo Usuario';
+            document.getElementById('btnSaveAdminUserLabel').textContent = 'Guardar Usuario';
+            document.getElementById('btnCancelEditUser').classList.add('hidden');
+            document.getElementById('adminUserFeedback').textContent = '';
+        }
+
+        function editAdminUser(idx) {
+            if (!isCurrentUserAdmin()) return;
+            const u = window.authorizedUsers[idx];
+            if (!u) return;
+            document.getElementById('adminEditUserIndex').value = String(idx);
+            document.getElementById('adminUserName').value = u.name || '';
+            document.getElementById('adminUserRole').value = u.role || 'Enfermera';
+            document.getElementById('adminUserPin').value = String(u.pin || '').trim();
+            document.getElementById('adminUserFormTitle').textContent = `Editando: ${u.name}`;
+            document.getElementById('btnSaveAdminUserLabel').textContent = 'Actualizar Usuario';
+            document.getElementById('btnCancelEditUser').classList.remove('hidden');
+            document.getElementById('adminUserFeedback').textContent = '';
+        }
+
+        async function toggleAdminUserActive(idx) {
+            if (!isCurrentUserAdmin()) return;
+            const u = window.authorizedUsers[idx];
+            if (!u) return;
+            if (window.loggedInUser && window.loggedInUser.id === u.id) {
+                alert('No puedes suspender tu propio usuario administrador en sesión.');
+                return;
+            }
+            u.active = !u.active;
+            renderGoogleDriveStaffTable();
+            populateStaffSelects();
+            if (window.saveToFirebase) await window.saveToFirebase();
+            document.getElementById('adminUserFeedback').textContent = `✓ ${u.name} ahora está ${u.active ? 'ACTIVO' : 'SUSPENDIDO'}.`;
+        }
+
+        async function saveAdminUserForm() {
+            if (!isCurrentUserAdmin()) {
+                alert('Solo el Administrador puede modificar usuarios o claves.');
+                return;
+            }
+            const idx = parseInt(document.getElementById('adminEditUserIndex').value, 10);
+            const name = document.getElementById('adminUserName').value.trim();
+            const role = document.getElementById('adminUserRole').value;
+            const pin = document.getElementById('adminUserPin').value.trim();
+            const feedback = document.getElementById('adminUserFeedback');
+
+            if (!name) {
+                feedback.textContent = '⚠️ Ingresa el nombre completo.';
+                return;
+            }
+            if (!/^\d{4}$/.test(pin)) {
+                feedback.textContent = '⚠️ El PIN debe tener exactamente 4 dígitos numéricos.';
+                return;
+            }
+            const duplicate = window.authorizedUsers.find((u, i) => i !== idx && String(u.pin).trim() === pin);
+            if (duplicate) {
+                feedback.textContent = `⚠️ El PIN ${pin} ya pertenece a ${duplicate.name}.`;
+                return;
+            }
+
+            if (idx >= 0 && window.authorizedUsers[idx]) {
+                const target = window.authorizedUsers[idx];
+                target.name = name;
+                target.role = role;
+                target.pin = pin;
+                if (window.loggedInUser && window.loggedInUser.id === target.id) {
+                    window.loggedInUser = target;
+                    localStorage.setItem('citen_logged_user_pin', pin);
+                    applyLoggedUserUI();
+                }
+            } else {
+                const prefix = /admin/i.test(role) ? 'ADM' : (/t[eé]c/i.test(role) ? 'TEC' : (/sec/i.test(role) ? 'SEC' : 'ENF'));
+                const newId = `${prefix}-${String(Date.now()).slice(-4)}`;
+                window.authorizedUsers.push({
+                    id: newId,
+                    name: name,
+                    role: role,
+                    pin: pin,
+                    active: true
+                });
+            }
+
+            renderGoogleDriveStaffTable();
+            populateStaffSelects();
+            if (window.saveToFirebase) await window.saveToFirebase();
+            resetAdminUserForm();
+            document.getElementById('adminUserFeedback').textContent = '✓ Cambios guardados y sincronizados en vivo.';
         }
 
         function renderFormConsultorioSelector() {

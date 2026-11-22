@@ -677,6 +677,11 @@
                         <button type="button" onclick="closeEditColaModal()" class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-700 text-xs font-extrabold">Cancelar</button>
                         <button type="submit" class="flex-1 py-2.5 rounded-xl bg-ios-blue text-white text-xs font-extrabold shadow-sm">💾 Guardar cambios</button>
                     </div>
+                    <div class="pt-1 border-t border-gray-100">
+                        <button type="button" onclick="eliminarDeSeguimientoCola()" class="w-full py-2.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-extrabold flex items-center justify-center gap-1.5 ios-tap">
+                            <i class="ph-bold ph-trash"></i> Eliminar de seguimiento
+                        </button>
+                    </div>
                 </form>
             </div>
 
@@ -2301,7 +2306,7 @@
 
             const pendingDnis = _getPendingDnisSet();
             const hoyIso = getLocalDateISO(new Date());
-            const raw30 = (window.colaGestion30d && window.colaGestion30d.items) || [];
+            const raw30 = ((window.colaGestion30d && window.colaGestion30d.items) || []).filter(_isPacienteActivoEnSeguimiento);
             const allBase = raw30.map(it => {
                 const fProx = String(it.fechaProxCred || '').substring(0, 10);
                 const fSf = String(it.fechaProxSf || '').substring(0, 10);
@@ -2749,6 +2754,42 @@
             if (typeof renderStats === 'function') renderStats();
         }
 
+        function _isPacienteActivoEnSeguimiento(it) {
+            const est = String((it && it.estadoPaciente) || 'ACTIVO').trim().toUpperCase();
+            return est === 'ACTIVO' || est === '';
+        }
+
+        async function eliminarDeSeguimientoCola() {
+            const dni = document.getElementById('editColaDni').value.trim();
+            const nombre = document.getElementById('editColaNombre').value.trim();
+            if (!dni) return;
+            const ok = confirm(`¿Seguro que deseas eliminar de seguimiento a:\n${nombre || dni}?\n\nYa no aparecerá en CITEN, pero quedará registrado en Firebase y Google Drive como "Eliminados de Control".`);
+            if (!ok) return;
+
+            const items = (window.colaGestion30d && window.colaGestion30d.items) || [];
+            const idx = items.findIndex(x => String(x.dni) === dni);
+            if (idx !== -1) {
+                items[idx].estadoPaciente = 'Eliminados de Control';
+                if (window.saveCola30dToFirebase) {
+                    await window.saveCola30dToFirebase(window.colaGestion30d);
+                }
+            }
+
+            if (typeof syncToGoogleDrive === 'function') {
+                syncToGoogleDrive({
+                    action: 'ACTUALIZAR_DATOS_MASTER',
+                    data: {
+                        dni,
+                        estadoPaciente: 'Eliminados de Control'
+                    }
+                });
+            }
+
+            closeEditColaModal();
+            renderPorCitar();
+            if (typeof renderStats === 'function') renderStats();
+        }
+
         function agendarDesdeCola(dniKey) {
             const items = (window.colaGestion30d && window.colaGestion30d.items) || [];
             const item = items.find(x => String(x.dni) === String(dniKey));
@@ -2799,7 +2840,7 @@
             const pendingDnis = _getPendingDnisSet();
             const hoyIso = getLocalDateISO(new Date());
             const incluirYaCitados = Boolean(document.getElementById('porCitarToggleYaCitados')?.checked);
-            const raw30 = (window.colaGestion30d && window.colaGestion30d.items) || [];
+            const raw30 = ((window.colaGestion30d && window.colaGestion30d.items) || []).filter(_isPacienteActivoEnSeguimiento);
 
             const baseItems = raw30.map(it => {
                 const dniClean = String(it.dni || '').trim();
